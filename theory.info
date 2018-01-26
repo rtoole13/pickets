@@ -1,0 +1,80 @@
+/---------------------Terrain---------------------/
+Field
+	Move throughout at default speed
+Road
+	Move along at increased speed
+
+
+River
+	Blocks path
+Bridge
+	allows river crossing
+	at default speed
+Ford
+	allows river crossing
+	at decreased speed
+
+Hills
+	Conceals to greater extent
+	Move throughout at default speed
+	Provides combat advantage
+Mountain
+	Blocks path
+Pass
+	allows mountain crossing at default speed
+
+Woods
+	Conceals to greater extent
+	Provides combat advantage
+
+/-------------------GameObjects-------------------/
+HQ
+	Commanding general's location
+	Can relocate?
+	Spawns couriers for issuing orders
+
+Infantry unit
+	base speed
+	all unit scales possible
+Cavalry unit
+	double speed
+	brigades and divisons possible
+Artillery unit
+	base speed
+	unique scales
+
+Courier
+	Unit that issues orders
+
+
+
+
+Will require A* pathfinding
+	Will be implented by all military units and couriers
+
+
+
+
+
+/---------------------Scales---------------------/
+Brigade
+	Cannot be divided
+	Smallest Unit, default at 3000 men
+
+Division
+	Can be divided into brigades if above certain threshold
+	Default at 4 brigades == 12000 men
+
+Corps
+	Can be divided into divisions if above certain threshold
+	Default at 2 divisions == 24000 men
+
+
+/----------------Artillery Scales----------------/
+Battery
+	cannot be divided
+	default at 6 guns
+Battalion
+	Can be divided into batteries if above certain threshold
+	default at 2 batteries == 12 guns
+
