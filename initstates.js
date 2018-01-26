@@ -1,14 +1,14 @@
 "use strict";
 
 function initBoardEmptyPlain(){
-	addPlayerGeneral(100, 500, 45, 10);
-	addEnemyGeneral(700, 100, 225, 10);
+	addPlayerGeneral(100, 500, -135, 10);
+	addEnemyGeneral(700, 100, 45, 10);
 
-	addPlayerInfantry(100, 400, 45, "Brigade");
-	addPlayerInfantry(200, 500, 45, "Brigade");
+	addPlayerInfantry(100, 400, -135, "Brigade");
+	addPlayerInfantry(200, 500, -135, "Brigade");
 
-	addEnemyInfantry(700, 200, 225, "Brigade");
-	addEnemyInfantry(600, 100, 225, "Brigade");
+	addEnemyInfantry(700, 200, 45, "Brigade");
+	addEnemyInfantry(600, 100, 45, "Brigade");
 }
 
 //Player Unit Init

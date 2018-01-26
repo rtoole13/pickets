@@ -31,7 +31,7 @@ function drawInfantryUnit(unit, color){
 	canvasContext.save();
 	canvasContext.fillStyle = color;
 	canvasContext.translate(unit.x, unit.y);
-	canvasContext.rotate(unit.angle * Math.PI/180);
+	canvasContext.rotate((90 - unit.angle) * Math.PI/180);
 	canvasContext.fillRect(-width/2, -height/2, width, height);
 	canvasContext.restore();
 }
