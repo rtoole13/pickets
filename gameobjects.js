@@ -9,12 +9,11 @@ class GameBoard{
 	}
 
 	initializeBoard(){
-		playerGeneral = new General(100, 500, 30, 10);
-		enemyGeneral  = new General(700, 100, 210, 10);
+		initBoardEmptyPlain();
 	}
 
 	update(dt){
-		
+
 	}
 }
 
@@ -24,6 +23,7 @@ class Unit{
 		this.y = y;
 		this.baseSpeed = 5;
 		this.angle = angle;
+		this.targetPosition = null;
 	}
 
 	update(dt){
@@ -32,6 +32,11 @@ class Unit{
 
 	move(dt){
 
+	}
+	updateTargetPosition(location){
+		this.targetPosition = location;
+		var xDiff = Math.abs(this.targetPosition.x - this.x);
+		this.angle = Math.acos((xDiff/getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y)))*180/Math.PI;
 	}
 
 	
@@ -59,7 +64,13 @@ class General extends Unit{
 		this.baseSpeed = this.baseSpeed * 2;
 		this.courierCount = courierCount;
 	}
-	issueCommand(){
-
+	issueCommand(target, type, location){
+		if (type == "move"){
+			target.updateTargetPosition(location);
+			console.log("Moving active unit to " + "(" + target.targetPosition.x + ", " + target.targetPosition.y + ")");
+		}
+		else{
+			console.log("Unsupported command " + type + "!!");
+		}
 	}
 }
