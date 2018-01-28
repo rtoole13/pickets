@@ -29,7 +29,8 @@ var gameBoard,
 	playerColor = "CadetBlue",
 	enemyColor  = "DarkRed",
 
-	activeUnit;
+	activeUnit,
+	selector = 0;
 
 
 window.onload = function(){

@@ -13,7 +13,6 @@ class GameBoard{
 	}
 
 	update(dt){
-
 		//Player updates first
 		playerGeneral.update(dt);
 		for (var id in playerCourierList){
@@ -58,6 +57,7 @@ class Unit{
 		this.targetPosition = null;
 		this.targetDistance = null;
 		this.targetSigma = 1;
+		this.orderRange = 5;
 	}
 
 	update(dt){
@@ -123,15 +123,66 @@ class General extends Unit{
 	constructor(x, y, angle, courierCount){
 		super(x, y, angle);
 		this.baseSpeed = this.baseSpeed * 2;
+		this.commandRadius = 120;
 		this.courierCount = courierCount;
 	}
 	issueCommand(target, type, location){
 		if (type == "move"){
-			target.updateTargetPosition(location);
-			console.log("Moving active unit to " + "(" + target.targetPosition.x + ", " + target.targetPosition.y + ")");
+			if (getDistanceSq(target.x, target.y, this.x, this.y) < Math.pow(this.commandRadius,2)){
+				target.updateTargetPosition(location);
+			}
+			else{
+				var order = {command: type, x: location.x, y: location.y};
+				addPlayerCourier(this.x, this.y, this.angle, this, target, order);
+			}
 		}
 		else{
 			console.log("Unsupported command " + type + "!!");
 		}
+	}
+}
+
+class Courier extends Unit{
+	constructor(x, y, angle, general, target, order){
+		super(x, y, angle);
+		this.baseSpeed = this.baseSpeed * 5;
+		this.general = general;
+		this.target = target;
+		this.order = order;
+		this.returning = false;
+	}
+	update(dt){
+		if (this.returning){
+			this.targetPosition = {x: this.general.x, y: this.general.y};
+		}
+		else{
+			this.targetPosition = {x: this.target.x, y: this.target.y};
+		}
+		super.update(dt);
+
+		if (this.targetDistance < this.orderRange){
+			if (this.returning){
+				this.reportToGeneral();
+			}
+			else{
+				this.deliverOrder();
+				this.returning = true;
+			}
+		}
+	}
+	deliverOrder(){
+		switch(this.order.command){
+			default:{
+				console.log("Unsupported command " + this.order.command + "!!");
+				break;
+			}
+			case "move": {
+				this.target.targetPosition = {x: this.order.x, y: this.order.y};
+				break;
+			}
+		}
+	}
+	reportToGeneral(){
+		delete playerCourierList[this.id];
 	}
 }

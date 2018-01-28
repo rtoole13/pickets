@@ -23,6 +23,13 @@ function addPlayerInfantry(x, y, angle, element){
 	playerInfantryList[id] = unit;
 }
 
+function addPlayerCourier(x, y, angle, general, target, order){
+	var id = getUniqueID(5, playerCourierList);
+	var unit = new Courier(x, y, angle, general, target, order);
+	unit.id = id;
+	playerCourierList[id] = unit;
+}
+
 //Enemy Unit Init
 function addEnemyGeneral(x, y, angle, courierCount){
 	enemyGeneral = new General(x, y, angle, courierCount);
