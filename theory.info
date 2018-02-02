@@ -1,3 +1,7 @@
+FILE GUIDELINES--------------------------------------------------------------------------------------------/
+NOTE KEY - Any line flagged as such has an affiliated concern/suggestion
+! : Important 'realistic' military element I very much want enforced
+
 /---------------------Terrain---------------------/
 Field
 	Move throughout at default speed
@@ -28,7 +32,7 @@ Woods
 	Provides combat advantage
 
 /-------------------GameObjects-------------------/
-HQ
+General
 	Commanding general's location
 	Can relocate?
 	Spawns couriers for issuing orders
@@ -47,11 +51,59 @@ Courier
 	Unit that issues orders
 
 
-
+/---------------------AI---------------------/
 
 Will require A* pathfinding
 	Will be implented by all military units and couriers
 
+!Generals must be fairly smart
+!If cavalry exists in the game, you must either be able to issue queued, yet flexible, orders or assume
+!that they will have the means of escaping a tricky situation. (Think Stuart's 2nd round o' McClellan, 
+!first during the Seven Days, second after more than a month of immobility following Antietam)
+
+/---------------------Combat---------------------/
+!Will need some implementation of fog of war
+!Need to get picket/skirmish action into the game somehow
+Units could have a march mode where they move faster, suffer an initial serious blow if surprised
+!In general, even in 'battle lines' suffer some hard initial blow if you discover an enemy real close
+
+!Need some way to visualize skirmishing vs full scale engagement
+
+Artillery can fire on entwined units at risk to one's own troops
+
+Need a visual/mechanical way to 'lock' units in combat.. Also need a way to lock more than just 1v1
+	- When a unit is 'locked' can they disengage?
+		- Perhaps so at serious cost? Hold out for the end of the day otherwise?
+
+/-----------------Unit Modes---------------------/
+Marching
+	- Lessened sight radius (encourage flanking units with cavalry)
+Battle lines
+	- Can't remain in battle lines indefinitely
+Bivouack
+	- After not marching/battling for a period of time, naturally enter this state.
+
+Retreat
+
+/-----------------------Time---------------------/
+Actual time, fighting after a point at night becomes nearly impossible somehow..
+	- Bivouacked units have fairly extensive pickets, but a large defensive penalty
+	- Any aggressors suffer more readily from desertion 
+	- All units suffer morale penalty
+	- Everyone's sight is limited
+	-
+
+Alternative or eventuality in any decided upon setup: End of day hard stop to combat
+	- Combatants are somehow retreated to skirmish distances
+	- Battle may resume next day - some cumulative morale score is tallied and dealt out come morning
+	- Could have scale of engagements die down towards evening too 
+		- Could have a a system in which commanded generals gently refuse orders when asked to do something
+		  dramatic towards day's end
+  			- This could be overcome, to an extent, by particularly high morale
+
+Time introduces some easy forced 'win conditions' or general constraints. For instance, perhaps the scenario
+is that you are far into enemy terratory in which the enemy vastly outnumbers you. You must clear an individual
+battle particularly quickly or risk enemy reinforcements
 
 
 
@@ -78,3 +130,10 @@ Battalion
 	Can be divided into batteries if above certain threshold
 	default at 2 batteries == 12 guns
 
+
+
+
+
+/----------------Major questions----------------/
+Scope..
+	How high level is the command to be?
