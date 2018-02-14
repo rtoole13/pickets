@@ -1,0 +1,121 @@
+I'm now of the mindset that cavalry might prove difficult to implement if the goal is to simulate a realistic Civil War battle.
+The cavalry units attached to the major armies rarely played a direct role in the tactical goings-on of infantry. To elaborate,
+the actions of cavalry may incite some reaction from a commander charged with infantry actively engaged in combat, but 
+any reactionary order issued rarely (if ever) is motivated by the tactical success/failure of the battle at hand. Rather, cavalry
+units play an incredible strategic role in skirmishing, raiding, disrupting communications or supply lines, and gathering 
+intelligence. I think, in a effort to bridle the scope of this project, we shouldn't be too concerned with the grander strategy 
+'beyond the map.' I may could implement 'objectives' that directly impact your final 'score' associated with some sort of campaign
+that is later developed. Prior to that, I'd like to focus on making battle interesting.
+
+One major downside to this decision is that there no longer realistically exists the possibility of courier messages being 
+intentionally intercepted by well-placed mobile units. I think this is okay until it is not okay. Will have to see what's possible
+with varying infantry and artillery unit sizes and variable terrain and the consequences thereof. 
+
+/----Infantry Unit----/
+
+***Variables***
+
+** 'public'
+size (# of men)
+statuses
+	cover
+	fortification
+time-to-fortification-shift (touched on in 'states' section)
+skirmish distance
+
+** 'private'
+experience
+morale
+speed
+combat distance
+view distance
+brace time
+entrench time
+front angle (An angle from 0-360. 0 implies no front. 360 implies the unit is 100% front.. angles concsidered front are within 
++/- front angle from the unit's direction vector)
+
+***states***
+**cover
+*height
+hills
+*natural defilade
+woods
+rock
+	A unit benefits from a (offensive) buff from natural defilade and/or height advantage. a unit can have both a height advantage and 
+	natural defilade advantage. If one's unit and its opposition occupy the same position, the effect is ultimately moot. This idea 
+	prompted me to realize that some mechanic has to exist based off of unit numbers and the differing scenarios, 1v1, 1v2, 2v2, 2v3, etc.
+
+**fortification
+*moving
+*braced
+*entrenched
+	A unit in motion has abandoned defilade and is most vulnerable, suffering a defensive debuff
+	When a unit stops moving, it transitions to 'braced' after a period of time. While braced, the unit enjoys no debuff / no buff.
+	Once in said fortified stance, a unit transitions to 'entrenched' after a period of time, under one condition: the unit is not 
+	engaged in full-scale engagement (more later). In this state, the unit enjoys a defensive buff.
+
+/--------commands--------/
+*Move
+Here, you tell a unit to move to a particular point. If the unit enters into skirmish range of an enemy unit, the unit halts and engages in 
+skirmishing. 
+	- Note, not sure whether or not the unit should rotate to face the enemy it's encountered or not. 
+*Attack-Move
+Here you tell a unit to move aggressively to a particular point. If the unit enters into skirmish range of an enemy unit, it turns and moves
+into combat distance, engaging in full-fledged assault
+
+*Skirmish (same key/button as 'move')
+Here you tell a unit to specifically target an enemy unit. it turns to this target and moves on it. Once in skirmish range, it halts and
+skirmishes.
+*Attack (same key/button as 'attack-move')
+Here you tell a unit to specifically target an enemy unit. it turns to this target and moves on it straight to combat distance, engaging fully.
+
+/------morale mechanics-----/
+*Factors on a unit
+Experience
+Rate of units lost
+proximity of general
+
+/-----movement mechanics----/
+Units need to halt to allow for other friendly units to pass. Need to figure out how one defers to another.
+
+/----combat interactions----/
+Damage that a unit dishes out in combat is based off of a dice roll per each enemy fired upon (odds to be determined).  
+Example of a unit's attack phase (in its update function):
+for each unit in attacked_units
+{
+	target = unit;
+	dist = distance between target and self;
+	if dist <= fullScaleEngage
+	{
+		combatDice() - This function determines the severity of a hit. Depending on the 'attack speed' of a unit, the severity of a 
+		blow will need to be tuned. Units should suffer noticeable casualties nearly every second of gameplay. Not sure how this will be done
+		yet. Divide damage into successful/failed hits based off of chance? Guarantee a hit every frame, roll on damage? etc.. To be enumerated
+		on in further detail later. Whatever the method, unit strengths should be a factor in damage dealt (i.e. in a 1v3 scenario the 
+		outnumbered combatant will roll for each enemy fired upon, but should do less considering the 'spread of fire')
+			- Might pull from Lanchester's Laws : (str1/str2)^2 
+	}
+}
+
+*route conditions
+Need to figure out how morale plays into things. At what point do units route? When they do, where do they run? How likely are they to rally?
+What is the defensive debuff suffered? How does chasing work?
+
+************** Notes **************
+All offensive/defensive buffs/debuffs are likely to change. In the combat system imagined it is unlikely for there to be a notable difference
+between an offensive buff and an enemy's defensive debuff, the inverse, a defensive debuff and the enemy's offensive buff, and that inverse.
+
+
+
+
+Major projects
+combat
+	dice roll
+	morale effects
+	rotation conditions
+line of sight
+	how do we get view of the map
+pathfinding
+	add terrain
+	make sense of terrain..
+
+	

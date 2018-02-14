@@ -31,6 +31,9 @@ Woods
 	Conceals to greater extent
 	Provides combat advantage
 
+/--------------------Base Unit--------------------/
+	Has a combat radius
+		- When an attacking enemy 
 /-------------------GameObjects-------------------/
 General
 	Commanding general's location
@@ -40,6 +43,10 @@ General
 Infantry unit
 	base speed
 	all unit scales possible
+	Has a skirmish/picket radius
+		- greater than combat radius
+	has a sight radius
+		- greater than or equal to skirmish/picket radius
 Cavalry unit
 	double speed
 	brigades and divisons possible
@@ -63,7 +70,7 @@ Will require A* pathfinding
 
 /---------------------Combat---------------------/
 !Will need some implementation of fog of war
-!Need to get picket/skirmish action into the game somehow
+
 Units could have a march mode where they move faster, suffer an initial serious blow if surprised
 !In general, even in 'battle lines' suffer some hard initial blow if you discover an enemy real close
 
@@ -77,13 +84,24 @@ Need a visual/mechanical way to 'lock' units in combat.. Also need a way to lock
 
 /-----------------Unit Modes---------------------/
 Marching
-	- Lessened sight radius (encourage flanking units with cavalry)
+	- Lessened sight radius to skirmish radius (encourage flanking units with cavalry)
+	- Decreased offense/defense
 Battle lines
-	- Can't remain in battle lines indefinitely
-Bivouack
-	- After not marching/battling for a period of time, naturally enter this state.
-
+	- After a period of immobility, units naturally enter into normal, defensive state
+		- Period of time unmoved determines stage (i.e after 5 sec, 'in line', 5 more for 'fortified')
+	- 2.5 stages
+		- transition (time of immobility before first stage)
+		- in line
+		- fortified
 Retreat
+	- Terrible debuff
+
+
+Notes:
+
+	When an enemy marches into a stationary enemies, the marching army enters into the transition state immediately
+	The stationary enemy's state is fixed in time wherever it's at immediately
+
 
 /-----------------------Time---------------------/
 Actual time, fighting after a point at night becomes nearly impossible somehow..
@@ -137,3 +155,37 @@ Battalion
 /----------------Major questions----------------/
 Scope..
 	How high level is the command to be?
+
+
+
+
+/--------------Major enforcements---------------/
+/---General game points---/
+Advantage to defender
+Flanking advantage
+Route under rapid destruction
+Presence of officers effect on morale and rally
+Advantage in cover
+	- Granted in two forms
+		- Sight advantage, jump on the enemy
+		- More rapidly reach 'fortified' state
+
+/---More esoteric points---/
+Skirmishing/pickets and visibility
+	- Units can engage in skirmishing outside of their combat radius
+		- Doing so will result in a steady, very slow reduction in 
+		  engaged units health
+
+Heavy defenses are far from impenetrable. It doesn't take as many men to 
+take a position as the history textbook would indicate..
+	- Still look to Lanchester's laws for rough guidelines
+
+Absurd strength of artillerly
+	- decimate forces if not treated properly
+		- not sure how this will function yet
+
+
+
+
+
+
