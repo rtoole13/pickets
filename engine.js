@@ -1,5 +1,49 @@
 "use strict";
 
+class CollisionEngine{
+	constructor(){
+
+	}
+	static broadCheck(){
+		//Check all
+		var unitA, unitB;
+		for (var idA in unitList){
+			unitA = unitList[idA];
+			for (var idB in unitList){
+				if (idB == idA){
+					//Pointing towards self
+					continue;
+				}
+				unitB = unitList[idB];
+				this.checkCollision(unitA, unitB); //calling a static method from a static method w/ 'this'
+			}
+		}
+
+	}
+	static checkCollision(unitA, unitB){
+		if (unitA.state == unitStates.marching || unitB.state == unitStates.marching){
+			var radiusA, radiusB, distanceSq, friendly = false;
+			if (unitA.army == unitB.army){
+				//Friendly
+				radiusA = unitA.combatRadius;
+				radiusB = unitB.combatRadius;
+				friendly = true;
+			}
+			else{
+				//Enemy
+				radiusA = unitA.skirmishRadius;
+				radiusB = unitB.skirmishRadius;
+			}
+			distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+			if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+				unitA.handleHit(unitB, distanceSq, friendly);
+				unitB.handleHit(unitA, distanceSq, friendly);
+			}
+		}
+	}
+
+}
+
 function pointInCircle(x, y, xt, yt, radius){
 		if (getDistanceSq(x, y, xt, yt) <= Math.pow(radius,2)){
 			return true;

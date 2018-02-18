@@ -11,6 +11,7 @@ var canvas = document.getElementById('gameCanvas'),
 
 //Game Objects//
 var gameBoard,
+	unitList = {},
 	playerCourierList = {},
 	playerCavalryList = {},
 	playerInfantryList = {},
@@ -25,6 +26,13 @@ var gameBoard,
 	//enemyUnitList{},
 	enemyGeneral,
 
+	//Enums
+	commandTypes,
+	unitStates,
+	armies,
+	unitTypes,
+
+	commandType,
 
 	playerColor = "CadetBlue",
 	enemyColor  = "DarkRed",
@@ -36,15 +44,26 @@ var gameBoard,
 window.onload = function(){
 	canvasContext = canvas.getContext('2d');
 	
+	canvas.style.cursor = "crosshair";
 	canvas.addEventListener("click", handleLeftClick, false);
 	canvas.addEventListener("contextmenu", handleRightClick, false);
 	canvas.addEventListener("mousemove", getMousePosition, false);
+
+	window.addEventListener("keydown", handleKeyPress, false);
 	init();
 
 }
 
 function init(){
+
+	//Enums 
+	commandTypes = Object.freeze({move:1, attackmove:2});
+	unitTypes    = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
+	unitStates   = Object.freeze({marching:1, braced:2, entrenched:3});
+	armies       = Object.freeze({blue:1, red:2});
+
 	//Initialize stuff
+	commandType = commandTypes.move;
 	gameBoard = new GameBoard(100,100);
 
 	//Enter main game loop
@@ -113,10 +132,33 @@ function handleRightClick(e){
 			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
 		}
 		else{
-			playerGeneral.issueCommand(activeUnit, "move", {x: mouseX, y: mouseY});
+			playerGeneral.issueCommand(activeUnit, commandType, {x: mouseX, y: mouseY});
 		}
 	}
 }
+
+function handleKeyPress(e){
+	var keyCode = e.keyCode;
+	switch (keyCode){
+		case 27:{
+			//Escape
+			if (activeUnit != undefined){
+				activeUnit = undefined;
+			}
+			commandType = commandTypes.move;
+		}
+		case 65:{
+			//A
+			if (commandType == commandTypes.attackmove){
+				commandType = commandTypes.move;
+			}
+			else{
+				commandType = commandTypes.attackmove;
+			}
+		}
+	}
+}
+
 function getMousePosition(e){
 	var rect = canvas.getBoundingClientRect(),
         root = document.documentElement;

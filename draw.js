@@ -16,24 +16,58 @@ function drawSelection(){
 	selector = selector % 1;
 	var radius = 25;
 
+	var color;
+	switch(commandType){
+		default:{
+			color = 'green';
+			break;
+		}
+		case commandTypes.move:{
+			color = 'green';
+			break;
+		}
+		case commandTypes.attackmove:{
+			color = 'red';
+			break;
+		}
+	}
 	canvasContext.save();
-	canvasContext.strokeStyle = "green";
+	canvasContext.strokeStyle = color;
 	canvasContext.beginPath();
 	canvasContext.arc(activeUnit.x, activeUnit.y, radius, selector * 2 * Math.PI, selector * 2 * Math.PI + Math.PI / 5);
 	canvasContext.stroke();
 	canvasContext.restore();
 }
 
-function drawInfantryUnit(unit, color){
+function drawInfantryUnit(unit){
 	var width  = 40,
-		height = 10;
+		height = 10,
+		color;
 
+	if (unit.army == armies.blue){
+		color = playerColor;
+	}
+	else{
+		color = enemyColor;
+	}
 	canvasContext.save();
 	canvasContext.fillStyle = color;
 	canvasContext.translate(unit.x, unit.y);
 	canvasContext.rotate((90 - unit.angle) * Math.PI/180);
 	canvasContext.fillRect(-width/2, -height/2, width, height);
 	canvasContext.restore();
+
+	//draw skirmish radius
+	canvasContext.strokeStyle = 'green';
+	canvasContext.beginPath();
+	canvasContext.arc(unit.x, unit.y, unit.skirmishRadius, 0, 2 * Math.PI);
+	canvasContext.stroke();
+
+	//draw 'combat' radius
+	canvasContext.strokeStyle = 'red';
+	canvasContext.beginPath();
+	canvasContext.arc(unit.x, unit.y, unit.combatRadius, 0, 2 * Math.PI);
+	canvasContext.stroke();
 }
 
 function drawCavalryUnit(){
@@ -44,10 +78,17 @@ function drawArtilleryUnit(){
 
 }
 
-function drawCourier(unit, color){
+function drawCourier(unit){
 	var width  = 10,
-		height = 15;
+		height = 15,
+		color;
 
+	if (unit.army == armies.blue){
+		color = playerColor;
+	}
+	else{
+		color = enemyColor;
+	}
 	canvasContext.save();
 	canvasContext.fillStyle = color;
 	canvasContext.translate(unit.x, unit.y);
@@ -56,9 +97,16 @@ function drawCourier(unit, color){
 	canvasContext.restore();
 }
 
-function drawGeneral(general, color, showCommandRadius){
-	var radius = 10;
+function drawGeneral(general, showCommandRadius){
+	var radius = 10,
+		color;
 
+	if (general.army == armies.blue){
+		color = playerColor;
+	}
+	else{
+		color = enemyColor;
+	}
 	canvasContext.save();
 	canvasContext.strokeStyle = color;
 	canvasContext.fillStyle = color;
@@ -88,25 +136,25 @@ function drawTerrain(){
 }
 
 function drawPlayerUnits(){
-	drawCouriers(playerCourierList, playerColor);
-	drawGeneral(playerGeneral, playerColor, true);
-	drawInfantry(playerInfantryList, playerColor);
+	drawCouriers(playerCourierList);
+	drawGeneral(playerGeneral, true);
+	drawInfantry(playerInfantryList);
 }
 
 function drawEnemyUnits(){
-	drawGeneral(enemyGeneral, enemyColor, false);
-	drawInfantry(enemyInfantryList, enemyColor);
+	drawGeneral(enemyGeneral, false);
+	drawInfantry(enemyInfantryList);
 }
 
-function drawCouriers(units, color){
+function drawCouriers(units){
 	for(var id in units){
-		drawCourier(units[id], color);
+		drawCourier(units[id]);
 	}	
 }
 
-function drawInfantry(units, color){
+function drawInfantry(units){
 	for(var id in units){
-		drawInfantryUnit(units[id], color);
+		drawInfantryUnit(units[id]);
 	}
 }
 
