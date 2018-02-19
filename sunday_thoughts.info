@@ -119,3 +119,6 @@ pathfinding
 	make sense of terrain..
 
 	
+
+
+I'm thinking that a unit's update function will begin with a switch between command types. If null, hold position?

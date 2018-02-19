@@ -52,7 +52,7 @@ class Unit{
 	constructor(x, y, angle, army){
 		this.x = x;
 		this.y = y;
-		this.baseSpeed = 5;
+		this.baseSpeed = 15;
 		this.angle = angle;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
@@ -60,6 +60,7 @@ class Unit{
 		this.targetDistance = null;
 		this.targetSigma = 1;
 		this.orderRange = 5;
+		this.command = null;
 		this.army = army;
 	}
 
@@ -80,6 +81,14 @@ class Unit{
 			this.x += this.baseSpeed * this.dirX * dt;
 			this.y += this.baseSpeed * this.dirY * dt;			
 		}
+	}
+
+	executeMoveOrder(location){
+		this.updateRoute(location);
+	}
+
+	executeAttackMoveOrder(location){
+		this.updateRoute(location);
 	}
 
 	updateRoute(location){
@@ -137,12 +146,12 @@ class InfantryUnit extends Unit{
 			this.state = unitStates.braced;
 		}
 	}
-	handleHit(unit, distanceSq, type){
+	handleHit(unit, distanceSq, friendly){
 		if (this.state != unitStates.marching){
 			this.halted = true;
 			return;
 		}
-		if (this.army = unit.army){
+		if (friendly){
 			// Ally
 			switch (unit.unitType){
 				case unitTypes.infantry:{
@@ -168,7 +177,38 @@ class InfantryUnit extends Unit{
 		}
 		else {
 			// Enemy
-			console.log("Not handled yet!");
+			switch (unit.unitType){
+				case unitTypes.infantry:{
+					//Infantry
+					if (this.command == commandTypes.move){
+						console.log();
+						if (getAngle(this.dirX, this.dirY, unit.x - this.x, unit.y - this.y, true) <= 90 
+							&& distanceSq < Math.pow(this.skirmishRadius,2)){
+							this.targetPosition = null;
+							this.targetDistance = null;
+							this.state = unitStates.braced;
+						}
+					}
+					else if (distanceSq < Math.pow(this.combatRadius,2)){
+						this.targetPosition = null;
+						this.targetDistance = null;
+						this.state = unitStates.braced;
+					}
+					break;
+				}
+				case unitTypes.cavalry:{
+					//Cavalry
+					break;
+				}
+				case unitTypes.general:{
+					//General
+					break;
+				}
+				case unitTypes.courier:{
+					//Courier
+					break;
+				}
+			}
 		}
 
 	}
@@ -195,8 +235,19 @@ class General extends Unit{
 	}
 	issueCommand(target, type, location){
 		if (type == commandTypes.move){ 	
-			if (getDistanceSq(target.x, target.y, this.x, this.y) < Math.pow(this.commandRadius,2)){
-				target.updateRoute(location);
+			if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
+				target.executeMoveOrder(location);
+				target.command = type;
+			}
+			else{
+				var order = {command: type, x: location.x, y: location.y};
+				addPlayerCourier(this.x, this.y, this.angle, this, target, order);
+			}
+		}
+		else if(type == commandTypes.attackmove){
+			if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
+				target.executeAttackMoveOrder(location);
+				target.command = type;
 			}
 			else{
 				var order = {command: type, x: location.x, y: location.y};
@@ -204,7 +255,7 @@ class General extends Unit{
 			}
 		}
 		else{
-			console.log("Unsupported command " + type + "!!");
+			console.log("Unsupported command: " + type + "!!");
 		}
 	}
 }
@@ -241,17 +292,26 @@ class Courier extends Unit{
 	deliverOrder(){
 		switch(this.order.command){
 			default:{
-				console.log("Unsupported command " + this.order.command + "!!");
+				console.log("Unsupported command: " + this.order.command + "!!");
 				break;
 			}
 			case commandTypes.move: {
+				//Here I'll want to distinguish whether the move order is to move towards a target or a target location.
 				var location = {x: this.order.x, y: this.order.y}
-				this.target.updateRoute(location);
+				this.target.executeMoveOrder(location);
+				break;
+			}
+			case commandTypes.attackmove: {
+				//Here I'll want to distinguish whether the move order is to move towards a target or a target location.
+				var location = {x: this.order.x, y: this.order.y}
+				this.target.executeAttackMoveOrder(location);
 				break;
 			}
 		}
+		this.target.command = this.order.command;
 	}
 	reportToGeneral(){
 		delete playerCourierList[this.id];
+		delete unitList[this.id];
 	}
 }
