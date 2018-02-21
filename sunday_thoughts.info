@@ -122,3 +122,20 @@ pathfinding
 
 
 I'm thinking that a unit's update function will begin with a switch between command types. If null, hold position?
+
+movement/collision model needs a revamp. If a unit encounters a friendly in its path, there are a few of options:
+1) If its target location is within a certain distance of encountered unit
+	a) If encountered unit is moving, hold 1st unit's position until 2nd passes.
+	b) If second unit is totally fixed (braced w/o a target position), brace 1st unit and set target pos to null
+	c) If second unit is temporarily fixed (braced w/ a target position), halt 1st unit, but keep target pos, anticipating unit 2 to move
+2) If target location is outside a certain radius of encountered unit, redirect around encountered.
+	- Here, I'd like to do this smartly. Example, unitA is moving in x+ direction, unitB is moving in y- direction, unitB hits the flank of unitA.
+	- unitA's path is given a slight y- component (went from heading due east to north east).
+	- unitB's path is given a x- component (went from heading due north to north west)
+
+	Other option, just move tangentially from one another. Have each favor the direction that sends them most on their original trajectory.
+
+Here I also need to consider the possibility of target position being a unit. If target position is actually a friendly, move to that unit and hold 
+position at the proper radius. The logic of point 1b slightly may change here as I might not want the target set to null, allowing a unit to follow
+another indefinitely. Otherwise, the logic in 1 and 2 shouldn't change?
+

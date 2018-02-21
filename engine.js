@@ -42,13 +42,31 @@ class CollisionEngine{
 		}
 	}
 
-}
-
-function pointInCircle(x, y, xt, yt, radius){
-		if (getDistanceSq(x, y, xt, yt) <= Math.pow(radius,2)){
+	static pointInCircle(x, y, xt, yt, radius){
+		if (getDistanceSq(x, y, xt, yt) < Math.pow(radius,2)){
 			return true;
 		}
 		return false;
+	}
+}
+
+function getAngleFromDir(dirX, dirY){
+	if (dirY >= 0){
+		return - Math.acos(dirX) * 180 / Math.PI;	
+	}
+	else{
+		return Math.acos(dirX) * 180 / Math.PI;	
+	}
+}
+
+function rotateVector(xi, yi, theta, degrees){
+	//Rotate a vector by theta (-theta == CW, +theta == CCW)
+	//returns a vector (vector.x, vector.y)
+	if (degrees){
+		theta *= Math.PI/180;
+	}
+	return {x: xi * Math.cos(theta) - yi * Math.sin(theta), 
+			y: xi * Math.sin(theta) + yi * Math.cos(theta)};
 }
 
 function getDistanceSq(xi, yi, xf, yf){

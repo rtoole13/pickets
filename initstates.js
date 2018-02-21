@@ -4,10 +4,10 @@ function initBoardEmptyPlain(){
 	addPlayerGeneral(100, 500, -135, 10);
 	addEnemyGeneral(700, 100, 45, 10);
 
-	addPlayerInfantry(100, 400, -135, "Brigade");
+	addPlayerInfantry(100, 400, 45, "Brigade");
 	addPlayerInfantry(200, 500, -135, "Brigade");
 
-	//addEnemyInfantry(700, 200, 45, "Brigade");
+	addEnemyInfantry(275, 400, 45, "Brigade");
 	//addEnemyInfantry(600, 100, 45, "Brigade");
 }
 

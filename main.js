@@ -87,7 +87,7 @@ function main(){
 
 //Event Handlers
 function handleLeftClick(e){
-	if (pointInCircle(mouseX, mouseY, playerGeneral.x, playerGeneral.y, 13)){
+	if (CollisionEngine.pointInCircle(mouseX, mouseY, playerGeneral.x, playerGeneral.y, 13)){
 		activeUnit = playerGeneral;
 		console.log("Selected general at " + "(" + playerGeneral.x + ", " + playerGeneral.y + ")");
 		return;
@@ -95,7 +95,7 @@ function handleLeftClick(e){
 
 	for (var id in playerCavalryList){
 		var unit = playerCavalryList[id];
-		if (pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
 			activeUnit = unit;
 			console.log("Selected cavalry unit at " + "(" + unit.x + ", " + unit.y + ")");
 			return;
@@ -104,7 +104,7 @@ function handleLeftClick(e){
 
 	for (var id in playerInfantryList){
 		var unit = playerInfantryList[id];
-		if (pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
 			activeUnit = unit;
 			console.log("Selected infantry unit at " + "(" + unit.x + ", " + unit.y + ")");
 			return;
@@ -113,7 +113,7 @@ function handleLeftClick(e){
 
 	for (var id in playerArtilleryList){
 		var unit = playerArtilleryList[id];
-		if (pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
 			activeUnit = unit;
 			console.log("Selected artillery unit at " + "(" + unit.x + ", " + unit.y + ")");
 			return;

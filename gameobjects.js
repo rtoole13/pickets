@@ -54,18 +54,27 @@ class Unit{
 		this.y = y;
 		this.baseSpeed = 15;
 		this.angle = angle;
+		this.rotationRate = 55;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
 		this.targetPosition = null;
 		this.targetDistance = null;
+		this.targetRadiusTolerance = 40;
 		this.targetSigma = 1;
+		this.targetAngleSigma = 0.5; //deg 
 		this.orderRange = 5;
 		this.command = null;
 		this.army = army;
+		this.rerouteTargetX = null;
+		this.rerouteTargetY = null;
+		this.rerouteDistance = 15;
+		this.rerouteTime = 1000;
+		this.rerouteBegan = null;
 	}
 
 	update(dt){
 		this.updateRoute(this.targetPosition);
+		this.rotate(dt);
 		this.move(dt);
 	}
 
@@ -90,9 +99,21 @@ class Unit{
 	executeAttackMoveOrder(location){
 		this.updateRoute(location);
 	}
-
+	
+	updateAngle(){
+		if (this.dirY >= 0){
+			this.angle = - Math.acos(this.dirX) * 180 / Math.PI;	
+		}
+		else{
+			this.angle = Math.acos(this.dirX) * 180 / Math.PI;	
+		}
+	}
+	updateDir(){
+		this.dirX = Math.cos((this.angle) * Math.PI/180);
+		this.dirY = - Math.sin((this.angle) * Math.PI/180);
+	}
 	updateRoute(location){
-		if (location == null || undefined){
+		if (location == null){
 			this.targetPosition = null;
 			this.targetDistance = null;
 			return;
@@ -105,17 +126,81 @@ class Unit{
 			this.targetDistance = null;
 			return;	
 		}
-		this.dirX = (this.targetPosition.x - this.x) / this.targetDistance;
-		this.dirY = (this.targetPosition.y - this.y) / this.targetDistance;
-		
-		if (this.dirY >= 0){
-			this.angle = - Math.acos(this.dirX) * 180 / Math.PI;	
-		}
-		else{
-			this.angle = Math.acos(this.dirX) * 180 / Math.PI;	
+		if (this.rerouteBegan != null && Date.now() - this.rerouteBegan >= this.rerouteTime){
+			this.rerouteTargetX  = null;
+			this.rerouteTargetY  = null;
+			this.rerouteBegan = null;
 		}
 	}
+
+	rotate(dt){
+		var currentTargetDirX, currentTargetDirY, currentTargetAngle;
+		if (this.targetPosition == null){
+			return;
+		}
+		if (this.rerouteTargetX != null && this.rerouteTargetY != null){
+			var currentDist = getDistance(this.x, this.y, this.rerouteTargetX, this.rerouteTargetY);
+			currentTargetDirX = (this.rerouteTargetX - this.x) / currentDist;
+			currentTargetDirY = (this.rerouteTargetY - this.y) / currentDist;
+		}
+		else{
+			currentTargetDirX = (this.targetPosition.x - this.x) / this.targetDistance;
+			currentTargetDirY = (this.targetPosition.y - this.y) / this.targetDistance;
+		}
+		currentTargetAngle = getAngleFromDir(currentTargetDirX, currentTargetDirY);
+		if (Math.abs(currentTargetAngle - this.angle) < this.targetAngleSigma){
+			this.angle = currentTargetAngle;
+			this.updateDir();
+			return;
+
+		}
+		var angleDiff = currentTargetAngle - this.angle;
+		if (angleDiff < -180){
+			angleDiff += 360;
+		}
+		else if (angleDiff > 180){
+			angleDiff -= 360;
+		}
+		
+		if (angleDiff < 0){
+			var temp = rotateVector(this.dirX, this.dirY, this.rotationRate * dt, true);
+		}
+		else{
+			var temp = rotateVector(this.dirX, this.dirY, -this.rotationRate * dt, true);
+		}
+		
+		this.dirX = temp.x;
+		this.dirY = temp.y;
+		this.updateAngle();
+	}
+
+	rerouteTangentially(unit, distanceSq){
+		if (this.rerouteBegan != null && Date.now() - this.rerouteBegan <= this.rerouteTime){
+			return;
+		}
+		var dist;
+		if (distanceSq != null){
+			dist = Math.sqrt(distanceSq);
+		}
+		else{
+			dist = getDistance(this.x, this.y, unit.x, unit.y);
+		}
+
+		var normalX, normalY, projLength, rerouteMag;
+		normalX = (unit.x - this.x)/dist;
+		normalY = (unit.y - this.y)/dist;
+
+		projLength = this.dirX * normalX + this.dirY * normalY;
+		this.rerouteTargetX = this.dirX - projLength * normalX;
+		this.rerouteTargetY = this.dirY - projLength * normalY;
+		rerouteMag = getVectorMag(this.rerouteTargetX, this.rerouteTargetY);
+		this.rerouteTargetX = this.x + this.rerouteDistance * this.rerouteTargetX/rerouteMag;
+		this.rerouteTargetY = this.y + this.rerouteDistance * this.rerouteTargetY/rerouteMag;
+
+		this.rerouteBegan = Date.now();
+	}
 }
+
 class InfantryUnit extends Unit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, army);
@@ -129,6 +214,7 @@ class InfantryUnit extends Unit{
 	}
 	update(dt){
 		this.updateRoute(this.targetPosition);
+		this.rotate(dt);
 		if (this.state == unitStates.marching){
 			this.move(dt);
 		}
@@ -146,6 +232,31 @@ class InfantryUnit extends Unit{
 			this.state = unitStates.braced;
 		}
 	}
+	handleFriendlyInfantryCollision(unit, distanceSq){
+		if (CollisionEngine.pointInCircle(this.targetPosition.x, this.targetPosition.y, unit.x, unit.y, unit.targetRadiusTolerance)){
+			//Unit is over target position.
+			if (unit.state == unitStates.marching){
+				//Unit is marching
+				this.rerouteTangentially(unit);
+			}
+			else{
+				//Unit is braced
+				if (unit.targetPosition == null){
+					//Unit is indefinitely fixed in position
+					this.state = unitStates.braced;
+					this.targetPosition = null;
+					this.targetDistance = null;
+				}
+				else{
+					//Unit is in transit.
+				}
+			}
+		}
+		else{
+			//Unit's not over target position.
+			this.rerouteTangentially(unit);
+		}
+	}
 	handleHit(unit, distanceSq, friendly){
 		if (this.state != unitStates.marching){
 			this.halted = true;
@@ -156,9 +267,7 @@ class InfantryUnit extends Unit{
 			switch (unit.unitType){
 				case unitTypes.infantry:{
 					//Infantry
-					if (unit.state == unitStates.marching && unit.halted == false){
-						this.halted = true;
-					}
+					this.handleFriendlyInfantryCollision(unit, distanceSq);
 					break;
 				}
 				case unitTypes.cavalry:{
@@ -181,7 +290,6 @@ class InfantryUnit extends Unit{
 				case unitTypes.infantry:{
 					//Infantry
 					if (this.command == commandTypes.move){
-						console.log();
 						if (getAngle(this.dirX, this.dirY, unit.x - this.x, unit.y - this.y, true) <= 90 
 							&& distanceSq < Math.pow(this.skirmishRadius,2)){
 							this.targetPosition = null;
@@ -229,7 +337,7 @@ class General extends Unit{
 	constructor(x, y, angle, courierCount, army){
 		super(x, y, angle, army);
 		this.baseSpeed = this.baseSpeed * 2;
-		this.commandRadius = 120;
+		this.commandRadius = 500;
 		this.courierCount = courierCount;
 		this.unitType = unitTypes.general;
 	}
