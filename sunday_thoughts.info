@@ -139,3 +139,9 @@ Here I also need to consider the possibility of target position being a unit. If
 position at the proper radius. The logic of point 1b slightly may change here as I might not want the target set to null, allowing a unit to follow
 another indefinitely. Otherwise, the logic in 1 and 2 shouldn't change?
 
+
+
+
+Think on a retreat mechanic..
+
+

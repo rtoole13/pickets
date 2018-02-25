@@ -64,20 +64,18 @@ function init(){
 
 	//Initialize stuff
 	commandType = commandTypes.move;
-	gameBoard = new GameBoard(100,100);
-
+	gameBoard = new GameBoard(30,40);
+	gameBoard.initializeBoard();
 	//Enter main game loop
 	main();
 }
 
 function main(){
 	//Main loop
-
 	//Time calculations
 	currentFrame = new Date();
 	dt = (currentFrame - lastFrame)/1000.0;
 	lastFrame = currentFrame;
-	
 	//Updates
 	gameBoard.update(dt);
 	draw(dt);

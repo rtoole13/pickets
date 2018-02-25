@@ -27,6 +27,14 @@ function getUniqueID(idLength, dict){
 	}
 }
 
+function inArray(obj, array){
+	for (var i = 0; i < array.length; i++){
+		if (obj == array[i]){
+			return true;
+		}
+	}
+	return false;
+}
 
 // Unit functions
 function initializeElement(elementType){

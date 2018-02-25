@@ -2,12 +2,50 @@
 
 function draw(dt){
 	drawBackground();
+	drawGridDebug();
 	drawTerrain();
 	drawPlayerUnits();
 	drawEnemyUnits();
 	drawSelection();
 }
 
+function drawGridDebug(){
+	for (var i = 0; i < gameBoard.grid.columns; i++){
+		for (var j = 0; j < gameBoard.grid.rows; j++){
+			drawGridPoint(gameBoard.grid.elem[i][j], false);
+		}
+	}
+
+	if (gameBoard.grid.path != null){
+		for (var i = 0; i < gameBoard.grid.path.length; i++){
+			drawGridPoint(gameBoard.grid.path[i], true);
+		}
+	}
+}
+
+function drawGridPoint(gridNode, pathNode){
+	// i refers to the column, j the row
+	var color;
+	if (pathNode){
+		color = 'cyan';
+	}
+	else{
+		if (gridNode.walkable){
+			color = 'green';
+		}
+		else{
+			color = 'red';
+		}
+	}
+	canvasContext.save()
+	//canvasContext.strokeStyle = 'black';
+	canvasContext.fillStyle = color;
+	canvasContext.translate(gridNode.x, gridNode.y);
+	//canvasContext.strokeRect(-gridNode.width/4, -gridNode.height/4, gridNode.width/2, gridNode.height/2);
+	canvasContext.fillRect(-gridNode.width/4, -gridNode.height/4, gridNode.width/2, gridNode.height/2);
+	canvasContext.restore();
+
+}
 function drawSelection(){
 	if (activeUnit == undefined || null){
 		return;
@@ -64,7 +102,7 @@ function drawInfantryUnit(unit){
 	canvasContext.stroke();
 
 	//draw 'combat' radius
-	canvasContext.strokeStyle = 'red';
+	canvasContext.strokeStyle = 'blue';
 	canvasContext.beginPath();
 	canvasContext.arc(unit.x, unit.y, unit.combatRadius, 0, 2 * Math.PI);
 	canvasContext.stroke();
