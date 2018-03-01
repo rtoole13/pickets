@@ -144,4 +144,6 @@ another indefinitely. Otherwise, the logic in 1 and 2 shouldn't change?
 
 Think on a retreat mechanic..
 
-
+Fallback move type.
+	- allow the unit to move backwards from a location. 
+	
