@@ -1,0 +1,52 @@
+
+***************************
+On path request,
+
+reset tiles to walkable
+
+if attack move:
+	if target == unit
+		get list of all static units visible (friend and enemy), consider their regions unwalkable
+		get path
+		** FIXME: what if path is invalid?
+	if target == location
+		get list of all static FRIENDLY units, consider their regions unwalkable
+		get path
+		** FIXME: what if path is invalid?
+
+else if skirmish move: 
+	if target == unit || location
+		get list of all static FRIENDLY units, consider their regions unwalkable
+		get path
+		** FIXME: what if path is invalid?
+
+else if fallback move:
+	//only location, cant target
+	get list of all static units visible (friend and enemy), consider their regions unwalkable
+	get path
+	** FIXME: what if path is invalid?
+
+***************************
+
+** ASIDE: on unit update, if it has a target, and that target isn't static, need to periodically request a new path
+** ASIDE: when a unit is rerouted for a time, it needs to request a new path after the reroute duration
+** ASIDE: Add to skirmish enemy collision check logic: If unit is within combat radius of enemies and target location is > 90 degrees in direction from unit's 			  direction, consider this a fallback command (maybe?)
+** ASIDE: Need logic to allow units to rotate and move about when in skirmish radius (the idea of an innermost skirmish radius they must avoid, but an outermost 		   that determines when damage is being dealt to the enemy. This way they dont get too close to be in combat range, but are free to move about)
+
+
+** ASIDE: Combat dice - combat dice rolled at a different interval than game iteration. This should be very easily adjustable so that I can control the pace 
+          of the game.
+** ASIDE: map pathfinding logic: For a given map, there should be certain tiles that are always unwalkable. These need not be refreshed when pathfinding is needed
+** ASIDE: Very much need the means of a unit stopping and rotating where necessary. If it can't move forward and gradually turn, it needs to stop and turn. This 		   should be a calculable metric. Something involving a comparision of rotation rate vs. movement speed and the distance to the desired location. It's also 		  important that units are absolutely incapable of moving through terrain unwalkables, like mountains and rivers.
+
+******TODO******
+fallback collision logic
+path request logic
+friendly collision check logic - look to laptop
+determine combat algorithm
+determine win condition
+determine morale effects / retreating
+make couriers finite
+surrender conditions
+ADD proximity to final destination logic to collision check logic. (if colliding with a static friendly and you're near your destination,
+consider your pathing complete)
