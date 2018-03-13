@@ -1,0 +1,138 @@
+<html>
+<body>
+<canvas id = "gameCanvas" width = "800" height = "600"></canvas>
+<script type = "text/javascript">
+
+"use strict";
+
+//Base//
+var canvas = document.getElementById('gameCanvas'),
+	canvasContext,
+	lastFrame = new Date(),
+	currentFrame,
+	dt,
+	mouseX,
+	mouseY;
+
+var lightSource,
+	obstacles;
+
+window.onload = function(){
+	canvasContext = canvas.getContext('2d');
+	canvas.addEventListener("mousemove", getMousePosition, false);
+	init();
+
+}
+
+function init(){
+	//Initialize stuff
+	lightSource = new LightSource(300, 300, 25, 60, 'red');
+
+	//Enter main game loop
+	main();
+}
+
+function main(){
+	//Main loop
+
+	//Time calculations
+	currentFrame = new Date();
+	dt = (currentFrame - lastFrame)/1000.0;
+	lastFrame = currentFrame;
+	
+	//Updates
+	update(dt);
+	draw(dt);
+
+	requestAnimationFrame(main);
+}
+
+
+function draw(dt){
+	drawBackground();
+	drawLightSource();
+	drawObstacles();
+}
+
+function drawBackground(){
+	canvasContext.fillStyle = 'AntiqueWhite';
+	canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function drawLightSource(){
+	canvasContext.fillStyle = lightSource.color;
+	canvasContext.beginPath();
+	canvasContext.arc(lightSource.x, lightSource.y, lightSource.radius, 0, 2 * Math.PI);
+	canvasContext.fill();
+
+}
+
+function drawObstacles(){
+
+}
+
+function update(dt){
+	lightSource.update(dt);
+	
+	/*
+	for (var obstable in obstacles){
+		obstacle.update(dt);
+	}
+	*/
+}
+
+
+function getMousePosition(e){
+	var rect = canvas.getBoundingClientRect(),
+        root = document.documentElement;
+
+	mouseX = e.pageX - rect.left - root.scrollLeft;
+	mouseY = e.pageY - rect.top - root.scrollTop;
+}
+
+class LightSource{
+	constructor(x, y, radius, rayCount, color){
+		this.x = x;
+		this.y = y;
+		this.radius = radius;
+		this.rayCount = rayCount;
+		this.rays = [];
+		this.color = color;
+
+	}
+	update(dt){
+		this.x = mouseX;
+		this.y = mouseY;
+		this.drawRays();
+	}
+	
+	drawRays(){
+		for (var ray in this.rays){
+			this.drawRay(ray);
+		}
+	}
+
+ 	drawRay(ray){
+
+	}
+}
+
+class Obstacle{
+	constructor(x, y, minRadius, maxRadius, vertexCount){
+		this.x = x;
+		this.y = y;
+		this.minRadius = minRadius;
+		this.maxRadius = maxRadius;
+		this.vertexCount = vertexCount;
+		this.vertices = initializeVertices();
+
+	}
+	initializeVertices(){
+		for (var i = 0; i < this.vertexCount; i++){
+			var theta = i * 2 
+		}
+	}
+}
+</script>
+</body>
+</html>
