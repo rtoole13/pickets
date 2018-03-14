@@ -147,3 +147,25 @@ Think on a retreat mechanic..
 Fallback move type.
 	- allow the unit to move backwards from a location. 
 	
+
+
+friendly collision check
+
+for each friendly in friendly unit list
+	if friendly isn't moving, continue;
+	
+	get list of moving friendly units colliding
+	get list of static friendly units colliding
+
+	for each moving unit colliding
+		if this unit in other unit's already hit list, continue
+		else, add this unit to other's list and other to this
+
+		if each unit's path intersects other unit
+			if unit directions < 90 degrees apart, (dot product is positive)
+				halt unit with oldest oder.. other finds a new path, with halted unit and other static friendlies as unwalkable
+			else unit directions > 90 degrees apart, (dot product is negative)
+				reroute both units in opposite directions, with static units as unwalkable
+		else if one unit's path intersects another, halt that one, let other continue
+		else (no unit paths intersect other unit)
+			both reroute even further in direction from one another temporarily 

@@ -16,6 +16,12 @@ function drawGridDebug(){
 		}
 	}
 
+	if (gameBoard.grid.pathOrig != null){
+		for (var i = 0; i < gameBoard.grid.pathOrig.length; i++){
+			drawGridPoint(gameBoard.grid.pathOrig[i], true, 'yellow');
+		}
+	}
+
 	if (gameBoard.grid.path != null){
 		for (var i = 0; i < gameBoard.grid.path.length; i++){
 			drawGridPoint(gameBoard.grid.path[i], true);
@@ -23,20 +29,24 @@ function drawGridDebug(){
 	}
 }
 
-function drawGridPoint(gridNode, pathNode){
+function drawGridPoint(gridNode, pathNode, color){
 	// i refers to the column, j the row
-	var color;
-	if (pathNode){
-		color = 'cyan';
-	}
-	else{
-		if (gridNode.walkable){
-			color = 'green';
+	
+	if (color == null){
+		var color;
+		if (pathNode){
+			color = 'cyan';
 		}
 		else{
-			color = 'red';
+			if (gridNode.walkable){
+				color = 'green';
+			}
+			else{
+				color = 'red';
+			}
 		}
 	}
+	
 	canvasContext.save()
 	//canvasContext.strokeStyle = 'black';
 	canvasContext.fillStyle = color;

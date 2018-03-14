@@ -46,116 +46,6 @@ class GameBoard{
 	}
 
 }
-class Grid{
-	constructor(rows, columns, width, height){
-		this.rows = rows;
-		this.columns = columns;
-		this.width = width;
-		this.height = height;
-
-		this.gridSpacing = {x:null, y:null};
-		this.minDim = null;
-		this.elem = [];
-		this.initializeNodes();
-
-		this.path = null;
-	}
-
-	initializeNodes(){
-
-		this.gridSpacing.x = canvas.width / this.columns;
-		this.gridSpacing.y = canvas.height / this.rows;
-
-		if (this.gridSpacing.x < this.gridSpacing.y){
-			this.minDim = this.gridSpacing.x;
-		}
-		else{
-			this.minDim = this.gridSpacing.y;
-		}
-
-		for (var i = 0; i < this.columns; i++){
-			var xLoc = this.gridSpacing.x/2 + this.gridSpacing.x * i;
-			var rowArray = [];
-			for (var j = 0; j < this.rows; j++){
-				var yLoc = this.gridSpacing.y / 2 + this.gridSpacing.y * j;
-				rowArray.push(new GridNode(xLoc, yLoc, this.gridSpacing.x, this.gridSpacing.y, i, j, true));
-			}
-			this.elem.push(rowArray);
-		}
-	}
-
-	update(){
-		this.reset();
-		//Doing a basic point in circle collision check temporarily.
-		for (var id in unitList){
-			var unit = unitList[id];
-			if (unit.state != unitStates.braced) continue;
-			for (var i = 0; i < this.columns; i++){
-				for (var j = 0; j < this.rows; j++){
-					var elem = this.elem[i][j];
-
-					if (CollisionEngine.pointInCircle(elem.x, elem.y, unit.x, unit.y, 2 * this.minDim + unit.rerouteDistance)){
-						elem.walkable = false;
-					}
-				}
-			}
-		}
-	}
-	reset(){
-		for (var i = 0; i < this.columns; i++){
-			for (var j = 0; j < this.rows; j++){
-				this.elem[i][j].walkable = true;
-			}
-		}
-	}
-
-	getNeighbors(node){
-		var neighbors = [];
-		for (var i = -1; i <= 1; i++){
-			for (var j = -1; j <= 1; j++){
-				if (i == 0 && j == 0){
-					continue;
-				}
-				var checkX = node.indX + i;
-				var checkY = node.indY + j;
-
-				if (checkX >= 0 && checkY < this.columns && checkY >= 0 && checkY < this.rows){
-					neighbors.push(this.elem[checkX][checkY]);
-				}
-			}	
-		}
-		return neighbors;
-	}
-
-	getNodeFromLocation(x, y){
-		var i,j;
-		i = Math.floor(x / this.gridSpacing.x);
-		j = Math.floor(y / this.gridSpacing.y);
-		return this.elem[i][j];
-	}
-}
-class GridNode{
-	constructor(x, y, width, height, indX, indY, walkable){
-		this.x = x;
-		this.y = y;
-		this.indX = indX;
-		this.indY = indY;
-
-		this.width = width;
-		this.height = height;
-		this.walkable = walkable;
-
-		this.parent = null;
-		this.gcost = 0;
-		this.hcost = 0;
-
-		//Might add a bool to distinguish a point occupied by a map feature or unit
-	}
-
-	fcost(){
-		return gcost + hcost;
-	}
-}
 
 class Unit{
 	constructor(x, y, angle, army){
@@ -169,12 +59,15 @@ class Unit{
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
 		this.targetPosition = null;
 		this.targetDistance = null;
+		this.targetAngle = this.angle;
+		this.turnRadiusTol = 30;
 		this.targetRadiusTolerance = 40;
-		this.targetSigma = 1;
-		this.targetAngleSigma = 0.5; //deg 
+		this.targetSigma = 5;
+		this.targetAngleSigma = 3; //deg 
 		this.orderRange = 5;
 		this.command = null;
 		this.army = army;
+		this.path = null;
 		this.rerouteTargetX = null;
 		this.rerouteTargetY = null;
 		this.rerouteDistance = 15;
@@ -184,29 +77,49 @@ class Unit{
 	}
 
 	update(dt){
-		this.updateRoute(this.targetPosition);
+		//this.updateRoute(this.targetPosition);
 		this.rotate(dt);
 		this.move(dt);
 	}
 
+	get_next_waypoint(){
+		if (this.path != null && this.path.length >= 1){
+			this.targetPosition = this.path.shift();
+		}
+		else{
+			this.targetPosition = null;
+		}
+		return this.targetPosition;
+	}
+
 	move(dt){
-		if (this.targetPosition == null || undefined){
+		if (this.targetPosition == null){
 			return;
 		}
+		this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
 		if (this.targetDistance < this.targetSigma){
-			this.x = this.targetPosition.x;
-			this.y = this.targetPosition.y;
+			this.targetPosition = this.get_next_waypoint();
+			if (this.targetPosition != null){
+				this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
+			}
+		}
+		else if (this.targetDistance < this.turnRadiusTol){
+			if(Math.abs(this.angle - this.targetAngle) < this.targetAngleSigma){
+				this.x += this.baseSpeed * this.dirX * dt;
+				this.y += this.baseSpeed * this.dirY * dt;
+			}			
 		}
 		else{
 			this.x += this.baseSpeed * this.dirX * dt;
-			this.y += this.baseSpeed * this.dirY * dt;			
+			this.y += this.baseSpeed * this.dirY * dt;		
 		}
+
 		this.currentNode = gameBoard.grid.getNodeFromLocation(this.x, this.y);
 	}
 
 	executeMoveOrder(location){
-		Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y));
-		this.updateRoute(location);
+		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y));
+		this.updateRoute();
 	}
 
 	executeAttackMoveOrder(location){
@@ -225,13 +138,9 @@ class Unit{
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
 	}
-	updateRoute(location){
-		if (location == null){
-			this.targetPosition = null;
-			this.targetDistance = null;
-			return;
-		}
-		this.targetPosition = location;
+	updateRoute(){
+		var targetNode = this.path.shift();
+		this.targetPosition = {x: targetNode.x, y: targetNode.y};
 		this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
 		if (this.targetDistance == 0){
 			//Don't change direction vector and angle if distance to target is 0;
@@ -247,7 +156,7 @@ class Unit{
 	}
 
 	rotate(dt){
-		var currentTargetDirX, currentTargetDirY, currentTargetAngle;
+		var currentTargetDirX, currentTargetDirY;
 		if (this.targetPosition == null){
 			return;
 		}
@@ -260,14 +169,16 @@ class Unit{
 			currentTargetDirX = (this.targetPosition.x - this.x) / this.targetDistance;
 			currentTargetDirY = (this.targetPosition.y - this.y) / this.targetDistance;
 		}
-		currentTargetAngle = getAngleFromDir(currentTargetDirX, currentTargetDirY);
-		if (Math.abs(currentTargetAngle - this.angle) < this.targetAngleSigma){
-			this.angle = currentTargetAngle;
+		this.targetAngle = getAngleFromDir(currentTargetDirX, currentTargetDirY);
+		var angleDiff = this.targetAngle - this.angle;
+		var absAngleDiff = Math.abs(angleDiff);
+		if (absAngleDiff < this.targetAngleSigma){
+			this.angle = this.targetAngle;
 			this.updateDir();
 			return;
-
 		}
-		var angleDiff = currentTargetAngle - this.angle;
+		var maxFrameRot = this.rotationRate * dt;
+		var rotation = (maxFrameRot < absAngleDiff)? maxFrameRot : absAngleDiff;
 		if (angleDiff < -180){
 			angleDiff += 360;
 		}
@@ -276,10 +187,10 @@ class Unit{
 		}
 		
 		if (angleDiff < 0){
-			var temp = rotateVector(this.dirX, this.dirY, this.rotationRate * dt, true);
+			var temp = rotateVector(this.dirX, this.dirY, rotation, true);
 		}
 		else{
-			var temp = rotateVector(this.dirX, this.dirY, -this.rotationRate * dt, true);
+			var temp = rotateVector(this.dirX, this.dirY, -rotation, true);
 		}
 		
 		this.dirX = temp.x;
@@ -326,15 +237,15 @@ class InfantryUnit extends Unit{
 		this.halted = false;
 	}
 	update(dt){
-		this.updateRoute(this.targetPosition);
+		//this.updateRoute();
 		this.rotate(dt);
 		if (this.state == unitStates.marching){
 			this.move(dt);
 		}
 		this.halted = false;
 	}
-	updateRoute(location){
-		super.updateRoute(location);
+	updateRoute(){
+		super.updateRoute();
 		
 		if (this.targetPosition != null && this.halted == false){
 			this.state = unitStates.marching;
