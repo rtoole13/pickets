@@ -62,8 +62,9 @@ class Unit{
 		this.targetAngle = this.angle;
 		this.turnRadiusTol = 30;
 		this.targetRadiusTolerance = 40;
-		this.targetSigma = 5;
+		this.targetSigma = 25;
 		this.targetAngleSigma = 3; //deg 
+		this.turnAngleTol = 90;
 		this.orderRange = 5;
 		this.command = null;
 		this.army = army;
@@ -104,7 +105,7 @@ class Unit{
 			}
 		}
 		else if (this.targetDistance < this.turnRadiusTol){
-			if(Math.abs(this.angle - this.targetAngle) < this.targetAngleSigma){
+			if(Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
 				this.x += this.baseSpeed * this.dirX * dt;
 				this.y += this.baseSpeed * this.dirY * dt;
 			}			
@@ -118,7 +119,7 @@ class Unit{
 	}
 
 	executeMoveOrder(location){
-		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y));
+		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y),);
 		this.updateRoute();
 	}
 

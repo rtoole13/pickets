@@ -209,3 +209,10 @@ class GridNode{
 		return gcost + hcost;
 	}
 }
+
+function getAdjacentNodeFromAngle(currentNode, dirX, dirY){
+	// NOTE: Not entirely accurate. If you're in the upper right corner of a particular node, a wider range of angles would point towards
+	// the top, right, and top-right nodes
+	
+
+}
