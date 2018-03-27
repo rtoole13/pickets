@@ -78,6 +78,10 @@ function drawSelection(){
 			color = 'red';
 			break;
 		}
+		case commandTypes.fallback:{
+			color = 'magenta';
+			break;
+		}
 	}
 	canvasContext.save();
 	canvasContext.strokeStyle = color;

@@ -57,7 +57,7 @@ window.onload = function(){
 function init(){
 
 	//Enums 
-	commandTypes = Object.freeze({move:1, attackmove:2});
+	commandTypes = Object.freeze({move:1, attackmove:2, fallback:3});
 	unitTypes    = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
 	unitStates   = Object.freeze({marching:1, braced:2, entrenched:3});
 	armies       = Object.freeze({blue:1, red:2});
@@ -76,12 +76,21 @@ function main(){
 	currentFrame = new Date();
 	dt = (currentFrame - lastFrame)/1000.0;
 	lastFrame = currentFrame;
+
+	//Game over?
+	checkWinCondition();
 	//Updates
 	gameBoard.update(dt);
 	draw(dt);
 
 	requestAnimationFrame(main);
 }
+
+function checkWinCondition(){
+	//Check win condition
+}
+
+
 
 //Event Handlers
 function handleLeftClick(e){
@@ -137,6 +146,7 @@ function handleRightClick(e){
 
 function handleKeyPress(e){
 	var keyCode = e.keyCode;
+	console.log(keyCode);
 	switch (keyCode){
 		case 27:{
 			//Escape
@@ -152,6 +162,14 @@ function handleKeyPress(e){
 			}
 			else{
 				commandType = commandTypes.attackmove;
+			}
+		}
+		case 70:{
+			if (commandType == commandTypes.fallback){
+				commandType = commandTypes.move;
+			}
+			else{
+				commandType = commandTypes.fallback;
 			}
 		}
 	}

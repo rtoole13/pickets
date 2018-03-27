@@ -2,11 +2,14 @@
 
 class Pathfinder{
 	constructor(){}
-	static findPath(startNode, targetNode){
+	static findPath(startNode, targetNode, currentUnit){
 		var wayPoints = [];
 		var pathSuccess = false;
 		var openSet = [];
 		var closedSet = [];
+
+		gameBoard.grid.update(currentUnit);
+
 		openSet.push(startNode);
 		
 		while (openSet.length > 0){
@@ -88,10 +91,10 @@ class Pathfinder{
 		yDist = Math.abs(nodeB.indY - nodeA.indY);
 
 		if (xDist > yDist){
-			return 14 * yDist + 10 * (xDist - yDist);
+			return 12 * yDist + 10 * (xDist - yDist);
 		}
 		else{
-			return 14 * xDist + 10 * (yDist - xDist);	
+			return 12 * xDist + 10 * (yDist - xDist);	
 		}
 	}
 
@@ -135,12 +138,15 @@ class Grid{
 		}
 	}
 
-	update(){
+	update(currentUnit){
 		this.reset();
-		/*
+		
 		//Doing a basic point in circle collision check temporarily.
 		for (var id in unitList){
 			var unit = unitList[id];
+			if (unit == currentUnit){
+				continue;
+			}
 			if (unit.state != unitStates.braced) continue;
 			for (var i = 0; i < this.columns; i++){
 				for (var j = 0; j < this.rows; j++){
@@ -152,7 +158,6 @@ class Grid{
 				}
 			}
 		}
-		*/
 	}
 	reset(){
 		for (var i = 0; i < this.columns; i++){

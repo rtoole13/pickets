@@ -7,11 +7,9 @@ class GameBoard{
 
 	initializeBoard	(){
 		initBoardEmptyPlain();
-		this.grid.update();
 	}
 
 	update(dt){
-		this.grid.update();
 		CollisionEngine.broadCheck();
 		//Player updates first
 		playerGeneral.update(dt);
@@ -62,7 +60,7 @@ class Unit{
 		this.targetAngle = this.angle;
 		this.turnRadiusTol = 30;
 		this.targetRadiusTolerance = 40;
-		this.targetSigma = 25;
+		this.targetSigma = 30;
 		this.targetAngleSigma = 3; //deg 
 		this.turnAngleTol = 90;
 		this.orderRange = 5;
@@ -79,17 +77,22 @@ class Unit{
 
 	update(dt){
 		//this.updateRoute(this.targetPosition);
+		if (this.targetPosition != null){
+			this.updateTargetParameters();
+		}
 		this.rotate(dt);
 		this.move(dt);
 	}
 
 	get_next_waypoint(){
 		if (this.path != null && this.path.length >= 1){
-			this.targetPosition = this.path.shift();
+			var node = this.path.shift();
+			this.targetPosition = {x:node.x, y:node.y};
 		}
 		else{
 			this.targetPosition = null;
 		}
+		this.updateTargetParameters();
 		return this.targetPosition;
 	}
 
@@ -97,80 +100,21 @@ class Unit{
 		if (this.targetPosition == null){
 			return;
 		}
-		this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
+		// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
 		if (this.targetDistance < this.targetSigma){
 			this.targetPosition = this.get_next_waypoint();
-			if (this.targetPosition != null){
-				this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
-			}
 		}
-		else if (this.targetDistance < this.turnRadiusTol){
-			if(Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
-				this.x += this.baseSpeed * this.dirX * dt;
-				this.y += this.baseSpeed * this.dirY * dt;
-			}			
-		}
-		else{
+		else if (Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
 			this.x += this.baseSpeed * this.dirX * dt;
-			this.y += this.baseSpeed * this.dirY * dt;		
+			this.y += this.baseSpeed * this.dirY * dt;	
 		}
-
 		this.currentNode = gameBoard.grid.getNodeFromLocation(this.x, this.y);
 	}
 
-	executeMoveOrder(location){
-		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y),);
-		this.updateRoute();
-	}
-
-	executeAttackMoveOrder(location){
-		this.updateRoute(location);
-	}
-	
-	updateAngle(){
-		if (this.dirY >= 0){
-			this.angle = - Math.acos(this.dirX) * 180 / Math.PI;	
-		}
-		else{
-			this.angle = Math.acos(this.dirX) * 180 / Math.PI;	
-		}
-	}
-	updateDir(){
-		this.dirX = Math.cos((this.angle) * Math.PI/180);
-		this.dirY = - Math.sin((this.angle) * Math.PI/180);
-	}
-	updateRoute(){
-		var targetNode = this.path.shift();
-		this.targetPosition = {x: targetNode.x, y: targetNode.y};
-		this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
-		if (this.targetDistance == 0){
-			//Don't change direction vector and angle if distance to target is 0;
-			this.targetPosition = null;
-			this.targetDistance = null;
-			return;	
-		}
-		if (this.rerouteBegan != null && Date.now() - this.rerouteBegan >= this.rerouteTime){
-			this.rerouteTargetX  = null;
-			this.rerouteTargetY  = null;
-			this.rerouteBegan = null;
-		}
-	}
-
 	rotate(dt){
-		var currentTargetDirX, currentTargetDirY;
 		if (this.targetPosition == null){
 			return;
 		}
-		if (this.rerouteTargetX != null && this.rerouteTargetY != null){
-			var currentDist = getDistance(this.x, this.y, this.rerouteTargetX, this.rerouteTargetY);
-			currentTargetDirX = (this.rerouteTargetX - this.x) / currentDist;
-			currentTargetDirY = (this.rerouteTargetY - this.y) / currentDist;
-		}
-		else{
-			currentTargetDirX = (this.targetPosition.x - this.x) / this.targetDistance;
-			currentTargetDirY = (this.targetPosition.y - this.y) / this.targetDistance;
-		}
-		this.targetAngle = getAngleFromDir(currentTargetDirX, currentTargetDirY);
 		var angleDiff = this.targetAngle - this.angle;
 		var absAngleDiff = Math.abs(angleDiff);
 		if (absAngleDiff < this.targetAngleSigma){
@@ -197,6 +141,60 @@ class Unit{
 		this.dirX = temp.x;
 		this.dirY = temp.y;
 		this.updateAngle();
+	}
+
+	executeMoveOrder(location){
+		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
+		this.get_next_waypoint();
+		//this.updateRoute();
+	}
+	
+	executeAttackMoveOrder(location){
+		//FIXME: behaves exactly like move order
+		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
+		this.get_next_waypoint();
+		//this.updateRoute();
+	}
+
+	executeFallBackOrder(location){
+		//FIXME: behaves exactly like move order
+		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
+		this.get_next_waypoint();
+		//this.updateRoute();
+	}
+
+	updateTargetParameters(){
+		if (this.targetPosition != null){
+			this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
+			var currentTargetDirX, currentTargetDirY;
+			if (this.rerouteTargetX != null && this.rerouteTargetY != null){
+				var currentDist = getDistance(this.x, this.y, this.rerouteTargetX, this.rerouteTargetY);
+				currentTargetDirX = (this.rerouteTargetX - this.x) / currentDist;
+				currentTargetDirY = (this.rerouteTargetY - this.y) / currentDist;
+			}
+			else{
+				currentTargetDirX = (this.targetPosition.x - this.x) / this.targetDistance;
+				currentTargetDirY = (this.targetPosition.y - this.y) / this.targetDistance;
+			}
+			this.targetAngle = getAngleFromDir(currentTargetDirX, currentTargetDirY);
+		}
+		else{
+			this.targetAngle = null;
+		}
+
+	}
+
+	updateAngle(){
+		if (this.dirY >= 0){
+			this.angle = - Math.acos(this.dirX) * 180 / Math.PI;	
+		}
+		else{
+			this.angle = Math.acos(this.dirX) * 180 / Math.PI;	
+		}
+	}
+	updateDir(){
+		this.dirX = Math.cos((this.angle) * Math.PI/180);
+		this.dirY = - Math.sin((this.angle) * Math.PI/180);
 	}
 
 	rerouteTangentially(unit, distanceSq){
@@ -239,24 +237,11 @@ class InfantryUnit extends Unit{
 	}
 	update(dt){
 		//this.updateRoute();
-		this.rotate(dt);
-		if (this.state == unitStates.marching){
-			this.move(dt);
-		}
+		super.update(dt)
+		
 		this.halted = false;
 	}
-	updateRoute(){
-		super.updateRoute();
-		
-		if (this.targetPosition != null && this.halted == false){
-			this.state = unitStates.marching;
-		}
-		else{
-			// this very much needs to change, doesn't allow for the third state. Also there's some
-			// confusion as to how this will work with the collision calling for a halt and so forth.
-			this.state = unitStates.braced;
-		}
-	}
+
 	handleFriendlyInfantryCollision(unit, distanceSq){
 		if (CollisionEngine.pointInCircle(this.targetPosition.x, this.targetPosition.y, unit.x, unit.y, unit.targetRadiusTolerance)){
 			//Unit is over target position.
@@ -378,8 +363,20 @@ class General extends Unit{
 			}
 		}
 		else if(type == commandTypes.attackmove){
+			//FIXME: behaves exactly like move
 			if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
 				target.executeAttackMoveOrder(location);
+				target.command = type;
+			}
+			else{
+				var order = {command: type, x: location.x, y: location.y};
+				addPlayerCourier(this.x, this.y, this.angle, this, target, order);
+			}
+		}
+		else if(type == commandTypes.fallback){
+			//FIXME: behaves exactly like move
+			if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
+				target.executeFallBackOrder(location);
 				target.command = type;
 			}
 			else{
@@ -435,9 +432,17 @@ class Courier extends Unit{
 				break;
 			}
 			case commandTypes.attackmove: {
+				//FIXME: behaves exactly like move
 				//Here I'll want to distinguish whether the move order is to move towards a target or a target location.
 				var location = {x: this.order.x, y: this.order.y}
 				this.target.executeAttackMoveOrder(location);
+				break;
+			}
+			case commandTypes.fallback: {
+				//FIXME: behaves exactly like move
+				//Here I'll want to distinguish whether the move order is to move towards a target or a target location.
+				var location = {x: this.order.x, y: this.order.y}
+				this.target.executeFallBackOrder(location);
 				break;
 			}
 		}
