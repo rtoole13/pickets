@@ -63,7 +63,6 @@ class Unit{
 		this.targetSigma = 30;
 		this.targetAngleSigma = 3; //deg 
 		this.turnAngleTol = 90;
-		this.orderRange = 5;
 		this.command = null;
 		this.army = army;
 		this.path = null;
@@ -91,6 +90,7 @@ class Unit{
 		}
 		else{
 			this.targetPosition = null;
+			this.updateCommand();
 		}
 		this.updateTargetParameters();
 		return this.targetPosition;
@@ -142,13 +142,37 @@ class Unit{
 		this.dirY = temp.y;
 		this.updateAngle();
 	}
-
+	updateCommand(order){
+		// Called on being given a command, and also on command completion
+		if (order == null){
+			this.command = null;
+			return;
+		}
+		this.command = order.type;
+		switch(this.command){
+			default:{
+				this.command = null;
+				break;
+			}
+			case commandTypes.move:{
+				this.executeMoveOrder({x: order.x, y: order.y});
+				break;
+			}
+			case commandTypes.attackmove:{
+				this.executeMoveOrder({x: order.x, y: order.y});
+				break;
+			}
+			case commandTypes.fallback:{
+				this.executeMoveOrder({x: order.x, y: order.y});	
+				break;
+			}
+		}
+	}
 	executeMoveOrder(location){
 		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
 		this.get_next_waypoint();
-		//this.updateRoute();
 	}
-	
+	/*
 	executeAttackMoveOrder(location){
 		//FIXME: behaves exactly like move order
 		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
@@ -162,7 +186,7 @@ class Unit{
 		this.get_next_waypoint();
 		//this.updateRoute();
 	}
-
+	*/
 	updateTargetParameters(){
 		if (this.targetPosition != null){
 			this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
@@ -347,45 +371,16 @@ class General extends Unit{
 	constructor(x, y, angle, courierCount, army){
 		super(x, y, angle, army);
 		this.baseSpeed = this.baseSpeed * 2;
-		this.commandRadius = 500;
+		this.commandRadius = 100;
 		this.courierCount = courierCount;
 		this.unitType = unitTypes.general;
 	}
-	issueCommand(target, type, location){
-		if (type == commandTypes.move){ 	
-			if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
-				target.executeMoveOrder(location);
-				target.command = type;
-			}
-			else{
-				var order = {command: type, x: location.x, y: location.y};
-				addPlayerCourier(this.x, this.y, this.angle, this, target, order);
-			}
-		}
-		else if(type == commandTypes.attackmove){
-			//FIXME: behaves exactly like move
-			if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
-				target.executeAttackMoveOrder(location);
-				target.command = type;
-			}
-			else{
-				var order = {command: type, x: location.x, y: location.y};
-				addPlayerCourier(this.x, this.y, this.angle, this, target, order);
-			}
-		}
-		else if(type == commandTypes.fallback){
-			//FIXME: behaves exactly like move
-			if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
-				target.executeFallBackOrder(location);
-				target.command = type;
-			}
-			else{
-				var order = {command: type, x: location.x, y: location.y};
-				addPlayerCourier(this.x, this.y, this.angle, this, target, order);
-			}
+	issueCommand(target, command){
+		if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
+			target.updateCommand(command);
 		}
 		else{
-			console.log("Unsupported command: " + type + "!!");
+			addPlayerCourier(this.x, this.y, this.angle, this, target, command);
 		}
 	}
 }
@@ -396,58 +391,55 @@ class Courier extends Unit{
 		this.baseSpeed = this.baseSpeed * 5;
 		this.general = general;
 		this.target = target;
+		this.deliveryDistance = getDistance(this.x, this.y, this.target.x, this.target.y);
 		this.order = order;
+		this.orderRange = 25;
+		this.targetSigma = 3;
+		this.turnAngleTol = 100;
+		this.rotationRate = 100;
 		this.returning = false;
 		this.unitType = unitTypes.courier;
+		this.updateRouteTimer = new Timer(2000, true);
+		this.updateRouteTimer.start();
+		this.ignoreList = [];
+		this.ignoreList.push(this.general);
+		this.ignoreList.push(this.target);
+		this.updateRoute();
+		
 	}
 	update(dt){
-		if (this.returning){
-			this.targetPosition = {x: this.general.x, y: this.general.y};
-		}
-		else{
-			this.targetPosition = {x: this.target.x, y: this.target.y};
-		}
-		super.update(dt);
-
-		if (this.targetDistance < this.orderRange){
+		this.deliveryDistance = getDistance(this.x, this.y, this.target.x, this.target.y);
+		
+		if (this.deliveryDistance < this.orderRange){
 			if (this.returning){
 				this.reportToGeneral();
 			}
 			else{
 				this.deliverOrder();
-				this.returning = true;
 			}
 		}
+
+		if (this.updateRouteTimer.checkTime()){
+			this.updateRoute();
+		}
+
+		super.update(dt);
+		
 	}
+
+	updateRoute(){
+		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(this.target.x, this.target.y), this, this.ignoreList);	
+		this.get_next_waypoint();
+	}
+
 	deliverOrder(){
-		switch(this.order.command){
-			default:{
-				console.log("Unsupported command: " + this.order.command + "!!");
-				break;
-			}
-			case commandTypes.move: {
-				//Here I'll want to distinguish whether the move order is to move towards a target or a target location.
-				var location = {x: this.order.x, y: this.order.y}
-				this.target.executeMoveOrder(location);
-				break;
-			}
-			case commandTypes.attackmove: {
-				//FIXME: behaves exactly like move
-				//Here I'll want to distinguish whether the move order is to move towards a target or a target location.
-				var location = {x: this.order.x, y: this.order.y}
-				this.target.executeAttackMoveOrder(location);
-				break;
-			}
-			case commandTypes.fallback: {
-				//FIXME: behaves exactly like move
-				//Here I'll want to distinguish whether the move order is to move towards a target or a target location.
-				var location = {x: this.order.x, y: this.order.y}
-				this.target.executeFallBackOrder(location);
-				break;
-			}
-		}
-		this.target.command = this.order.command;
+		this.target.updateCommand(this.order);
+		this.returning = true;
+		this.target = this.general;
+		this.angle -= 180;
+		this.updateRoute();
 	}
+
 	reportToGeneral(){
 		delete playerCourierList[this.id];
 		delete unitList[this.id];

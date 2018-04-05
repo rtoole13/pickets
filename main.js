@@ -139,14 +139,13 @@ function handleRightClick(e){
 			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
 		}
 		else{
-			playerGeneral.issueCommand(activeUnit, commandType, {x: mouseX, y: mouseY});
+			playerGeneral.issueCommand(activeUnit, {type: commandType, x: mouseX, y: mouseY});
 		}
 	}
 }
 
 function handleKeyPress(e){
 	var keyCode = e.keyCode;
-	console.log(keyCode);
 	switch (keyCode){
 		case 27:{
 			//Escape

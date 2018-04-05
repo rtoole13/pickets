@@ -28,6 +28,9 @@ function getUniqueID(idLength, dict){
 }
 
 function inArray(obj, array){
+	if (array == null){
+		return false;
+	}
 	for (var i = 0; i < array.length; i++){
 		if (obj == array[i]){
 			return true;

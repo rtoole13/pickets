@@ -93,6 +93,7 @@ function dotProduct(x, y, xt, yt){
 	//Calculate the dot product of two vectors, (x,y) and (xt,yt)
 	return x*xt + y*yt;
 }
+
 function getAngle(x, y, xt, yt, degrees){
 	//Get the angle between the two vectors, (x,y) and (xt,yt)
 	var angle = Math.acos(dotProduct(x, y, xt, yt)/(getVectorMag(x,y) * getVectorMag(xt,yt)));
@@ -100,4 +101,23 @@ function getAngle(x, y, xt, yt, degrees){
 		return  angle * 180/Math.PI;
 	}
 	return angle;
+}
+
+class Timer{
+	constructor(duration, repeating){
+		this.duration = duration;
+		this.repeating = repeating;
+	}
+	start(){
+		this.startTime = Date.now();
+	}
+	checkTime(){
+		if ( Date.now() - this.startTime > this.duration){
+			if (this.repeating){
+				this.start();
+			}
+			return true;
+		}
+		return false;
+	}
 }
