@@ -9,17 +9,58 @@ class CollisionEngine{
 		var unitA, unitB;
 		for (var idA in unitList){
 			unitA = unitList[idA];
-			for (var idB in unitList){
+			if (unitA.command == null){
+				continue;
+			}
+			this.checkEnemyCollision(unitA);
+		}
+
+	}
+	static checkEnemyCollision(unitA, idA){
+		//Check unitA against enemies
+		for (var idB in unitList){
 				if (idB == idA){
 					//Pointing towards self
 					continue;
 				}
-				unitB = unitList[idB];
-				this.checkCollision(unitA, unitB); //calling a static method from a static method w/ 'this'
+				var unitB = unitList[idB];
+				if (unitB.army == unitA.army){
+					continue;
+				}
+				switch(unitA.command){
+					case commandTypes.move:{
+						this.moveCollision(unitA, unitB);
+						break;
+					}
+					case commandTypes.attackmove:{
+						this.attackMoveCollision(unitA, unitB);
+						break;
+					}
+					case commandTypes.fallback:{
+						
+						break;
+					}
+				}
 			}
-		}
-
 	}
+	static checkFriendlyCollision(unitA, idA){
+		//Check unitA against friendlies.
+	}
+
+	static moveCollision(unitA, unitB){
+		
+	}
+
+	static attackMoveCollision(unitA, unitB){
+		var radiusA = unitA.combatRadius;
+		var radiusB = unitB.combatRadius;
+		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+		
+		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+			//Whether to handle both A and B's coll? Or just As
+		}
+	}
+
 	static checkCollision(unitA, unitB){
 		if (unitA.state == unitStates.marching || unitB.state == unitStates.marching){
 			var radiusA, radiusB, distanceSq, friendly = false;

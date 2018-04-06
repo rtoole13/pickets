@@ -144,7 +144,7 @@ class Grid{
 		//Doing a basic point in circle collision check temporarily.
 		for (var id in unitList){
 			var unit = unitList[id];
-			if (unit == currentUnit || inArray(unit, ignoreList) || unit.unitType == unitTypes.courier){
+			if (unit == currentUnit || inArray(unit, ignoreList) || unit.unitType == unitTypes.courier || unit.army != currentUnit.army){
 				continue;
 			}
 			if (unit.state != unitStates.braced) continue;

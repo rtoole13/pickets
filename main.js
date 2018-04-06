@@ -153,6 +153,7 @@ function handleKeyPress(e){
 				activeUnit = undefined;
 			}
 			commandType = commandTypes.move;
+			break;
 		}
 		case 65:{
 			//A
@@ -162,14 +163,17 @@ function handleKeyPress(e){
 			else{
 				commandType = commandTypes.attackmove;
 			}
+			break;
 		}
 		case 70:{
+			//F
 			if (commandType == commandTypes.fallback){
 				commandType = commandTypes.move;
 			}
 			else{
 				commandType = commandTypes.fallback;
 			}
+			break;
 		}
 	}
 }
