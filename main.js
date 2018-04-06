@@ -139,7 +139,7 @@ function handleRightClick(e){
 			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
 		}
 		else{
-			playerGeneral.issueCommand(activeUnit, {type: commandType, x: mouseX, y: mouseY});
+			playerGeneral.issueCommand(activeUnit, {type: commandType, x: mouseX, y: mouseY, date: Date.now()});
 		}
 	}
 }

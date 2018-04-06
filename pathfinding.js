@@ -178,7 +178,7 @@ class Grid{
 				var checkX = node.indX + i;
 				var checkY = node.indY + j;
 
-				if (checkX >= 0 && checkY < this.columns && checkY >= 0 && checkY < this.rows){
+				if (checkX >= 0 && checkX < this.columns && checkY >= 0 && checkY < this.rows){
 					neighbors.push(this.elem[checkX][checkY]);
 				}
 			}	
