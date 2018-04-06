@@ -380,6 +380,7 @@ class General extends Unit{
 			target.updateCommand(command);
 		}
 		else{
+
 			addPlayerCourier(this.x, this.y, this.angle, this, target, command);
 		}
 	}
@@ -391,11 +392,12 @@ class Courier extends Unit{
 		this.baseSpeed = this.baseSpeed * 5;
 		this.general = general;
 		this.target = target;
-		this.deliveryDistance = getDistance(this.x, this.y, this.target.x, this.target.y);
+		this.faceTarget();
 		this.order = order;
 		this.orderRange = 25;
-		this.targetSigma = 3;
-		this.turnAngleTol = 100;
+		this.closingRange = 100;
+		this.targetSigma = 15;
+		this.turnAngleTol = 60;
 		this.rotationRate = 100;
 		this.returning = false;
 		this.unitType = unitTypes.courier;
@@ -418,15 +420,28 @@ class Courier extends Unit{
 				this.deliverOrder();
 			}
 		}
-
-		if (this.updateRouteTimer.checkTime()){
-			this.updateRoute();
+		else if (this.deliveryDistance < this.closingRange){
+			this.path = [];
+			this.targetPosition = {x: this.target.x, y: this.target.y};
 		}
+		else{
+			if (this.updateRouteTimer.checkTime()){
+				this.updateRoute();
+			}	
+		}
+
+		
 
 		super.update(dt);
 		
 	}
 
+	faceTarget(){
+		this.deliveryDistance = getDistance(this.x, this.y, this.target.x, this.target.y);
+		this.dirX = (this.target.x - this.x)/this.deliveryDistance;
+		this.dirY = (this.target.y - this.y)/this.deliveryDistance;
+		this.updateAngle();
+	}
 	updateRoute(){
 		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(this.target.x, this.target.y), this, this.ignoreList);	
 		this.get_next_waypoint();
@@ -436,7 +451,7 @@ class Courier extends Unit{
 		this.target.updateCommand(this.order);
 		this.returning = true;
 		this.target = this.general;
-		this.angle -= 180;
+		this.faceTarget();
 		this.updateRoute();
 	}
 
