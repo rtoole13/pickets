@@ -4,10 +4,10 @@ function initBoardEmptyPlain(){
 	addPlayerGeneral(100, 500, 45, 10);
 	addEnemyGeneral(700, 100, -135, 10);
 
-	addPlayerInfantry(100, 200, 45, "Brigade");
+	addPlayerInfantry(300, 400, 45, "Brigade");
 	addPlayerInfantry(200, 500, 45, "Brigade");
 
-	addEnemyInfantry(275, 400, -135, "Brigade");
+	//addEnemyInfantry(275, 400, -135, "Brigade");
 	//addEnemyInfantry(600, 100, -135, "Brigade");
 }
 
@@ -16,6 +16,7 @@ function addPlayerGeneral(x, y, angle, courierCount){
 	var id = getUniqueID(5, unitList);
 	playerGeneral = new General(x, y, angle, courierCount, armies.blue);
 	playerGeneral.id = id;
+	playerUnitList[id] = playerGeneral;
 	unitList[id] = playerGeneral;
 }
 
@@ -24,6 +25,7 @@ function addPlayerInfantry(x, y, angle, element){
 	var unit = new InfantryUnit(x, y, angle, element, armies.blue);
 	unit.id = id;
 	playerInfantryList[id] = unit;
+	playerUnitList[id] = unit;
 	unitList[id] = unit;
 }
 
@@ -32,6 +34,7 @@ function addPlayerCourier(x, y, angle, general, target, order){
 	var unit = new Courier(x, y, angle, general, target, order, armies.blue);
 	unit.id = id;
 	playerCourierList[id] = unit;
+	playerUnitList[id] = unit;
 	unitList[id] = unit;
 }
 
@@ -40,6 +43,7 @@ function addEnemyGeneral(x, y, angle, courierCount){
 	var id = getUniqueID(5, unitList);
 	enemyGeneral = new General(x, y, angle, courierCount, armies.red);
 	enemyGeneral.id = id;
+	enemyUnitList[id] = enemyGeneral;
 	unitList[id] = enemyGeneral;
 }
 
@@ -48,6 +52,7 @@ function addEnemyInfantry(x, y, angle, element){
 	var unit = new InfantryUnit(x, y, angle, element, armies.red);
 	unit.id = id;
 	enemyInfantryList[id] = unit;
+	enemyUnitList[id] = unit;
 	unitList[id] = unit;
 }
 

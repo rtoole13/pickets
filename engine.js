@@ -12,55 +12,104 @@ class CollisionEngine{
 			if (unitA.command == null){
 				continue;
 			}
-			this.checkEnemyCollision(unitA);
+			var friendlyList, enemyList;
+			switch(unitA.army){
+				case armies.blue:{
+					friendlyList = playerUnitList;
+					enemyList = enemyUnitList;
+					break;
+				}
+				case armies.red:{
+					friendlyList = enemyUnitList;
+					enemyList = playerUnitList;
+					break;
+				}
+				default:{
+					console.log('Nonexistent army.');
+					break;
+				}
+			}
+			this.checkEnemyCollision(unitA, idA, enemyList);
+			this.checkFriendlyCollision(unitA, idA, friendlyList);
 		}
 
 	}
-	static checkEnemyCollision(unitA, idA){
+	static checkEnemyCollision(unitA, idA, enemyList){
 		//Check unitA against enemies
-		for (var idB in unitList){
-				if (idB == idA){
-					//Pointing towards self
-					continue;
+		for (var idB in enemyList){
+			if (idA == idB){
+				continue;
+			}
+			var unitB = enemyList[idB];
+
+			switch(unitA.command){
+				case commandTypes.move:{
+					this.moveCollisionEnemy(unitA, unitB);
+					break;
 				}
-				var unitB = unitList[idB];
-				if (unitB.army == unitA.army){
-					continue;
+				case commandTypes.attackmove:{
+					this.attackMoveCollisionEnemy(unitA, unitB);
+					break;
 				}
-				switch(unitA.command){
-					case commandTypes.move:{
-						this.moveCollision(unitA, unitB);
-						break;
-					}
-					case commandTypes.attackmove:{
-						this.attackMoveCollision(unitA, unitB);
-						break;
-					}
-					case commandTypes.fallback:{
-						
-						break;
-					}
+				case commandTypes.fallback:{
+					
+					break;
 				}
 			}
+		}
+
 	}
-	static checkFriendlyCollision(unitA, idA){
+	static checkFriendlyCollision(unitA, idA, friendlyList){
 		//Check unitA against friendlies.
+		for (var idB in friendlyList){
+			if (idA == idB){
+				continue;
+			}
+			var unitB = friendlyList[idB];
+			if (unitA.command == null){
+				this.collisionStaticFriendly(unitA, unitB);
+			}
+			else{
+				this.collisionDynamicFriendly(unitA, unitB);
+			}
+		}
+	}
+	static collisionStaticFriendly(unitA, unitB){
+		var radiusA = unitA.combatRadius;
+		var radiusB = unitB.combatRadius;
+		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+			//Whether to handle both A and B's coll? Or just As
+			console.log('collision with static friendy');
+		}
 	}
 
-	static moveCollision(unitA, unitB){
-		
-	}
-
-	static attackMoveCollision(unitA, unitB){
+	static collisionDynamicFriendly(unitA, unitB){
 		var radiusA = unitA.combatRadius;
 		var radiusB = unitB.combatRadius;
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		
 		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
 			//Whether to handle both A and B's coll? Or just As
+			
 		}
 	}
 
+	static moveCollisionEnemy(unitA, unitB){
+		
+	}
+
+	static attackMoveCollisionEnemy(unitA, unitB){
+		var radiusA = unitA.combatRadius;
+		var radiusB = unitB.combatRadius;
+		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+		
+		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+			//Whether to handle both A and B's coll? Or just As
+			console.log('attack move collision with enemy');
+		}
+	}
+	/*
 	static checkCollision(unitA, unitB){
 		if (unitA.state == unitStates.marching || unitB.state == unitStates.marching){
 			var radiusA, radiusB, distanceSq, friendly = false;
@@ -82,7 +131,7 @@ class CollisionEngine{
 			}
 		}
 	}
-
+	*/
 	static pointInCircle(x, y, xt, yt, radius){
 		if (getDistanceSq(x, y, xt, yt) < Math.pow(radius,2)){
 			return true;

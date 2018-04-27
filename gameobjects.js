@@ -3,6 +3,9 @@
 class GameBoard{
 	constructor(rows, columns){
 		this.grid = new Grid(rows, columns, canvas.width, canvas.height);
+		this.debug = true;
+		this.collisionCheckTime = 1000;
+		this.collisionTimer = Date.now();
 	}
 
 	initializeBoard	(){
@@ -10,7 +13,17 @@ class GameBoard{
 	}
 
 	update(dt){
-		CollisionEngine.broadCheck();
+		if (this.debug){
+			var newDate = Date.now();
+			if (newDate - this.collisionTimer > this.collisionCheckTime){
+				CollisionEngine.broadCheck();
+				this.collisionTimer = newDate;
+			}
+		}
+		else{
+			CollisionEngine.broadCheck();
+		}
+
 		//Player updates first
 		playerGeneral.update(dt);
 		for (var id in playerCourierList){
@@ -281,7 +294,7 @@ class General extends Unit{
 	constructor(x, y, angle, courierCount, army){
 		super(x, y, angle, army);
 		this.baseSpeed = this.baseSpeed * 2;
-		this.commandRadius = 100;
+		this.commandRadius = 500;
 		this.courierCount = courierCount;
 		this.unitType = unitTypes.general;
 	}
@@ -367,6 +380,7 @@ class Courier extends Unit{
 
 	reportToGeneral(){
 		delete playerCourierList[this.id];
+		delete playerUnitList[this.id];
 		delete unitList[this.id];
 	}
 }

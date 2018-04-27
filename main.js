@@ -16,14 +16,14 @@ var gameBoard,
 	playerCavalryList = {},
 	playerInfantryList = {},
 	playerArtilleryList = {},
-	//playerUnitList = {},
+	playerUnitList = {},
 	playerGeneral,
 
 	enemyCourierList = {},
 	enemyCavalryList = {},
 	enemyInfantryList = {},
 	enemyArtilleryList = {},
-	//enemyUnitList{},
+	enemyUnitList = {},
 	enemyGeneral,
 
 	//Enums
