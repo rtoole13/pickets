@@ -4,7 +4,7 @@ class GameBoard{
 	constructor(rows, columns){
 		this.grid = new Grid(rows, columns, canvas.width, canvas.height);
 		this.debug = true;
-		this.collisionCheckTime = 1000;
+		this.collisionCheckTime = 3000;
 		this.collisionTimer = Date.now();
 	}
 
@@ -64,6 +64,7 @@ class Unit{
 		this.y = y;
 		this.currentNode = gameBoard.grid.getNodeFromLocation(this.x, this.y);
 		this.baseSpeed = 15;
+		this.currentSpeed = 0;
 		this.angle = angle;
 		this.rotationRate = 55;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
@@ -81,17 +82,15 @@ class Unit{
 		this.path = null;
 		this.rerouteTargetX = null;
 		this.rerouteTargetY = null;
-		this.rerouteDistance = 15;
-		this.rerouteTime = 1000;
-		this.rerouteBegan = null;
+		this.rerouteDistance = 100;
+		this.rerouting = false;
 		this.state = unitStates.braced;
+		this.collisionList = [];
 	}
 
 	update(dt){
-		//this.updateRoute(this.targetPosition);
-		if (this.targetPosition != null){
-			this.updateTargetParameters();
-		}
+		this.updateTargetParameters();
+
 		this.rotate(dt);
 		this.move(dt);
 	}
@@ -111,21 +110,30 @@ class Unit{
 
 	move(dt){
 		if (this.targetPosition == null){
+			this.currentSpeed = 0;
 			return;
 		}
+		if (this.rerouting && this.targetDistance < this.targetSigma){
+			this.rerouting = false;
+		}
+
 		// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
 		if (this.targetDistance < this.targetSigma){
 			this.targetPosition = this.get_next_waypoint();
 		}
 		else if (Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
-			this.x += this.baseSpeed * this.dirX * dt;
-			this.y += this.baseSpeed * this.dirY * dt;	
+			this.currentSpeed = this.baseSpeed;
+			this.x += this.currentSpeed * this.dirX * dt;
+			this.y += this.currentSpeed * this.dirY * dt;	
+		}
+		else{
+			this.currentSpeed = 0;
 		}
 		this.currentNode = gameBoard.grid.getNodeFromLocation(this.x, this.y);
 	}
 
 	rotate(dt){
-		if (this.targetPosition == null){
+		if (this.targetAngle == null){
 			return;
 		}
 		var angleDiff = this.targetAngle - this.angle;
@@ -202,14 +210,14 @@ class Unit{
 	*/
 	updateTargetParameters(){
 		if (this.targetPosition != null){
-			this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
 			var currentTargetDirX, currentTargetDirY;
-			if (this.rerouteTargetX != null && this.rerouteTargetY != null){
-				var currentDist = getDistance(this.x, this.y, this.rerouteTargetX, this.rerouteTargetY);
-				currentTargetDirX = (this.rerouteTargetX - this.x) / currentDist;
-				currentTargetDirY = (this.rerouteTargetY - this.y) / currentDist;
+			if (this.rerouting && this.rerouteTargetX != null && this.rerouteTargetY != null){
+				this.targetDistance = getDistance(this.x, this.y, this.rerouteTargetX, this.rerouteTargetY);
+				currentTargetDirX = (this.rerouteTargetX - this.x) / this.targetDistance;
+				currentTargetDirY = (this.rerouteTargetY - this.y) / this.targetDistance;
 			}
 			else{
+				this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
 				currentTargetDirX = (this.targetPosition.x - this.x) / this.targetDistance;
 				currentTargetDirY = (this.targetPosition.y - this.y) / this.targetDistance;
 			}

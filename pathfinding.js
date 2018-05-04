@@ -147,7 +147,9 @@ class Grid{
 			if (unit == currentUnit || inArray(unit, ignoreList) || unit.unitType == unitTypes.courier || unit.army != currentUnit.army){
 				continue;
 			}
-			if (unit.state != unitStates.braced) continue;
+			//NOTE: This line adds only  static units in unit's army the impassable list. Removing at the moment for debug purposes
+			//if (unit.state != unitStates.braced) continue;
+			continue;
 			for (var i = 0; i < this.columns; i++){
 				for (var j = 0; j < this.rows; j++){
 					var elem = this.elem[i][j];

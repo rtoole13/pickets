@@ -9,6 +9,13 @@ class CollisionEngine{
 		var unitA, unitB;
 		for (var idA in unitList){
 			unitA = unitList[idA];
+
+			// Since I'm potentially only checking collision in DEBUG MODE every second or so. I'm only clearing the collision list and 
+			// returning the unit to a rerouting == false state here
+			unitA.collisionList = []; 
+			unitA.rerouteTargetX = null;
+			unitA.rerouteTargetY = null;
+
 			if (unitA.command == null){
 				continue;
 			}
@@ -65,13 +72,20 @@ class CollisionEngine{
 			if (idA == idB){
 				continue;
 			}
+			if (unitA.collisionList.includes(idB)){
+				continue;
+			}
 			var unitB = friendlyList[idB];
+			/*
+			//NOTE: This code distinguishes static from dynamic. Going to see if all can be considered identically.
 			if (unitA.command == null){
 				this.collisionStaticFriendly(unitA, unitB);
 			}
 			else{
 				this.collisionDynamicFriendly(unitA, unitB);
 			}
+			*/
+			this.collisionDynamicFriendly(unitA, idA, unitB, idB);
 		}
 	}
 	static collisionStaticFriendly(unitA, unitB){
@@ -84,14 +98,63 @@ class CollisionEngine{
 		}
 	}
 
-	static collisionDynamicFriendly(unitA, unitB){
+	static collisionDynamicFriendly(unitA, idA, unitB, idB){
 		var radiusA = unitA.combatRadius;
 		var radiusB = unitB.combatRadius;
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		
 		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
-			//Whether to handle both A and B's coll? Or just As
+			var dX = unitA.x - unitB.x;
+			var dY = unitA.y - unitB.y;
+
+			//var relVel = {x: (unitA.targetPosition.x - unitA.x) / unitA.targetDistance, 
+			//			  y: (unitA.targetPosition.y - unitA.y)/ unitA.targetDistance};
 			
+			var relVel = {x: (unitA.currentSpeed * unitA.dirX) - (unitB.currentSpeed * unitB.dirX),
+						  y: (unitA.currentSpeed * unitA.dirY) - (unitB.currentSpeed * unitB.dirY)};
+
+			if (dotProduct(dX, dY, relVel.x, relVel.y) > 0){
+				//do nothing
+			}
+			else{
+				//We've got a collision. Do things.
+				unitA.rerouting = true;
+				//get normalized normal (pointing from B to A)
+				var normal = normalizeVector(dX, dY);
+				// get vector perpendicular to norm, in the general direction of A's dir.
+				// perpendicular to normal: 1 of 2
+				var perp = {x: -1 * normal.y, y: normal.x};
+				
+				if (dotProduct(unitA.dirX, unitA.dirY, perp.x, perp.y) < 0){
+					// perpendicular to normal: 2 of 2
+					perp.x = normal.y;
+					perp.y = -1 * normal.x;	
+
+				}
+				console.log(perp);
+				var redirectDir = {x: 0, y: 0};
+				if (dotProduct(relVel.x, relVel.y, perp.x, perp.y) < 0){
+					// A is to be rerouted in the negative perp direction. 
+					// if B is moving too, it gets routed in the perp direction.
+					
+					redirectDir.x = - normal.x - perp.x;
+					redirectDir.y = - normal.y - perp.y;
+				}
+				else{
+					// A is to be rerouted in the perp direction.
+					// if B is moving too, it gets routed in the negative perp direction.
+					redirectDir.x = - normal.x + perp.x;
+					redirectDir.y = - normal.y + perp.y;
+				}
+				
+				redirectDir = normalizeVector(redirectDir.x, redirectDir.y);
+				
+				unitA.rerouteTargetX = unitA.x + unitA.rerouteDistance * redirectDir.x;
+				unitA.rerouteTargetY = unitA.y + unitA.rerouteDistance * redirectDir.y;
+			}
+			unitA.collisionList.push(idB);
+			unitB.collisionList.push(idA);
+
 		}
 	}
 
@@ -191,6 +254,11 @@ function getAngle(x, y, xt, yt, degrees){
 		return  angle * 180/Math.PI;
 	}
 	return angle;
+}
+
+function normalizeVector(x, y){
+	var magnitude = getVectorMag(x, y);
+	return {x: x / magnitude, y: y / magnitude};
 }
 
 class Timer{
