@@ -3,8 +3,8 @@
 class GameBoard{
 	constructor(rows, columns){
 		this.grid = new Grid(rows, columns, canvas.width, canvas.height);
-		this.debug = true;
-		this.collisionCheckTime = 3000;
+		this.debug = false;
+		this.collisionCheckTime = 200;
 		this.collisionTimer = Date.now();
 	}
 
@@ -66,7 +66,7 @@ class Unit{
 		this.baseSpeed = 15;
 		this.currentSpeed = 0;
 		this.angle = angle;
-		this.rotationRate = 55;
+		this.rotationRate = 120;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
 		this.targetPosition = null;
@@ -82,7 +82,7 @@ class Unit{
 		this.path = null;
 		this.rerouteTargetX = null;
 		this.rerouteTargetY = null;
-		this.rerouteDistance = 100;
+		this.rerouteDistance = 15;
 		this.rerouting = false;
 		this.state = unitStates.braced;
 		this.collisionList = [];
@@ -113,10 +113,6 @@ class Unit{
 			this.currentSpeed = 0;
 			return;
 		}
-		if (this.rerouting && this.targetDistance < this.targetSigma){
-			this.rerouting = false;
-		}
-
 		// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
 		if (this.targetDistance < this.targetSigma){
 			this.targetPosition = this.get_next_waypoint();
@@ -210,14 +206,14 @@ class Unit{
 	*/
 	updateTargetParameters(){
 		if (this.targetPosition != null){
+			this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
 			var currentTargetDirX, currentTargetDirY;
 			if (this.rerouting && this.rerouteTargetX != null && this.rerouteTargetY != null){
-				this.targetDistance = getDistance(this.x, this.y, this.rerouteTargetX, this.rerouteTargetY);
-				currentTargetDirX = (this.rerouteTargetX - this.x) / this.targetDistance;
-				currentTargetDirY = (this.rerouteTargetY - this.y) / this.targetDistance;
+				var rerouteDist = getDistance(this.x, this.y, this.rerouteTargetX, this.rerouteTargetY);
+				currentTargetDirX = (this.rerouteTargetX - this.x) / rerouteDist;
+				currentTargetDirY = (this.rerouteTargetY - this.y) / rerouteDist;
 			}
 			else{
-				this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
 				currentTargetDirX = (this.targetPosition.x - this.x) / this.targetDistance;
 				currentTargetDirY = (this.targetPosition.y - this.y) / this.targetDistance;
 			}

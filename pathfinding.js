@@ -148,8 +148,8 @@ class Grid{
 				continue;
 			}
 			//NOTE: This line adds only  static units in unit's army the impassable list. Removing at the moment for debug purposes
-			//if (unit.state != unitStates.braced) continue;
-			continue;
+			if (unit.command != null) continue;
+			//continue;
 			for (var i = 0; i < this.columns; i++){
 				for (var j = 0; j < this.rows; j++){
 					var elem = this.elem[i][j];

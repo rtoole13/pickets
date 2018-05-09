@@ -2,7 +2,7 @@
 
 function draw(dt){
 	drawBackground();
-	//drawGridDebug();
+	drawGridDebug();
 	drawTerrain();
 	drawPlayerUnits();
 	drawEnemyUnits();

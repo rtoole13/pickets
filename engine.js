@@ -15,6 +15,7 @@ class CollisionEngine{
 			unitA.collisionList = []; 
 			unitA.rerouteTargetX = null;
 			unitA.rerouteTargetY = null;
+			unitA.rerouting = false;
 
 			if (unitA.command == null){
 				continue;
@@ -107,11 +108,11 @@ class CollisionEngine{
 			var dX = unitA.x - unitB.x;
 			var dY = unitA.y - unitB.y;
 
-			//var relVel = {x: (unitA.targetPosition.x - unitA.x) / unitA.targetDistance, 
-			//			  y: (unitA.targetPosition.y - unitA.y)/ unitA.targetDistance};
+			var relVel = {x: (unitA.targetPosition.x - unitA.x) / unitA.targetDistance, 
+						  y: (unitA.targetPosition.y - unitA.y)/ unitA.targetDistance};
 			
-			var relVel = {x: (unitA.currentSpeed * unitA.dirX) - (unitB.currentSpeed * unitB.dirX),
-						  y: (unitA.currentSpeed * unitA.dirY) - (unitB.currentSpeed * unitB.dirY)};
+			//var relVel = {x: (unitA.currentSpeed * unitA.dirX) - (unitB.currentSpeed * unitB.dirX),
+			//			  y: (unitA.currentSpeed * unitA.dirY) - (unitB.currentSpeed * unitB.dirY)};
 
 			if (dotProduct(dX, dY, relVel.x, relVel.y) > 0){
 				//do nothing
@@ -131,20 +132,19 @@ class CollisionEngine{
 					perp.y = -1 * normal.x;	
 
 				}
-				console.log(perp);
 				var redirectDir = {x: 0, y: 0};
 				if (dotProduct(relVel.x, relVel.y, perp.x, perp.y) < 0){
 					// A is to be rerouted in the negative perp direction. 
 					// if B is moving too, it gets routed in the perp direction.
 					
-					redirectDir.x = - normal.x - perp.x;
-					redirectDir.y = - normal.y - perp.y;
+					redirectDir.x = -1 * perp.x;
+					redirectDir.y = -1 * perp.y;
 				}
 				else{
 					// A is to be rerouted in the perp direction.
 					// if B is moving too, it gets routed in the negative perp direction.
-					redirectDir.x = - normal.x + perp.x;
-					redirectDir.y = - normal.y + perp.y;
+					redirectDir.x = perp.x;
+					redirectDir.y = perp.y;
 				}
 				
 				redirectDir = normalizeVector(redirectDir.x, redirectDir.y);
