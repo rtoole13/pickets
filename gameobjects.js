@@ -95,7 +95,7 @@ class Unit{
 		this.move(dt);
 	}
 
-	get_next_waypoint(){
+	getNextWaypoint(){
 		if (this.path != null && this.path.length >= 1){
 			var node = this.path.shift();
 			this.targetPosition = {x:node.x, y:node.y};
@@ -115,7 +115,7 @@ class Unit{
 		}
 		// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
 		if (this.targetDistance < this.targetSigma){
-			this.targetPosition = this.get_next_waypoint();
+			this.targetPosition = this.getNextWaypoint();
 		}
 		else if (Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
 			this.currentSpeed = this.baseSpeed;
@@ -187,20 +187,20 @@ class Unit{
 	}
 	executeMoveOrder(location){
 		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
-		this.get_next_waypoint();
+		this.getNextWaypoint();
 	}
 	/*
 	executeAttackMoveOrder(location){
 		//FIXME: behaves exactly like move order
 		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
-		this.get_next_waypoint();
+		this.getNextWaypoint();
 		//this.updateRoute();
 	}
 
 	executeFallBackOrder(location){
 		//FIXME: behaves exactly like move order
 		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
-		this.get_next_waypoint();
+		this.getNextWaypoint();
 		//this.updateRoute();
 	}
 	*/
@@ -371,7 +371,7 @@ class Courier extends Unit{
 	}
 	updateRoute(){
 		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(this.target.x, this.target.y), this, this.ignoreList);	
-		this.get_next_waypoint();
+		this.getNextWaypoint();
 	}
 
 	deliverOrder(){

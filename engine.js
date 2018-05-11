@@ -102,8 +102,19 @@ class CollisionEngine{
 	static collisionDynamicFriendly(unitA, idA, unitB, idB){
 		var radiusA = unitA.combatRadius;
 		var radiusB = unitB.combatRadius;
+		var distanceSq = getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitB.x, unitB.y);
+		if (unitA.targetSigma > unitA.combatRadius){
+			var rad = radiusB - (unitA.targetSigma - unitA.combatRadius);
+			if (distanceSq <= rad * rad){
+				unitA.getNextWaypoint();
+			}
+		}
+		else{
+			if(distanceSq <= unitA.combatRadius * unitA.combatRadius){
+				unitA.getNextWaypoint();
+			}
+		}
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
-		
 		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
 			var dX = unitA.x - unitB.x;
 			var dY = unitA.y - unitB.y;
