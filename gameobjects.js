@@ -66,7 +66,7 @@ class Unit{
 		this.baseSpeed = 15;
 		this.currentSpeed = 0;
 		this.angle = angle;
-		this.rotationRate = 120;
+		this.rotationRate = 85;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
 		this.targetPosition = null;
@@ -113,18 +113,32 @@ class Unit{
 			this.currentSpeed = 0;
 			return;
 		}
-		// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
-		if (this.targetDistance < this.targetSigma){
-			this.targetPosition = this.getNextWaypoint();
-		}
-		else if (Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
-			this.currentSpeed = this.baseSpeed;
-			this.x += this.currentSpeed * this.dirX * dt;
-			this.y += this.currentSpeed * this.dirY * dt;	
+
+		if (this.rerouting){
+			if (this.targetDistance < this.targetSigma){
+				this.targetPosition = this.getNextWaypoint();
+			}
+			else{
+				this.currentSpeed = this.baseSpeed;
+				this.x += this.currentSpeed * this.dirX * dt;
+				this.y += this.currentSpeed * this.dirY * dt;	
+			}
 		}
 		else{
-			this.currentSpeed = 0;
+			// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
+			if (this.targetDistance < this.targetSigma){
+				this.targetPosition = this.getNextWaypoint();
+			}
+			else if (Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
+				this.currentSpeed = this.baseSpeed;
+				this.x += this.currentSpeed * this.dirX * dt;
+				this.y += this.currentSpeed * this.dirY * dt;	
+			}
+			else{
+				this.currentSpeed = 0;
+			}
 		}
+		
 		this.currentNode = gameBoard.grid.getNodeFromLocation(this.x, this.y);
 	}
 

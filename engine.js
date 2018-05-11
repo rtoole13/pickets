@@ -74,12 +74,13 @@ class CollisionEngine{
 				continue;
 			}
 			if (unitA.collisionList.includes(idB)){
+				// these units have already collided this frame!
 				continue;
 			}
 			var unitB = friendlyList[idB];
 			/*
 			//NOTE: This code distinguishes static from dynamic. Going to see if all can be considered identically.
-			if (unitA.command == null){
+			if (unitB.command == null){
 				this.collisionStaticFriendly(unitA, unitB);
 			}
 			else{
@@ -102,35 +103,49 @@ class CollisionEngine{
 	static collisionDynamicFriendly(unitA, idA, unitB, idB){
 		var radiusA = unitA.combatRadius;
 		var radiusB = unitB.combatRadius;
-		var distanceSq = getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitB.x, unitB.y);
-		if (unitA.targetSigma > unitA.combatRadius){
-			var rad = radiusB - (unitA.targetSigma - unitA.combatRadius);
-			if (distanceSq <= rad * rad){
-				unitA.getNextWaypoint();
-			}
-		}
-		else{
-			if(distanceSq <= unitA.combatRadius * unitA.combatRadius){
-				unitA.getNextWaypoint();
-			}
-		}
+		
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+			distanceSq = getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitB.x, unitB.y);
+			if (unitA.targetSigma > unitA.combatRadius){
+				var rad = radiusB - (unitA.targetSigma - unitA.combatRadius);
+				if (distanceSq <= (rad * rad)){
+					unitA.getNextWaypoint();
+				}
+			}
+			else{
+				if(distanceSq <= (unitA.combatRadius * unitA.combatRadius)){
+					unitA.getNextWaypoint();
+				}
+			}
+
+			var relVel, velA, velB;
+			if (unitA.targetPosition == null){
+				velA = {x: 0, y: 0};
+			}
+			else {
+				velA = {x: unitA.currentSpeed * (unitA.targetPosition.x - unitA.x) / unitA.targetDistance,
+				    	y: unitA.currentSpeed * (unitA.targetPosition.y - unitA.y) / unitA.targetDistance};
+			}
+			
+			if (unitB.targetPosition == null){
+				velB = {x: 0, y: 0};
+			}
+			else {
+				velB = {x: unitB.currentSpeed * (unitB.targetPosition.x - unitB.x) / unitB.targetDistance,
+				    	y: unitB.currentSpeed * (unitB.targetPosition.y - unitB.y) / unitB.targetDistance};
+			}
+			relVel = {x: velA.x - velB.x, y: velA.y - velB.y};
+
 			var dX = unitA.x - unitB.x;
 			var dY = unitA.y - unitB.y;
-
-			var relVel = {x: (unitA.targetPosition.x - unitA.x) / unitA.targetDistance, 
-						  y: (unitA.targetPosition.y - unitA.y)/ unitA.targetDistance};
-			
-			//var relVel = {x: (unitA.currentSpeed * unitA.dirX) - (unitB.currentSpeed * unitB.dirX),
-			//			  y: (unitA.currentSpeed * unitA.dirY) - (unitB.currentSpeed * unitB.dirY)};
-
-			if (dotProduct(dX, dY, relVel.x, relVel.y) > 0){
-				//do nothing
+			if (dotProduct(dX, dY, relVel.x, relVel.y) >= 0){
+				//could potentially grab next waypoint if there's one available?
+				//only if there's logic to make sure the path to the next waypoint is clear
 			}
 			else{
 				//We've got a collision. Do things.
-				unitA.rerouting = true;
+				
 				//get normalized normal (pointing from B to A)
 				var normal = normalizeVector(dX, dY);
 				// get vector perpendicular to norm, in the general direction of A's dir.
@@ -162,10 +177,17 @@ class CollisionEngine{
 				
 				unitA.rerouteTargetX = unitA.x + unitA.rerouteDistance * redirectDir.x;
 				unitA.rerouteTargetY = unitA.y + unitA.rerouteDistance * redirectDir.y;
+
+				if (velB.x != 0 && velB.y != 0){
+					unitB.rerouteTargetX = unitB.x + unitB.rerouteDistance * -redirectDir.x;
+					unitB.rerouteTargetY = unitB.y + unitB.rerouteDistance * -redirectDir.y;
+					unitB.rerouting = true;
+				}
+				unitA.rerouting = true;
+				
 			}
 			unitA.collisionList.push(idB);
 			unitB.collisionList.push(idA);
-
 		}
 	}
 
