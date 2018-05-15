@@ -39,6 +39,19 @@ function inArray(obj, array){
 	return false;
 }
 
+function hexToRGB(hex, alpha){
+	hex = hex.replace("#", "");
+	var r, g, b;
+	if (alpha == undefined){
+		alpha = 1.0;
+	}
+	r = parseInt(hex.substring(0,2), 16);
+	g = parseInt(hex.substring(2,4), 16);
+	b = parseInt(hex.substring(4,6), 16);
+	return 'rgba(' + r.toString() + ', ' + g.toString() + ', ' + b.toString() + ', ' + alpha.toString() + ')';
+	
+}
+
 // Unit functions
 function initializeElement(elementType){
 	var strength;

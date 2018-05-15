@@ -34,10 +34,15 @@ var gameBoard,
 
 	commandType,
 
-	playerColor = "CadetBlue",
-	enemyColor  = "DarkRed",
+	playerColor = "#5F9EA0",
+	enemyColor  = "#8B0000",
+	
+	orderColor,
 
 	activeUnit,
+	targetOriginX,
+	targetOriginY,
+	givingOrder = false,
 	selector = 0;
 
 
@@ -45,8 +50,8 @@ window.onload = function(){
 	canvasContext = canvas.getContext('2d');
 	
 	canvas.style.cursor = "crosshair";
-	canvas.addEventListener("click", handleLeftClick, false);
-	canvas.addEventListener("contextmenu", handleRightClick, false);
+	canvas.addEventListener("mousedown", handleMouseDown, false);
+	canvas.addEventListener("contextmenu", handleRightClickUp, false);
 	canvas.addEventListener("mousemove", getMousePosition, false);
 
 	window.addEventListener("keydown", handleKeyPress, false);
@@ -61,6 +66,9 @@ function init(){
 	unitTypes    = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
 	unitStates   = Object.freeze({marching:1, braced:2, entrenched:3});
 	armies       = Object.freeze({blue:1, red:2});
+
+	//Initialize colors
+	orderColor = hexToRGB(playerColor, 0.25);
 
 	//Initialize stuff
 	commandType = commandTypes.move;
@@ -93,7 +101,20 @@ function checkWinCondition(){
 
 
 //Event Handlers
-function handleLeftClick(e){
+function handleMouseDown(e){
+	switch(e.button){
+		case 0:{
+			handleLeftClick();
+			break;
+		}
+		case 2:{
+			handleRightClickDown();
+			break;
+		}
+	}
+}
+
+function handleLeftClick(){
 	if (CollisionEngine.pointInCircle(mouseX, mouseY, playerGeneral.x, playerGeneral.y, 13)){
 		activeUnit = playerGeneral;
 		console.log("Selected general at " + "(" + playerGeneral.x + ", " + playerGeneral.y + ")");
@@ -131,9 +152,21 @@ function handleLeftClick(e){
 	return;
 }
 
-function handleRightClick(e){
+function handleRightClickDown(){
+	if (activeUnit != undefined || null){
+		givingOrder = true;
+		
+		targetOriginX = mouseX;
+		targetOriginY = mouseY;
+	}
+	else{
+		givingOrder = false;
+	}
+}
+function handleRightClickUp(e){
 	e.preventDefault();
 	if (activeUnit != undefined || null){
+		givingOrder = false;
 		if (activeUnit == playerGeneral){
 			playerGeneral.targetPosition = {x: mouseX, y: mouseY};
 			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
