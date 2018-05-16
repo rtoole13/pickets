@@ -167,12 +167,17 @@ function handleRightClickUp(e){
 	e.preventDefault();
 	if (activeUnit != undefined || null){
 		givingOrder = false;
+		var dist, dirX, dirY, targetAngle;
+		dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
+		dirX = (mouseX - targetOriginX) / dist;
+		dirY = (mouseY - targetOriginY) / dist;
+		targetAngle = getAngleFromDir(dirX, dirY);
 		if (activeUnit == playerGeneral){
 			playerGeneral.targetPosition = {x: mouseX, y: mouseY};
 			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
 		}
 		else{
-			playerGeneral.issueCommand(activeUnit, {type: commandType, x: mouseX, y: mouseY, date: Date.now()});
+			playerGeneral.issueCommand(activeUnit, {type: commandType, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now()});
 		}
 	}
 }

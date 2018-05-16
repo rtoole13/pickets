@@ -62,7 +62,6 @@ class Unit{
 	constructor(x, y, angle, army){
 		this.x = x;
 		this.y = y;
-		this.currentNode = gameBoard.grid.getNodeFromLocation(this.x, this.y);
 		this.baseSpeed = 15;
 		this.currentSpeed = 0;
 		this.angle = angle;
@@ -72,9 +71,11 @@ class Unit{
 		this.targetPosition = null;
 		this.targetDistance = null;
 		this.targetAngle = this.angle;
+		this.targetAngleFinal = null;
 		this.turnRadiusTol = 30;
 		this.targetRadiusTolerance = 40;
 		this.targetSigma = 30;
+		this.targetSigmaFinal = 5;
 		this.targetAngleSigma = 3; //deg 
 		this.turnAngleTol = 90;
 		this.command = null;
@@ -112,7 +113,7 @@ class Unit{
 		if (this.targetPosition == null){
 			this.currentSpeed = 0;
 			return;
-		}
+		}		
 
 		if (this.rerouting){
 			if (this.targetDistance < this.targetSigma){
@@ -125,8 +126,15 @@ class Unit{
 			}
 		}
 		else{
+			var currentTargetSigma;
+			if (this.path.length == 0){
+				currentTargetSigma = this.targetSigmaFinal;
+			}
+			else{
+				currentTargetSigma = this.targetSigma;
+			}
 			// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
-			if (this.targetDistance < this.targetSigma){
+			if (this.targetDistance < currentTargetSigma){
 				this.targetPosition = this.getNextWaypoint();
 			}
 			else if (Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
@@ -138,8 +146,6 @@ class Unit{
 				this.currentSpeed = 0;
 			}
 		}
-		
-		this.currentNode = gameBoard.grid.getNodeFromLocation(this.x, this.y);
 	}
 
 	rotate(dt){
@@ -150,6 +156,10 @@ class Unit{
 		var absAngleDiff = Math.abs(angleDiff);
 		if (absAngleDiff < this.targetAngleSigma){
 			this.angle = this.targetAngle;
+			if (this.targetAngle == this.targetAngleFinal){
+				this.targetAngleFinal = null;
+				this.targetAngle = null;
+			}
 			this.updateDir();
 			return;
 		}
@@ -186,7 +196,7 @@ class Unit{
 				break;
 			}
 			case commandTypes.move:{
-				this.executeMoveOrder({x: order.x, y: order.y});
+				this.executeMoveOrder({x: order.x, y: order.y}, order.angle);
 				break;
 			}
 			case commandTypes.attackmove:{
@@ -199,21 +209,22 @@ class Unit{
 			}
 		}
 	}
-	executeMoveOrder(location){
-		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
+	executeMoveOrder(location, angle){
+		this.targetAngleFinal = angle;
+		this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
 		this.getNextWaypoint();
 	}
 	/*
 	executeAttackMoveOrder(location){
 		//FIXME: behaves exactly like move order
-		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
+		this.path = Pathfinder.findPath(gameBoard.grid.getNodeFromLocation(this.x, this.y), gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
 		this.getNextWaypoint();
 		//this.updateRoute();
 	}
 
 	executeFallBackOrder(location){
 		//FIXME: behaves exactly like move order
-		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
+		this.path = Pathfinder.findPath(gameBoard.grid.getNodeFromLocation(this.x, this.y), gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
 		this.getNextWaypoint();
 		//this.updateRoute();
 	}
@@ -234,7 +245,7 @@ class Unit{
 			this.targetAngle = getAngleFromDir(currentTargetDirX, currentTargetDirY);
 		}
 		else{
-			this.targetAngle = null;
+			this.targetAngle = (this.targetAngleFinal != null) ? this.targetAngleFinal : null;
 		}
 
 	}
@@ -384,7 +395,7 @@ class Courier extends Unit{
 		this.updateAngle();
 	}
 	updateRoute(){
-		this.path = Pathfinder.findPath(this.currentNode, gameBoard.grid.getNodeFromLocation(this.target.x, this.target.y), this, this.ignoreList);	
+		this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, this.ignoreList);	
 		this.getNextWaypoint();
 	}
 

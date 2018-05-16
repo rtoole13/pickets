@@ -2,14 +2,15 @@
 
 class Pathfinder{
 	constructor(){}
-	static findPath(startNode, targetNode, currentUnit, ignoreList){
+	static findPath(startX, startY, targetX, targetY, currentUnit, ignoreList){
 		var wayPoints = [];
 		var pathSuccess = false;
 		var openSet = [];
 		var closedSet = [];
-
+		var startNode, targetNode;
 		gameBoard.grid.update(currentUnit, ignoreList);
-
+		startNode = gameBoard.grid.getNodeFromLocation(startX, startY);
+		targetNode = gameBoard.grid.getNodeFromLocation(targetX, targetY);
 		openSet.push(startNode);
 		
 		while (openSet.length > 0){
@@ -45,12 +46,12 @@ class Pathfinder{
 			}
 		}
 		if (pathSuccess){
-			wayPoints = this.retracePath(startNode, targetNode);
+			wayPoints = this.retracePath(startNode, targetNode, targetX, targetY);
 			gameBoard.grid.path = wayPoints;
 		}
 		return wayPoints;
 	}
-	static retracePath(startNode, endNode){
+	static retracePath(startNode, endNode, targetX, targetY){
 		var path = [];
 		var currentNode = endNode;
 		while (currentNode != startNode){
@@ -60,28 +61,28 @@ class Pathfinder{
 		//path.push(startNode);
 		path.reverse();
 		gameBoard.grid.pathOrig = path;
-		path = this.simplifyPath(path);
+		path = this.simplifyPath(path, targetX, targetY);
 		return path;
 	}
 
 	static getDirection(currentNode, targetNode){
-		return {x: targetNode.indX - currentNode.indX,y: targetNode.indY - currentNode.indY};
+		return {x: targetNode.indX - currentNode.indX, y: targetNode.indY - currentNode.indY};
 	}
 
-	static simplifyPath(path){
+	static simplifyPath(path, targetX, targetY){
 		var waypoints = [];
 		var oldDirection = {x: 0, y: 0};
 		var newDirection;
 		for (var i = 1; i < path.length - 1; i++){
 			newDirection = this.getDirection(path[i - 1], path[i]);
 			if ((newDirection.x - oldDirection.x != 0) || (newDirection.y - oldDirection.y != 0)){
-				waypoints.push(path[i-1]);
+				waypoints.push({x:path[i-1].x, y:path[i-1].y});
 			}
 			
 			
 			oldDirection = newDirection;
 		}
-		waypoints.push(path[path.length - 1]);
+		waypoints.push({x: targetX, y: targetY});
 		return waypoints;
 	}
 
