@@ -68,6 +68,8 @@ class Unit{
 		this.rotationRate = 85;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
+		this.target = null;
+		this.updateRouteTimer = new Timer(2000, true);
 		this.targetPosition = null;
 		this.targetDistance = null;
 		this.targetAngle = this.angle;
@@ -80,7 +82,7 @@ class Unit{
 		this.turnAngleTol = 90;
 		this.command = null;
 		this.army = army;
-		this.path = null;
+		this.path = [];
 		this.rerouteTargetX = null;
 		this.rerouteTargetY = null;
 		this.rerouteDistance = 15;
@@ -90,6 +92,12 @@ class Unit{
 	}
 
 	update(dt){
+		if (this.target != null){
+			if (this.updateRouteTimer.checkTime()){
+				this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, this.ignoreList);	
+				this.getNextWaypoint();
+			}
+		}
 		this.updateTargetParameters();
 
 		this.rotate(dt);
@@ -114,7 +122,6 @@ class Unit{
 			this.currentSpeed = 0;
 			return;
 		}		
-
 		if (this.rerouting){
 			if (this.targetDistance < this.targetSigma){
 				this.targetPosition = this.getNextWaypoint();
@@ -133,6 +140,7 @@ class Unit{
 			else{
 				currentTargetSigma = this.targetSigma;
 			}
+			
 			// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
 			if (this.targetDistance < currentTargetSigma){
 				this.targetPosition = this.getNextWaypoint();
@@ -196,7 +204,7 @@ class Unit{
 				break;
 			}
 			case commandTypes.move:{
-				this.executeMoveOrder({x: order.x, y: order.y}, order.angle);
+				this.executeMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
 				break;
 			}
 			case commandTypes.attackmove:{
@@ -209,9 +217,16 @@ class Unit{
 			}
 		}
 	}
-	executeMoveOrder(location, angle){
+	executeMoveOrder(location, angle, target){
 		this.targetAngleFinal = angle;
-		this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
+		this.target = target;
+		if (target != null){
+			this.path = Pathfinder.findPath(this.x, this.y, target.x, target.y, this);
+			this.updateRouteTimer.start();
+		}
+		else{
+			this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
+		}
 		this.getNextWaypoint();
 	}
 	/*
@@ -324,6 +339,7 @@ class General extends Unit{
 		super(x, y, angle, army);
 		this.baseSpeed = this.baseSpeed * 2;
 		this.commandRadius = 500;
+		this.combatRadius = 30;
 		this.courierCount = courierCount;
 		this.unitType = unitTypes.general;
 	}

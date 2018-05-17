@@ -151,13 +151,53 @@ function handleLeftClick(){
 	console.log("No unit selected");
 	return;
 }
+function selectEnemyUnit(x, y){
+	if (CollisionEngine.pointInCircle(x, y, enemyGeneral.x, enemyGeneral.y, 13)){
+		return enemyGeneral;
+	}
+
+	for (var id in enemyCavalryList){
+		var unit = enemyCavalryList[id];
+		if (CollisionEngine.pointInCircle(x, y, unit.x, unit.y, 23)){
+			return unit;
+		}
+	}
+
+	for (var id in enemyInfantryList){
+		var unit = enemyInfantryList[id];
+		if (CollisionEngine.pointInCircle(x, y, unit.x, unit.y, 23)){
+			return unit;
+		}
+	}
+
+	for (var id in enemyArtilleryList){
+		var unit = enemyArtilleryList[id];
+		if (CollisionEngine.pointInCircle(x, y, unit.x, unit.y, 23)){
+			return unit;
+		}
+	}
+	return null;
+}
 
 function handleRightClickDown(){
 	if (activeUnit != undefined || null){
-		givingOrder = true;
-		
-		targetOriginX = mouseX;
-		targetOriginY = mouseY;
+		if (activeUnit == playerGeneral){
+			playerGeneral.targetPosition = {x: mouseX, y: mouseY};
+			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
+		}
+		else{
+			targetOriginX = mouseX;
+			targetOriginY = mouseY;
+
+			var target;
+			target = selectEnemyUnit(mouseX, mouseY);
+			if (target != null){
+				playerGeneral.issueCommand(activeUnit, {type: commandType, target: target, x: targetOriginX, y: targetOriginY, angle: null, date: Date.now()});
+			}
+			else{
+			givingOrder = true;
+			}
+		}
 	}
 	else{
 		givingOrder = false;
@@ -165,20 +205,16 @@ function handleRightClickDown(){
 }
 function handleRightClickUp(e){
 	e.preventDefault();
-	if (activeUnit != undefined || null){
+	if ((activeUnit != undefined || null) && (activeUnit != playerGeneral) && givingOrder){
 		givingOrder = false;
+
 		var dist, dirX, dirY, targetAngle;
 		dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
 		dirX = (mouseX - targetOriginX) / dist;
 		dirY = (mouseY - targetOriginY) / dist;
 		targetAngle = getAngleFromDir(dirX, dirY);
-		if (activeUnit == playerGeneral){
-			playerGeneral.targetPosition = {x: mouseX, y: mouseY};
-			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
-		}
-		else{
-			playerGeneral.issueCommand(activeUnit, {type: commandType, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now()});
-		}
+
+		playerGeneral.issueCommand(activeUnit, {type: commandType, target: null, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now()});
 	}
 }
 

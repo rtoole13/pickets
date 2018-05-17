@@ -51,6 +51,7 @@ class Pathfinder{
 		}
 		return wayPoints;
 	}
+
 	static retracePath(startNode, endNode, targetX, targetY){
 		var path = [];
 		var currentNode = endNode;

@@ -45,9 +45,7 @@ class CollisionEngine{
 	static checkEnemyCollision(unitA, idA, enemyList){
 		//Check unitA against enemies
 		for (var idB in enemyList){
-			if (idA == idB){
-				continue;
-			}
+
 			var unitB = enemyList[idB];
 
 			switch(unitA.command){
@@ -192,7 +190,13 @@ class CollisionEngine{
 	}
 
 	static moveCollisionEnemy(unitA, unitB){
-		
+		var radiusA = unitA.combatRadius;
+		var radiusB = unitB.combatRadius;
+		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+
+		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+			return;
+		}
 	}
 
 	static attackMoveCollisionEnemy(unitA, unitB){
@@ -205,29 +209,7 @@ class CollisionEngine{
 			console.log('attack move collision with enemy');
 		}
 	}
-	/*
-	static checkCollision(unitA, unitB){
-		if (unitA.state == unitStates.marching || unitB.state == unitStates.marching){
-			var radiusA, radiusB, distanceSq, friendly = false;
-			if (unitA.army == unitB.army){
-				//Friendly
-				radiusA = unitA.combatRadius;
-				radiusB = unitB.combatRadius;
-				friendly = true;
-			}
-			else{
-				//Enemy
-				radiusA = unitA.skirmishRadius;
-				radiusB = unitB.skirmishRadius;
-			}
-			distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
-			if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
-				unitA.handleHit(unitB, distanceSq, friendly);
-				unitB.handleHit(unitA, distanceSq, friendly);
-			}
-		}
-	}
-	*/
+
 	static pointInCircle(x, y, xt, yt, radius){
 		if (getDistanceSq(x, y, xt, yt) < Math.pow(radius,2)){
 			return true;
