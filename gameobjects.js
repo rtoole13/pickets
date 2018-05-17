@@ -64,6 +64,8 @@ class Unit{
 		this.y = y;
 		this.baseSpeed = 15;
 		this.currentSpeed = 0;
+		this.isMoving = false;
+		this.isRotating = false;
 		this.angle = angle;
 		this.rotationRate = 85;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
@@ -87,7 +89,6 @@ class Unit{
 		this.rerouteTargetY = null;
 		this.rerouteDistance = 15;
 		this.rerouting = false;
-		this.state = unitStates.braced;
 		this.collisionList = [];
 	}
 
@@ -100,8 +101,10 @@ class Unit{
 		}
 		this.updateTargetParameters();
 
-		this.rotate(dt);
-		this.move(dt);
+		//rotate and move, isRotating and isMoving indicate whether the unit moved this frame.
+		this.isRotating = this.rotate(dt);
+		this.isMoving = this.move(dt);
+		
 	}
 
 	getNextWaypoint(){
@@ -118,19 +121,20 @@ class Unit{
 	}
 
 	move(dt){
+		var moved = false;
 		if (this.targetPosition == null){
 			this.currentSpeed = 0;
-			return;
+			return moved;
 		}		
 		if (this.rerouting){
 			if (this.targetDistance < this.targetSigma){
 				this.targetPosition = this.getNextWaypoint();
+				this.updateTargetParameters();
 			}
-			else{
-				this.currentSpeed = this.baseSpeed;
-				this.x += this.currentSpeed * this.dirX * dt;
-				this.y += this.currentSpeed * this.dirY * dt;	
-			}
+			this.currentSpeed = this.baseSpeed;
+			this.x += this.currentSpeed * this.dirX * dt;
+			this.y += this.currentSpeed * this.dirY * dt;
+			moved = true;	
 		}
 		else{
 			var currentTargetSigma;
@@ -144,22 +148,29 @@ class Unit{
 			// Here we can add other distances. If > this.targetSigma, but still pretty far away, no need to stop moving entirely.
 			if (this.targetDistance < currentTargetSigma){
 				this.targetPosition = this.getNextWaypoint();
+				this.updateTargetParameters();
 			}
-			else if (Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
+			
+			if ((this.targetAngle != null) && Math.abs(this.angle - this.targetAngle) < this.turnAngleTol){
 				this.currentSpeed = this.baseSpeed;
 				this.x += this.currentSpeed * this.dirX * dt;
-				this.y += this.currentSpeed * this.dirY * dt;	
+				this.y += this.currentSpeed * this.dirY * dt;
+				moved = true;	
 			}
 			else{
 				this.currentSpeed = 0;
 			}
 		}
+		return moved;
 	}
 
 	rotate(dt){
+		var rotating = false;
 		if (this.targetAngle == null){
-			return;
+			this.isRotating = false;
+			return rotating;
 		}
+		rotating = true;
 		var angleDiff = this.targetAngle - this.angle;
 		var absAngleDiff = Math.abs(angleDiff);
 		if (absAngleDiff < this.targetAngleSigma){
@@ -169,8 +180,10 @@ class Unit{
 				this.targetAngle = null;
 			}
 			this.updateDir();
-			return;
+			return rotating;
 		}
+
+		// Actively rotating
 		var maxFrameRot = this.rotationRate * dt;
 		var rotation = (maxFrameRot < absAngleDiff)? maxFrameRot : absAngleDiff;
 		if (angleDiff < -180){
@@ -190,6 +203,7 @@ class Unit{
 		this.dirX = temp.x;
 		this.dirY = temp.y;
 		this.updateAngle();
+		return rotating;
 	}
 	updateCommand(order){
 		// Called on being given a command, and also on command completion
@@ -313,14 +327,33 @@ class InfantryUnit extends Unit{
 		this.combatRadius = 30;
 		this.skirmishRadius = 65;
 		this.state = unitStates.braced;
+		this.bracedTimer = new Timer(5000, false);
+		this.bracedTimer.start();
 		this.unitType = unitTypes.infantry;
 		this.halted = false;
 	}
 	update(dt){
 		//this.updateRoute();
-		super.update(dt)
-		
-		this.halted = false;
+		super.update(dt);
+		this.updateState();
+	}
+	updateState(){
+		var previousState = this.state;
+		if (this.isRotating || this.isMoving){
+			this.state = unitStates.marching;
+		}
+		else{
+			if (this.state == unitStates.entrenched){
+				return;
+			}
+			else if (previousState == unitStates.marching){
+				this.state = unitStates.braced;
+				this.bracedTimer.start();
+			}
+			else{
+				this.state = (this.bracedTimer.checkTime()) ? unitStates.entrenched : unitStates.braced; 
+			}
+		}
 	}
 }
 

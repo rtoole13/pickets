@@ -190,12 +190,25 @@ class CollisionEngine{
 	}
 
 	static moveCollisionEnemy(unitA, unitB){
-		var radiusA = unitA.combatRadius;
+		var radiusA = unitA.skirmishRadius;
 		var radiusB = unitB.combatRadius;
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
+		}
+		
+		if (unitA.target != null){
+			if (unitA.target == unitB.target){
+				// rotate to unitB
+			}
+			else{
+				// don't rotate to unitB
+			}
+		}
+		else{
+			// no target specified
+			// if near specified target location, rotate to specified orientation
 		}
 	}
 
@@ -204,9 +217,21 @@ class CollisionEngine{
 		var radiusB = unitB.combatRadius;
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		
-		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
-			//Whether to handle both A and B's coll? Or just As
-			console.log('attack move collision with enemy');
+		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+			return;
+		}
+
+		if (unitA.target != null){
+			if (unitA.target == unitB.target){
+				// rotate to unitB
+			}
+			else{
+				// don't rotate to unitB
+			}
+		}
+		else{
+			// no target specified
+			// if near specified target location, rotate to specified orientation
 		}
 	}
 
