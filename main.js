@@ -42,6 +42,8 @@ var gameBoard,
 	activeUnit,
 	targetOriginX,
 	targetOriginY,
+	minDragDrawDistance = 5,
+
 	givingOrder = false,
 	selector = 0;
 
@@ -210,10 +212,14 @@ function handleRightClickUp(e){
 
 		var dist, dirX, dirY, targetAngle;
 		dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
-		dirX = (mouseX - targetOriginX) / dist;
-		dirY = (mouseY - targetOriginY) / dist;
-		targetAngle = getAngleFromDir(dirX, dirY);
-
+		if (dist >= minDragDrawDistance){
+			dirX = (mouseX - targetOriginX) / dist;
+			dirY = (mouseY - targetOriginY) / dist;
+			targetAngle = getAngleFromDir(dirX, dirY);
+		}
+		else{
+			targetAngle = null;
+		}
 		playerGeneral.issueCommand(activeUnit, {type: commandType, target: null, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now()});
 	}
 }

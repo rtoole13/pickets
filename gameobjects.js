@@ -175,11 +175,11 @@ class Unit{
 		var absAngleDiff = Math.abs(angleDiff);
 		if (absAngleDiff < this.targetAngleSigma){
 			this.angle = this.targetAngle;
+			this.updateDir();
 			if (this.targetAngle == this.targetAngleFinal){
 				this.targetAngleFinal = null;
 				this.targetAngle = null;
 			}
-			this.updateDir();
 			return rotating;
 		}
 
@@ -199,7 +199,6 @@ class Unit{
 		else{
 			var temp = rotateVector(this.dirX, this.dirY, -rotation, true);
 		}
-		
 		this.dirX = temp.x;
 		this.dirY = temp.y;
 		this.updateAngle();
@@ -333,7 +332,12 @@ class InfantryUnit extends Unit{
 		this.halted = false;
 	}
 	update(dt){
-		//this.updateRoute();
+		// below will likely be the means of halting a unit on enemy collision
+		/*
+		if (this.command == null){
+			return;
+		}
+		*/
 		super.update(dt);
 		this.updateState();
 	}

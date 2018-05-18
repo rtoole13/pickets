@@ -138,12 +138,12 @@ class CollisionEngine{
 			var dX = unitA.x - unitB.x;
 			var dY = unitA.y - unitB.y;
 			if (dotProduct(dX, dY, relVel.x, relVel.y) >= 0){
+
 				//could potentially grab next waypoint if there's one available?
 				//only if there's logic to make sure the path to the next waypoint is clear
 			}
 			else{
 				//We've got a collision. Do things.
-				
 				//get normalized normal (pointing from B to A)
 				var normal = normalizeVector(dX, dY);
 				// get vector perpendicular to norm, in the general direction of A's dir.

@@ -69,15 +69,20 @@ function drawOrder(){
 	if (!givingOrder || activeUnit == playerGeneral){
 		return;
 	}
+	var dist;
+	dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
+	
+	if (dist < minDragDrawDistance){
+		return;
+	}
+	
 	var width  = 40, //dims hardcoded to match infantry
 		height = 10, 
 		color = orderColor,
 		unit = {x: targetOriginX, y: targetOriginY, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0},
-		dirX,
-		dirY,
-		dist;
-	
-	dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
+		dirX, 
+		dirY;
+
 	dirX = (mouseX - targetOriginX) / dist;
 	dirY = (mouseY - targetOriginY) / dist;
 	
