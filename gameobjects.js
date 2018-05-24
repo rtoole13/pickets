@@ -66,6 +66,7 @@ class Unit{
 		this.currentSpeed = 0;
 		this.isMoving = false;
 		this.isRotating = false;
+		this.isSkirmishing = false;
 		this.angle = angle;
 		this.rotationRate = 85;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
@@ -76,8 +77,7 @@ class Unit{
 		this.targetDistance = null;
 		this.targetAngle = this.angle;
 		this.targetAngleFinal = null;
-		this.turnRadiusTol = 30;
-		this.targetRadiusTolerance = 40;
+		this.combatTargetProximityTol = 40;
 		this.targetSigma = 30;
 		this.targetSigmaFinal = 5;
 		this.targetAngleSigma = 3; //deg 
@@ -221,7 +221,7 @@ class Unit{
 				break;
 			}
 			case commandTypes.attackmove:{
-				this.executeMoveOrder({x: order.x, y: order.y});
+				this.executeMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
 				break;
 			}
 			case commandTypes.fallback:{
@@ -242,21 +242,21 @@ class Unit{
 		}
 		this.getNextWaypoint();
 	}
-	/*
-	executeAttackMoveOrder(location){
-		//FIXME: behaves exactly like move order
-		this.path = Pathfinder.findPath(gameBoard.grid.getNodeFromLocation(this.x, this.y), gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
-		this.getNextWaypoint();
-		//this.updateRoute();
+	executeAttackMoveOrder(location, angle, target){
+		//currently behaves exactly like a move order. The difference is really just that the 
+		//unit's command is 'attackmove'
+		//Add any additional logic here
+		this.executeMoveOrder(location, angle, target);
 	}
 
 	executeFallBackOrder(location){
-		//FIXME: behaves exactly like move order
-		this.path = Pathfinder.findPath(gameBoard.grid.getNodeFromLocation(this.x, this.y), gameBoard.grid.getNodeFromLocation(location.x, location.y), this);
+		//FIXME need to make the movement behavior reversed, basically. move and rotation.
+		this.targetAngleFinal = null;
+		this.target = null;
+		this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
 		this.getNextWaypoint();
-		//this.updateRoute();
 	}
-	*/
+	
 	updateTargetParameters(){
 		if (this.targetPosition != null){
 			this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);

@@ -58,7 +58,7 @@ class CollisionEngine{
 					break;
 				}
 				case commandTypes.fallback:{
-					
+					this.fallBackCollisionEnemy(unitA, unitB);
 					break;
 				}
 			}
@@ -190,26 +190,39 @@ class CollisionEngine{
 	}
 
 	static moveCollisionEnemy(unitA, unitB){
-		var radiusA = unitA.skirmishRadius;
-		var radiusB = unitB.combatRadius;
-		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
-
-		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
-			return;
-		}
-		
-		if (unitA.target != null){
-			if (unitA.target == unitB.target){
-				// rotate to unitB
-			}
-			else{
-				// don't rotate to unitB
-			}
+		// It's looking like the collision methods will mostly be identical? With the exception of the skirmish check
+		// and the radii involved
+		if (unitA.isSkirmishing){
+			//Alrighty in skirmishing range of at least one enemy unit. Collision check is identical to attack move's
+			this.attackMoveCollisionEnemy(unitA, unitB);
 		}
 		else{
-			// no target specified
-			// if near specified target location, rotate to specified orientation
+			// Unit was moving from out of skirmish into it, considering it's a move order. halt the unit in place.
+			var radiusA = unitA.skirmishRadius;
+			var radiusB = unitB.combatRadius;
+			var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+
+			if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+				return;
+			}
+			if (unitA.target != null){
+				if (unitA.target == unitB.target){
+					// rotate to unitB
+				}
+				else{
+					// don't rotate to unitB
+				}
+			}
+			else{
+				// no target unit specified
+				
+				if (getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitA.x, unitA.y) <= Math.pow(combatTargetProximityTol, 2)){
+					// if near specified target location, rotate to specified orientation
+
+				}
+			}
 		}
+		
 	}
 
 	static attackMoveCollisionEnemy(unitA, unitB){
@@ -231,8 +244,16 @@ class CollisionEngine{
 		}
 		else{
 			// no target specified
-			// if near specified target location, rotate to specified orientation
+
+			if (getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitA.x, unitA.y) <= Math.pow(unitA.combatTargetProximityTol, 2)){
+					// if near specified target location, rotate to specified orientation
+
+				}
 		}
+	}
+
+	static fallBackCollisionEnemy(unitA, unitB){
+		//TODO fallback collision logic
 	}
 
 	static pointInCircle(x, y, xt, yt, radius){
