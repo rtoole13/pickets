@@ -70,23 +70,31 @@ function drawOrder(){
 		return;
 	}
 	var dist;
-	dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
-	
-	if (dist < minDragDrawDistance){
-		return;
-	}
-	
-	var width  = 40, //dims hardcoded to match infantry
-		height = 10, 
-		color = orderColor,
-		unit = {x: targetOriginX, y: targetOriginY, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0},
-		dirX, 
-		dirY;
+	if (commandType == commandTypes.fallback){
+		dist = getDistance(activeUnit.x, activeUnit.y, mouseX, mouseY);
+		if (dist < minDragDrawDistance){
+			return;
+		}
 
-	dirX = (mouseX - targetOriginX) / dist;
-	dirY = (mouseY - targetOriginY) / dist;
-	
+		var unit, dirX, dirY;
+		unit = {x: activeUnit.x, y: activeUnit.y, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0};
+		dirX = (mouseX - activeUnit.x) / dist;
+		dirY = (mouseY - activeUnit.y) / dist;
+	}
+	else{
+		dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
+		if (dist < minDragDrawDistance){
+			return;
+		}
+
+		var unit, dirX, dirY;
+		unit = {x: targetOriginX, y: targetOriginY, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0};
+		dirX = (mouseX - targetOriginX) / dist;
+		dirY = (mouseY - targetOriginY) / dist;
+	}	
 	unit.angle = getAngleFromDir(dirX, dirY);
+	var color = orderColor;
+
 	drawInfantryUnit(unit, false, color);
 
 	switch(commandType){

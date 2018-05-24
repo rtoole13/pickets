@@ -62,7 +62,6 @@ class Unit{
 	constructor(x, y, angle, army){
 		this.x = x;
 		this.y = y;
-		this.baseSpeed = 15;
 		this.currentSpeed = 0;
 		this.isMoving = false;
 		this.isRotating = false;
@@ -125,7 +124,10 @@ class Unit{
 		if (this.targetPosition == null){
 			this.currentSpeed = 0;
 			return moved;
-		}		
+		}
+
+		this.baseSpeed = this.adjustSpeed();
+
 		if (this.rerouting){
 			if (this.targetDistance < this.targetSigma){
 				this.targetPosition = this.getNextWaypoint();
@@ -221,7 +223,7 @@ class Unit{
 				break;
 			}
 			case commandTypes.attackmove:{
-				this.executeMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
+				this.executeAttackMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
 				break;
 			}
 			case commandTypes.fallback:{
@@ -290,37 +292,16 @@ class Unit{
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
 	}
-
-	rerouteTangentially(unit, distanceSq){
-		if (this.rerouteBegan != null && Date.now() - this.rerouteBegan <= this.rerouteTime){
-			return;
-		}
-		var dist;
-		if (distanceSq != null){
-			dist = Math.sqrt(distanceSq);
-		}
-		else{
-			dist = getDistance(this.x, this.y, unit.x, unit.y);
-		}
-
-		var normalX, normalY, projLength, rerouteMag;
-		normalX = (unit.x - this.x)/dist;
-		normalY = (unit.y - this.y)/dist;
-
-		projLength = this.dirX * normalX + this.dirY * normalY;
-		this.rerouteTargetX = this.dirX - projLength * normalX;
-		this.rerouteTargetY = this.dirY - projLength * normalY;
-		rerouteMag = getVectorMag(this.rerouteTargetX, this.rerouteTargetY);
-		this.rerouteTargetX = this.x + this.rerouteDistance * this.rerouteTargetX/rerouteMag;
-		this.rerouteTargetY = this.y + this.rerouteDistance * this.rerouteTargetY/rerouteMag;
-
-		this.rerouteBegan = Date.now();
+	adjustSpeed(){
+		// Any logic for terrain speed modifiers and such will go here. It's likely that classes will override
+		return this.derivativeSpeed;
 	}
 }
 
 class InfantryUnit extends Unit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, army);
+		this.derivativeSpeed = unitSpeeds.infantry;
 		this.element = element;
 		this.strength =	initializeElement(this.element);
 		this.combatRadius = 30;
@@ -341,6 +322,7 @@ class InfantryUnit extends Unit{
 		super.update(dt);
 		this.updateState();
 	}
+
 	updateState(){
 		var previousState = this.state;
 		if (this.isRotating || this.isMoving){
@@ -359,6 +341,12 @@ class InfantryUnit extends Unit{
 			}
 		}
 	}
+	adjustSpeed(){
+		if (this.command == commandTypes.fallback){
+			return -0.65 * this.derivativeSpeed;
+		}
+		return this.derivativeSpeed;
+	}
 }
 
 class CavalryUnit extends Unit{
@@ -366,7 +354,7 @@ class CavalryUnit extends Unit{
 		super(x, y, angle, army);
 		this.element = element;
 		this.strength = initializeElement(this.element);
-		this.baseSpeed = this.baseSpeed * 2;
+		this.derivativeSpeed = unitSpeeds.cavalry;
 		this.unitType = unitTypes.cavalry;
 	}
 }
@@ -374,7 +362,7 @@ class CavalryUnit extends Unit{
 class General extends Unit{
 	constructor(x, y, angle, courierCount, army){
 		super(x, y, angle, army);
-		this.baseSpeed = this.baseSpeed * 2;
+		this.derivativeSpeed = unitSpeeds.general;
 		this.commandRadius = 500;
 		this.combatRadius = 30;
 		this.courierCount = courierCount;
@@ -394,7 +382,7 @@ class General extends Unit{
 class Courier extends Unit{
 	constructor(x, y, angle, general, target, order, army){
 		super(x, y, angle, army);
-		this.baseSpeed = this.baseSpeed * 5;
+		this.derivativeSpeed = unitSpeeds.courier;
 		this.general = general;
 		this.target = target;
 		this.faceTarget();
@@ -429,16 +417,7 @@ class Courier extends Unit{
 			this.path = [];
 			this.targetPosition = {x: this.target.x, y: this.target.y};
 		}
-		else{
-			if (this.updateRouteTimer.checkTime()){
-				this.updateRoute();
-			}	
-		}
-
-		
-
 		super.update(dt);
-		
 	}
 
 	faceTarget(){
