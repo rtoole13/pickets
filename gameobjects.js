@@ -127,7 +127,6 @@ class Unit{
 		}
 
 		this.baseSpeed = this.adjustSpeed();
-		if (this.army == armies.blue){console.log(this.baseSpeed)};
 		if (this.rerouting){
 			if (this.targetDistance < this.targetSigma){
 				this.targetPosition = this.getNextWaypoint();
@@ -210,6 +209,9 @@ class Unit{
 		// Called on being given a command, and also on command completion
 		if (order == null){
 			this.command = null;
+			this.targetPosition = null;
+			this.targetAngle = null;
+			this.path = [];
 			return;
 		}
 		this.command = order.type;
@@ -258,7 +260,6 @@ class Unit{
 		this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
 		this.getNextWaypoint();
 	}
-	
 	updateTargetParameters(){
 		if (this.targetPosition != null){
 			this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);

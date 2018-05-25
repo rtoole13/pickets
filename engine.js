@@ -205,6 +205,8 @@ class CollisionEngine{
 			if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 				return;
 			}
+			unitA.isSkirmishing = true; 
+
 			if (unitA.target != null){
 				if (unitA.target == unitB.target){
 					// rotate to unitB
@@ -215,12 +217,15 @@ class CollisionEngine{
 			}
 			else{
 				// no target unit specified
-				
-				if (getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitA.x, unitA.y) <= Math.pow(this.combatTargetProximityTol, 2)){
-					// if near specified target location, rotate to specified orientation
 
+				var targetFinalPosition = (unitA.path.length > 0) ? unitA.path[unitA.path.length - 1] : unitA.targetPosition;
+				if (getDistanceSq(targetFinalPosition.x, targetFinalPosition.y, unitA.x, unitA.y) > Math.pow(unitA.combatTargetProximityTol, 2)){
+				// if not near specified target location, dont rotate to specified orientation
+					unitA.targetAngleFinal = null;
 				}
 			}
+			unitA.updateCommand(null);
+			console.log(unitA);
 		}
 		
 	}
@@ -237,6 +242,7 @@ class CollisionEngine{
 		if (unitA.target != null){
 			if (unitA.target == unitB.target){
 				// rotate to unitB
+
 			}
 			else{
 				// don't rotate to unitB
@@ -244,11 +250,8 @@ class CollisionEngine{
 		}
 		else{
 			// no target specified
-
-			if (getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitA.x, unitA.y) <= Math.pow(unitA.combatTargetProximityTol, 2)){
-					// if near specified target location, rotate to specified orientation
-
-				}
+			unitA.targetAngleFinal = null;	
+			unitA.updateCommand(null);
 		}
 	}
 
