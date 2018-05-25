@@ -127,7 +127,7 @@ class Unit{
 		}
 
 		this.baseSpeed = this.adjustSpeed();
-
+		if (this.army == armies.blue){console.log(this.baseSpeed)};
 		if (this.rerouting){
 			if (this.targetDistance < this.targetSigma){
 				this.targetPosition = this.getNextWaypoint();
@@ -273,6 +273,7 @@ class Unit{
 				currentTargetDirY = (this.targetPosition.y - this.y) / this.targetDistance;
 			}
 			this.targetAngle = getAngleFromDir(currentTargetDirX, currentTargetDirY);
+			this.targetAngle = this.adjustAngle(this.targetAngle);
 		}
 		else{
 			this.targetAngle = (this.targetAngleFinal != null) ? this.targetAngleFinal : null;
@@ -291,6 +292,10 @@ class Unit{
 	updateDir(){
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
 		this.dirY = - Math.sin((this.angle) * Math.PI/180);
+	}
+	adjustAngle(angle){
+		// By default nothing happens here. Classes will override potentially for fallback command
+		return angle;
 	}
 	adjustSpeed(){
 		// Any logic for terrain speed modifiers and such will go here. It's likely that classes will override
@@ -341,9 +346,21 @@ class InfantryUnit extends Unit{
 			}
 		}
 	}
+	adjustAngle(angle){
+		if (this.command == commandTypes.fallback){
+			angle += 180;
+			if (angle < -180){
+				angle += 360;
+			}
+			else if (angle > 180){
+				angle -= 360;
+			}
+		}
+		return angle;
+	}
 	adjustSpeed(){
 		if (this.command == commandTypes.fallback){
-			return -0.65 * this.derivativeSpeed;
+			return -0.4 * this.derivativeSpeed;
 		}
 		return this.derivativeSpeed;
 	}

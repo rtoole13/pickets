@@ -122,16 +122,16 @@ class CollisionEngine{
 				velA = {x: 0, y: 0};
 			}
 			else {
-				velA = {x: unitA.currentSpeed * (unitA.targetPosition.x - unitA.x) / unitA.targetDistance,
-				    	y: unitA.currentSpeed * (unitA.targetPosition.y - unitA.y) / unitA.targetDistance};
+				velA = {x: Math.abs(unitA.currentSpeed) * (unitA.targetPosition.x - unitA.x) / unitA.targetDistance,
+				    	y: Math.abs(unitA.currentSpeed) * (unitA.targetPosition.y - unitA.y) / unitA.targetDistance};
 			}
 			
 			if (unitB.targetPosition == null){
 				velB = {x: 0, y: 0};
 			}
 			else {
-				velB = {x: unitB.currentSpeed * (unitB.targetPosition.x - unitB.x) / unitB.targetDistance,
-				    	y: unitB.currentSpeed * (unitB.targetPosition.y - unitB.y) / unitB.targetDistance};
+				velB = {x: Math.abs(unitA.currentSpeed) * (unitB.targetPosition.x - unitB.x) / unitB.targetDistance,
+				    	y: Math.abs(unitA.currentSpeed) * (unitB.targetPosition.y - unitB.y) / unitB.targetDistance};
 			}
 			relVel = {x: velA.x - velB.x, y: velA.y - velB.y};
 
@@ -216,7 +216,7 @@ class CollisionEngine{
 			else{
 				// no target unit specified
 				
-				if (getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitA.x, unitA.y) <= Math.pow(combatTargetProximityTol, 2)){
+				if (getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitA.x, unitA.y) <= Math.pow(this.combatTargetProximityTol, 2)){
 					// if near specified target location, rotate to specified orientation
 
 				}
