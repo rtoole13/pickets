@@ -88,7 +88,9 @@ class Unit{
 		this.rerouteTargetY = null;
 		this.rerouteDistance = 15;
 		this.rerouting = false;
-		this.collisionList = [];
+		this.friendlyCollisionList = [];
+		this.combatCollisionList = [];
+		this.skirmishCollisionList = [];
 	}
 
 	update(dt){
@@ -216,22 +218,22 @@ class Unit{
 		}
 		this.command = order.type;
 		switch(this.command){
-			default:{
+			default:
 				this.command = null;
 				break;
-			}
-			case commandTypes.move:{
+			
+			case commandTypes.move:
 				this.executeMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
 				break;
-			}
-			case commandTypes.attackmove:{
+			
+			case commandTypes.attackmove:
 				this.executeAttackMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
 				break;
-			}
-			case commandTypes.fallback:{
+			
+			case commandTypes.fallback:
 				this.executeMoveOrder({x: order.x, y: order.y});	
 				break;
-			}
+			
 		}
 	}
 	executeMoveOrder(location, angle, target){

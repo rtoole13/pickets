@@ -56,18 +56,18 @@ function hexToRGB(hex, alpha){
 function initializeElement(elementType){
 	var strength;
 	switch(elementType){
-		default:{
+		default:
 			console.log("Unsupported element type!!");
-		}
-		case "Brigade":{
+		
+		case "Brigade":
 			strength = 3000;
-		}
-		case "Division":{
+		
+		case "Division":
 			strength = 12000;
-		}
-		case "Corps":{
+		
+		case "Corps":
 			strength = 24000;
-		}
+		
 	}
 	return strength;
 }

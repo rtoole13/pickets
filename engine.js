@@ -12,32 +12,44 @@ class CollisionEngine{
 
 			// Since I'm potentially only checking collision in DEBUG MODE every second or so. I'm only clearing the collision list and 
 			// returning the unit to a rerouting == false state here
-			unitA.collisionList = []; 
+			unitA.friendlyCollisionList = []; 
+			unitA.combatCollisionList = [];
+			unitA.skirmishCollisionList = [];
+
 			unitA.rerouteTargetX = null;
 			unitA.rerouteTargetY = null;
 			unitA.rerouting = false;
 
-			if (unitA.command == null){
-				continue;
-			}
 			var friendlyList, enemyList;
 			switch(unitA.army){
-				case armies.blue:{
+				case armies.blue:
 					friendlyList = playerUnitList;
 					enemyList = enemyUnitList;
 					break;
-				}
-				case armies.red:{
+				
+				case armies.red:
 					friendlyList = enemyUnitList;
 					enemyList = playerUnitList;
 					break;
-				}
-				default:{
+				
+				default:
 					console.log('Nonexistent army.');
 					break;
-				}
+				
 			}
 			this.checkEnemyCollision(unitA, idA, enemyList);
+			
+			if (unitA.command == null){
+				//General doesn't have a 'command'. Still want to check coll, however
+				continue;
+			}
+			/*
+			if (unitA.command == null && unitA.unitType != unitTypes.general){
+				//General doesn't have a 'command'. Still want to check coll, however
+				continue;
+			}
+			*/
+
 			this.checkFriendlyCollision(unitA, idA, friendlyList);
 		}
 
@@ -45,22 +57,28 @@ class CollisionEngine{
 	static checkEnemyCollision(unitA, idA, enemyList){
 		//Check unitA against enemies
 		for (var idB in enemyList){
-
+			if (unitA.combatCollisionList.includes(idB) || unitA.skirmishCollisionList.includes(idB)){
+				// these units have already collided this frame!
+				continue;
+			}
 			var unitB = enemyList[idB];
 
 			switch(unitA.command){
-				case commandTypes.move:{
-					this.moveCollisionEnemy(unitA, unitB);
+				case commandTypes.move:
+					this.moveCollisionEnemy(unitA, idA, unitB, idB);
 					break;
-				}
-				case commandTypes.attackmove:{
-					this.attackMoveCollisionEnemy(unitA, unitB);
+				
+				case commandTypes.attackmove:
+					this.attackMoveCollisionEnemy(unitA, idA, unitB, idB);
 					break;
-				}
-				case commandTypes.fallback:{
-					this.fallBackCollisionEnemy(unitA, unitB);
+				
+				case commandTypes.fallback:
+					this.fallBackCollisionEnemy(unitA, idA, unitB, idB);
 					break;
-				}
+				default:
+					//static units
+					this.staticCollisionEnemy(unitA, idA, unitB, idB);
+					break;
 			}
 		}
 
@@ -71,30 +89,13 @@ class CollisionEngine{
 			if (idA == idB){
 				continue;
 			}
-			if (unitA.collisionList.includes(idB)){
+			if (unitA.friendlyCollisionList.includes(idB)){
 				// these units have already collided this frame!
 				continue;
 			}
 			var unitB = friendlyList[idB];
-			/*
-			//NOTE: This code distinguishes static from dynamic. Going to see if all can be considered identically.
-			if (unitB.command == null){
-				this.collisionStaticFriendly(unitA, unitB);
-			}
-			else{
-				this.collisionDynamicFriendly(unitA, unitB);
-			}
-			*/
+
 			this.collisionDynamicFriendly(unitA, idA, unitB, idB);
-		}
-	}
-	static collisionStaticFriendly(unitA, unitB){
-		var radiusA = unitA.combatRadius;
-		var radiusB = unitB.combatRadius;
-		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
-		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
-			//Whether to handle both A and B's coll? Or just As
-			console.log('collision with static friendy');
 		}
 	}
 
@@ -104,6 +105,7 @@ class CollisionEngine{
 		
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+			console.log(unitB);
 			distanceSq = getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitB.x, unitB.y);
 			if (unitA.targetSigma > unitA.combatRadius){
 				var rad = radiusB - (unitA.targetSigma - unitA.combatRadius);
@@ -184,17 +186,31 @@ class CollisionEngine{
 				unitA.rerouting = true;
 				
 			}
-			unitA.collisionList.push(idB);
-			unitB.collisionList.push(idA);
+			unitA.friendlyCollisionList.push(idB);
+			unitB.friendlyCollisionList.push(idA);
 		}
 	}
 
-	static moveCollisionEnemy(unitA, unitB){
+	static staticCollisionEnemy(unitA, idA, unitB, idB){
+		// Very similar to moveCollisionEnemy
+		var radiusA = unitA.skirmishRadius;
+		var radiusB = unitB.combatRadius;
+		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+
+		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+			return;
+		}
+		unitA.isSkirmishing = true;
+		unitA.skirmishCollisionList.push(idB);
+		unitB.skirmishCollisionList.push(idA);	
+	}
+
+	static moveCollisionEnemy(unitA, idA, unitB, idB){
 		// It's looking like the collision methods will mostly be identical? With the exception of the skirmish check
 		// and the radii involved
 		if (unitA.isSkirmishing){
 			//Alrighty in skirmishing range of at least one enemy unit. Collision check is identical to attack move's
-			this.attackMoveCollisionEnemy(unitA, unitB);
+			this.attackMoveCollisionEnemy(unitA, idA, unitB, idB);
 		}
 		else{
 			// Unit was moving from out of skirmish into it, considering it's a move order. halt the unit in place.
@@ -208,7 +224,7 @@ class CollisionEngine{
 			unitA.isSkirmishing = true; 
 
 			if (unitA.target != null){
-				if (unitA.target == unitB.target){
+				if (unitA.target == unitB){
 					// rotate to unitB
 				}
 				else{
@@ -224,38 +240,49 @@ class CollisionEngine{
 					unitA.targetAngleFinal = null;
 				}
 			}
+			unitA.skirmishCollisionList.push(idB);
+			unitB.skirmishCollisionList.push(idA);
 			unitA.updateCommand(null);
-			console.log(unitA);
 		}
 		
 	}
 
-	static attackMoveCollisionEnemy(unitA, unitB){
+	static attackMoveCollisionEnemy(unitA, idA, unitB, idB){
 		var radiusA = unitA.combatRadius;
 		var radiusB = unitB.combatRadius;
+
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
 		}
 
-		if (unitA.target != null){
-			if (unitA.target == unitB.target){
-				// rotate to unitB
+		//Unit A
+		this.resolveCombatCollision(unitA, unitB, idB);
+
+		//Unit B
+		this.resolveCombatCollision(unitB, unitA, idA);
+	}
+
+	static resolveCombatCollision(unit, otherUnit, otherID){
+		if (unit.target != null){
+			if (unit.target == otherUnit){
+				// rotate to otherUnit
 
 			}
 			else{
-				// don't rotate to unitB
+				// don't rotate to otherUnit
 			}
 		}
 		else{
-			// no target specified
-			unitA.targetAngleFinal = null;	
-			unitA.updateCommand(null);
+			// unit has no target specified
+			unit.targetAngleFinal = null;	
 		}
+		unit.combatCollisionList.push(otherID);
+		unit.updateCommand(null);
 	}
 
-	static fallBackCollisionEnemy(unitA, unitB){
+	static fallBackCollisionEnemy(unitA, idA, unitB, idB){
 		//TODO fallback collision logic
 	}
 

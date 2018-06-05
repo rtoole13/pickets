@@ -2,12 +2,25 @@
 
 function draw(dt){
 	drawBackground();
-	//drawGridDebug();
+	drawDebug();
 	drawTerrain();
 	drawPlayerUnits();
 	drawEnemyUnits();
 	drawSelection();
 	drawOrder();
+}
+function drawDebug(){
+	drawTextDebug();
+	drawGridDebug();
+}
+function drawTextDebug(){
+	var fps = 1/dt;
+	fps = fps.toFixed(1);
+	canvasContext.save();
+	canvasContext.fillStyle = 'magenta';
+	canvasContext.font = '20px sans-serif';
+	canvasContext.fillText("fps: " + fps, 10, 50);
+	canvasContext.restore();
 }
 
 function drawGridDebug(){
@@ -98,22 +111,22 @@ function drawOrder(){
 	drawInfantryUnit(unit, false, color);
 
 	switch(commandType){
-		default:{
+		default:
 			color = 'green';
 			break;
-		}
-		case commandTypes.move:{
+		
+		case commandTypes.move:
 			color = 'green';
 			break;
-		}
-		case commandTypes.attackmove:{
+		
+		case commandTypes.attackmove:
 			color = 'red';
 			break;
-		}
-		case commandTypes.fallback:{
+		
+		case commandTypes.fallback:
 			color = 'magenta';
 			break;
-		}
+		
 	}
 	drawRay(unit.x, unit.y, dirX, dirY, 25, color);
 }
@@ -122,33 +135,34 @@ function drawSelection(){
 	if (activeUnit == undefined || null){
 		return;
 	}
-	selector += .05;
+	selector += .035;
 	selector = selector % 1;
 	var radius = 25;
 
 	var color;
 	switch(commandType){
-		default:{
+		default:
 			color = 'green';
 			break;
-		}
-		case commandTypes.move:{
+		
+		case commandTypes.move:
 			color = 'green';
 			break;
-		}
-		case commandTypes.attackmove:{
+		
+		case commandTypes.attackmove:
 			color = 'red';
 			break;
-		}
-		case commandTypes.fallback:{
+		
+		case commandTypes.fallback:
 			color = 'magenta';
 			break;
-		}
+		
 	}
 	canvasContext.save();
 	canvasContext.strokeStyle = color;
+	canvasContext.lineWidth = 3;
 	canvasContext.beginPath();
-	canvasContext.arc(activeUnit.x, activeUnit.y, radius, selector * 2 * Math.PI, selector * 2 * Math.PI + Math.PI / 5);
+	canvasContext.arc(activeUnit.x, activeUnit.y, radius, selector * 2 * Math.PI, selector * 2 * Math.PI + Math.PI / 3);
 	canvasContext.stroke();
 	canvasContext.restore();
 }

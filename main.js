@@ -106,14 +106,14 @@ function checkWinCondition(){
 //Event Handlers
 function handleMouseDown(e){
 	switch(e.button){
-		case 0:{
+		case 0:
 			handleLeftClick();
 			break;
-		}
-		case 2:{
+		
+		case 2:
 			handleRightClickDown();
 			break;
-		}
+		
 	}
 }
 
@@ -228,15 +228,15 @@ function handleRightClickUp(e){
 function handleKeyPress(e){
 	var keyCode = e.keyCode;
 	switch (keyCode){
-		case 27:{
+		case 27:
 			//Escape
 			if (activeUnit != undefined){
 				activeUnit = undefined;
 			}
 			commandType = commandTypes.move;
 			break;
-		}
-		case 65:{
+		
+		case 65:
 			//A
 			if (commandType == commandTypes.attackmove){
 				commandType = commandTypes.move;
@@ -245,8 +245,8 @@ function handleKeyPress(e){
 				commandType = commandTypes.attackmove;
 			}
 			break;
-		}
-		case 70:{
+		
+		case 70:
 			//F
 			if (commandType == commandTypes.fallback){
 				commandType = commandTypes.move;
@@ -255,7 +255,7 @@ function handleKeyPress(e){
 				commandType = commandTypes.fallback;
 			}
 			break;
-		}
+		
 	}
 }
 
