@@ -63,23 +63,43 @@ class CollisionEngine{
 			}
 			var unitB = enemyList[idB];
 
+			var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 			switch(unitA.command){
 				case commandTypes.move:
-					this.moveCollisionEnemy(unitA, idA, unitB, idB);
+					this.moveCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
 					break;
 				
 				case commandTypes.attackmove:
-					this.attackMoveCollisionEnemy(unitA, idA, unitB, idB);
+					this.attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
 					break;
 				
 				case commandTypes.fallback:
-					this.fallBackCollisionEnemy(unitA, idA, unitB, idB);
+					this.fallBackCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
 					break;
 				default:
 					//static units
-					this.staticCollisionEnemy(unitA, idA, unitB, idB);
+					this.staticCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
 					break;
 			}
+
+			switch(unitB.command){
+				case commandTypes.move:
+					this.moveCollisionEnemy(unitB, idB, unitA, idA, distanceSq);
+					break;
+				
+				case commandTypes.attackmove:
+					this.attackMoveCollisionEnemy(unitB, idB, unitA, idA, distanceSq);
+					break;
+				
+				case commandTypes.fallback:
+					this.fallBackCollisionEnemy(unitB, idB, unitA, idA, distanceSq);
+					break;
+				default:
+					//static units
+					this.staticCollisionEnemy(unitB, idB, unitA, idA, distanceSq);
+					break;
+			}
+
 		}
 
 	}
@@ -191,77 +211,85 @@ class CollisionEngine{
 		}
 	}
 
-	static staticCollisionEnemy(unitA, idA, unitB, idB){
+	static staticCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
 		// Very similar to moveCollisionEnemy
-		var radiusA = unitA.skirmishRadius;
-		var radiusB = unitB.combatRadius;
-		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+		if (unitA.isSkirmishing){
+			var radiusA = unitA.combatRadius;
+			var radiusB = unitB.combatRadius;
 
-		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
-			return;
+			if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+				return;
+			}
+
+			this.resolveCombatCollision(unitA, unitB, idB);
 		}
-		unitA.isSkirmishing = true;
-		unitA.skirmishCollisionList.push(idB);
-		unitB.skirmishCollisionList.push(idA);	
+		else{
+			var radiusA = unitA.skirmishRadius;
+			var radiusB = unitB.combatRadius;
+
+			if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+				return;
+			}
+
+			this.resolveSkirmishCollision(unitA, unitB, idB, true);
+		}
+		
 	}
 
-	static moveCollisionEnemy(unitA, idA, unitB, idB){
+	static moveCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
 		// It's looking like the collision methods will mostly be identical? With the exception of the skirmish check
 		// and the radii involved
 		if (unitA.isSkirmishing){
 			//Alrighty in skirmishing range of at least one enemy unit. Collision check is identical to attack move's
-			this.attackMoveCollisionEnemy(unitA, idA, unitB, idB);
+			this.attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
 		}
 		else{
 			// Unit was moving from out of skirmish into it, considering it's a move order. halt the unit in place.
 			var radiusA = unitA.skirmishRadius;
 			var radiusB = unitB.combatRadius;
-			var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 
 			if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 				return;
 			}
-			unitA.isSkirmishing = true; 
-
-			if (unitA.target != null){
-				if (unitA.target == unitB){
-					// rotate to unitB
-				}
-				else{
-					// don't rotate to unitB
-				}
-			}
-			else{
-				// no target unit specified
-
-				var targetFinalPosition = (unitA.path.length > 0) ? unitA.path[unitA.path.length - 1] : unitA.targetPosition;
-				if (getDistanceSq(targetFinalPosition.x, targetFinalPosition.y, unitA.x, unitA.y) > Math.pow(unitA.combatTargetProximityTol, 2)){
-				// if not near specified target location, dont rotate to specified orientation
-					unitA.targetAngleFinal = null;
-				}
-			}
-			unitA.skirmishCollisionList.push(idB);
-			unitB.skirmishCollisionList.push(idA);
-			unitA.updateCommand(null);
+			this.resolveSkirmishCollision(unitA, unitB, idB, false);
 		}
 		
 	}
 
-	static attackMoveCollisionEnemy(unitA, idA, unitB, idB){
+	static attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
 		var radiusA = unitA.combatRadius;
 		var radiusB = unitB.combatRadius;
 
-		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
-		
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
 		}
-
-		//Unit A
 		this.resolveCombatCollision(unitA, unitB, idB);
+	}
 
-		//Unit B
-		this.resolveCombatCollision(unitB, unitA, idA);
+	static resolveSkirmishCollision(unit, otherUnit, otherID, isStatic){
+		unit.isSkirmishing = true; 
+		unit.skirmishCollisionList.push(otherID);
+		if (isStatic){
+			return;
+		}
+
+		if (unit.target != null){
+			if (unit.target == otherUnit){
+				// rotate to otherUnit
+			}
+			else{
+				// don't rotate to otherUnit
+			}
+		}
+		else{
+			// no target unit specified
+			var targetFinalPosition = (unit.path.length > 0) ? unit.path[unit.path.length - 1] : unit.targetPosition;
+			if (getDistanceSq(targetFinalPosition.x, targetFinalPosition.y, unit.x, unit.y) > Math.pow(unit.combatTargetProximityTol, 2)){
+			// if not near specified target location, dont rotate to specified orientation
+				unit.targetAngleFinal = null;
+			}
+		}
+		unit.updateCommand(null);
 	}
 
 	static resolveCombatCollision(unit, otherUnit, otherID){

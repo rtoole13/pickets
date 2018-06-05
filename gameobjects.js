@@ -3,7 +3,7 @@
 class GameBoard{
 	constructor(rows, columns){
 		this.grid = new Grid(rows, columns, canvas.width, canvas.height);
-		this.debug = false;
+		this.debug = true;
 		this.collisionCheckTime = 200;
 		this.collisionTimer = Date.now();
 	}
