@@ -89,8 +89,9 @@ class Unit{
 		this.rerouteDistance = 15;
 		this.rerouting = false;
 		this.friendlyCollisionList = [];
-		this.combatCollisionList = [];
-		this.skirmishCollisionList = [];
+		this.enemyCollisionList = []; //Enemies checked against this frame
+		this.combatCollisionList = []; //Enemies in combat range this frame
+		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
 	}
 
 	update(dt){

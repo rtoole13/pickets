@@ -12,7 +12,8 @@ class CollisionEngine{
 
 			// Since I'm potentially only checking collision in DEBUG MODE every second or so. I'm only clearing the collision list and 
 			// returning the unit to a rerouting == false state here
-			unitA.friendlyCollisionList = []; 
+			unitA.friendlyCollisionList = [];
+			unitA.enemyCollisionList = []; 
 			unitA.combatCollisionList = [];
 			unitA.skirmishCollisionList = [];
 
@@ -31,7 +32,7 @@ class CollisionEngine{
 					friendlyList = enemyUnitList;
 					enemyList = playerUnitList;
 					break;
-				
+
 				default:
 					console.log('Nonexistent army.');
 					break;
@@ -57,12 +58,14 @@ class CollisionEngine{
 	static checkEnemyCollision(unitA, idA, enemyList){
 		//Check unitA against enemies
 		for (var idB in enemyList){
+			unitA.enemyCollisionList.push(idB);
+
 			if (unitA.combatCollisionList.includes(idB) || unitA.skirmishCollisionList.includes(idB)){
 				// these units have already collided this frame!
+				//NOTE: This really means that collision has already been checked and this pair IS colliding
 				continue;
 			}
 			var unitB = enemyList[idB];
-
 			var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 			switch(unitA.command){
 				case commandTypes.move:
@@ -101,6 +104,19 @@ class CollisionEngine{
 			}
 
 		}
+		//check lists to determine whether skirmishing or not
+		//cannot reset the skirmish flag at engine.broadcheck() call. If that were the case,
+		//unit's will always 'enter' skirmish state every frame
+		if (activeUnit == unitA){
+
+		}
+
+		if (unitA.skirmishCollisionList.length < 1){
+			unitA.isSkirmishing = false;
+		}
+		if (unitB.skirmishCollisionList.length < 1){
+			unitB.isSkirmishing = false;
+		}
 
 	}
 	static checkFriendlyCollision(unitA, idA, friendlyList){
@@ -125,7 +141,6 @@ class CollisionEngine{
 		
 		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
-			console.log(unitB);
 			distanceSq = getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitB.x, unitB.y);
 			if (unitA.targetSigma > unitA.combatRadius){
 				var rad = radiusB - (unitA.targetSigma - unitA.combatRadius);
@@ -213,46 +228,41 @@ class CollisionEngine{
 
 	static staticCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
 		// Very similar to moveCollisionEnemy
-		if (unitA.isSkirmishing){
-			var radiusA = unitA.combatRadius;
-			var radiusB = unitB.combatRadius;
+		var radiusA = unitA.skirmishRadius;
+		var radiusB = unitB.combatRadius;
 
-			if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
-				return;
-			}
-
-			this.resolveCombatCollision(unitA, unitB, idB);
+		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+			return;
 		}
-		else{
-			var radiusA = unitA.skirmishRadius;
-			var radiusB = unitB.combatRadius;
-
-			if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
-				return;
-			}
-
-			this.resolveSkirmishCollision(unitA, unitB, idB, true);
-		}
+		unitA.skirmishCollisionList.push(idB);
 		
+		radiusA = unitA.combatRadius;
+		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+			return;
+		}
+		unitA.combatCollisionList.push(idB);
 	}
 
 	static moveCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
-		// It's looking like the collision methods will mostly be identical? With the exception of the skirmish check
-		// and the radii involved
+		// Unit was moving from out of skirmish into it, considering it's a move order. halt the unit in place.
+		var radiusA = unitA.skirmishRadius;
+		var radiusB = unitB.combatRadius;
+
+		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+			return;
+		}
+
+		unitA.skirmishCollisionList.push(idB);
 		if (unitA.isSkirmishing){
-			//Alrighty in skirmishing range of at least one enemy unit. Collision check is identical to attack move's
-			this.attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
+			if (!this.attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq)){
+				this.resolveSkirmishCollision(unitA, unitB, idB, true);
+			}
 		}
 		else{
-			// Unit was moving from out of skirmish into it, considering it's a move order. halt the unit in place.
-			var radiusA = unitA.skirmishRadius;
-			var radiusB = unitB.combatRadius;
-
-			if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
-				return;
-			}
 			this.resolveSkirmishCollision(unitA, unitB, idB, false);
 		}
+		unitA.isSkirmishing = true;
+		return true;
 		
 	}
 
@@ -261,18 +271,14 @@ class CollisionEngine{
 		var radiusB = unitB.combatRadius;
 
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
-			return;
+			return false;
 		}
+		unitA.combatCollisionList.push(idB);
 		this.resolveCombatCollision(unitA, unitB, idB);
+		return true;
 	}
 
-	static resolveSkirmishCollision(unit, otherUnit, otherID, isStatic){
-		unit.isSkirmishing = true; 
-		unit.skirmishCollisionList.push(otherID);
-		if (isStatic){
-			return;
-		}
-
+	static resolveSkirmishCollision(unit, otherUnit, otherID, isSkirmishing){
 		if (unit.target != null){
 			if (unit.target == otherUnit){
 				// rotate to otherUnit
@@ -289,7 +295,9 @@ class CollisionEngine{
 				unit.targetAngleFinal = null;
 			}
 		}
-		unit.updateCommand(null);
+		if (!isSkirmishing){
+			unit.updateCommand(null);
+		}
 	}
 
 	static resolveCombatCollision(unit, otherUnit, otherID){
@@ -306,7 +314,6 @@ class CollisionEngine{
 			// unit has no target specified
 			unit.targetAngleFinal = null;	
 		}
-		unit.combatCollisionList.push(otherID);
 		unit.updateCommand(null);
 	}
 
