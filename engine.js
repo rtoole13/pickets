@@ -107,10 +107,6 @@ class CollisionEngine{
 		//check lists to determine whether skirmishing or not
 		//cannot reset the skirmish flag at engine.broadcheck() call. If that were the case,
 		//unit's will always 'enter' skirmish state every frame
-		if (activeUnit == unitA){
-
-		}
-
 		if (unitA.skirmishCollisionList.length < 1){
 			unitA.isSkirmishing = false;
 		}
@@ -227,7 +223,6 @@ class CollisionEngine{
 	}
 
 	static staticCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
-		// Very similar to moveCollisionEnemy
 		var radiusA = unitA.skirmishRadius;
 		var radiusB = unitB.combatRadius;
 
@@ -282,6 +277,12 @@ class CollisionEngine{
 		if (unit.target != null){
 			if (unit.target == otherUnit){
 				// rotate to otherUnit
+				
+				var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
+
+				unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
+				unit.updateCommand(null);
+				
 			}
 			else{
 				// don't rotate to otherUnit
@@ -301,19 +302,9 @@ class CollisionEngine{
 	}
 
 	static resolveCombatCollision(unit, otherUnit, otherID){
-		if (unit.target != null){
-			if (unit.target == otherUnit){
-				// rotate to otherUnit
+		var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
 
-			}
-			else{
-				// don't rotate to otherUnit
-			}
-		}
-		else{
-			// unit has no target specified
-			unit.targetAngleFinal = null;	
-		}
+		unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
 		unit.updateCommand(null);
 	}
 

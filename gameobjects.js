@@ -214,6 +214,7 @@ class Unit{
 			this.command = null;
 			this.targetPosition = null;
 			this.targetAngle = null;
+			this.target = null;
 			this.path = [];
 			return;
 		}
