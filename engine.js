@@ -14,8 +14,6 @@ class CollisionEngine{
 			// returning the unit to a rerouting == false state here
 			unitA.friendlyCollisionList = [];
 			unitA.enemyCollisionList = []; 
-			unitA.combatCollisionList = [];
-			unitA.skirmishCollisionList = [];
 
 			unitA.rerouteTargetX = null;
 			unitA.rerouteTargetY = null;
@@ -277,7 +275,6 @@ class CollisionEngine{
 		if (unit.target != null){
 			if (unit.target == otherUnit){
 				// rotate to otherUnit
-				
 				var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
 
 				unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);

@@ -7,7 +7,8 @@ var canvas = document.getElementById('gameCanvas'),
 	currentFrame,
 	dt,
 	mouseX,
-	mouseY;
+	mouseY,
+    debugState = false;
 
 //Game Objects//
 var gameBoard,
@@ -32,7 +33,7 @@ var gameBoard,
 	armies,
 	unitTypes,
 	unitSpeeds,
-
+    winConditions,
 	commandType,
 
 	playerColor = "#5F9EA0",
@@ -65,11 +66,12 @@ window.onload = function(){
 function init(){
 
 	//Enums 
-	commandTypes = Object.freeze({move:1, attackmove:2, fallback:3});
-	unitTypes    = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
-	unitSpeeds	 = Object.freeze({infantry:15, general:30, courier:75, artillery:12, cavalry:30})
-	unitStates   = Object.freeze({marching:1, braced:2, entrenched:3});
-	armies       = Object.freeze({blue:1, red:2});
+	commandTypes  = Object.freeze({move:1, attackmove:2, fallback:3});
+	unitTypes     = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
+	unitSpeeds	  = Object.freeze({infantry:15, general:30, courier:75, artillery:12, cavalry:30})
+    winConditions = Object.freeze({generalCaptured:1, unitsRouting:2, unitsCaptured:3})
+	unitStates    = Object.freeze({marching:1, braced:2, entrenched:3});
+	armies        = Object.freeze({blue:1, red:2});
 	//Initialize colors
 	orderColor = hexToRGB(playerColor, 0.25);
 
@@ -89,7 +91,10 @@ function main(){
 	lastFrame = currentFrame;
 
 	//Game over?
-	checkWinCondition();
+	if(checkWinCondition()){
+        return;
+    }
+
 	//Updates
 	gameBoard.update(dt);
 	draw(dt);
@@ -98,10 +103,36 @@ function main(){
 }
 
 function checkWinCondition(){
-	//Check win condition
+	//Check win conditions
+    var gameOver = false;
+    var playerVictory = false;
+    var condition;
+    if (playerGeneral.captured){
+        gameOver = true;
+        condition = winConditions.generalCaptured;
+    }
+    else if (enemyGeneral.captured){
+        gameOver = true;
+        condition = winConditions.generalCaptured;
+        playerVictory = true;
+    }
+    else if (Object.keys(playerInfantryList) < 1 && Object.keys(playerCavalryList) < 1 && Object.keys(playerArtilleryList) < 1){
+        gameOver = true;
+        condition = winConditions.unitsCaptured;
+    }
+    else if (Object.keys(enemyInfantryList) < 1 && Object.keys(enemyCavalryList) < 1 && Object.keys(enemyArtilleryList) < 1){
+        gameOver = true;
+        condition = winConditions.unitsCaptured;
+        playerVictory = true;
+    }
+
+
+    if (gameOver){
+        //Game's over, go to end screen.
+        drawEndGame(playerVictory, condition);
+    }
+    return gameOver;
 }
-
-
 
 //Event Handlers
 function handleMouseDown(e){

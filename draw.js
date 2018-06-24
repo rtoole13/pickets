@@ -190,16 +190,20 @@ function drawInfantryUnit(unit, drawRadii, color){
 	if (!drawRadii){
 		return;
 	}
-	//draw skirmish radius
-	canvasContext.strokeStyle = 'green';
-	canvasContext.beginPath();
-	canvasContext.arc(unit.x, unit.y, unit.skirmishRadius, 0, 2 * Math.PI);
-	canvasContext.stroke();
 
 	//draw 'combat' radius
 	canvasContext.strokeStyle = 'blue';
 	canvasContext.beginPath();
 	canvasContext.arc(unit.x, unit.y, unit.combatRadius, 0, 2 * Math.PI);
+	canvasContext.stroke();
+
+	if (unit.inBattle){
+		return;
+	}
+	//draw skirmish radius
+	canvasContext.strokeStyle = 'green';
+	canvasContext.beginPath();
+	canvasContext.arc(unit.x, unit.y, unit.skirmishRadius, 0, 2 * Math.PI);
 	canvasContext.stroke();
 }
 
@@ -256,6 +260,74 @@ function drawGeneral(general, showCommandRadius){
 	canvasContext.restore();
 
 
+
+}
+function drawEndGame(playerVictory, condition){
+	/*switch(commandType){
+		var fps = 1/dt;
+	fps = fps.toFixed(1);
+	canvasContext.save();
+	canvasContext.fillStyle = 'magenta';
+	canvasContext.font = '20px sans-serif';
+	canvasContext.fillText("fps: " + fps, 10, 50);
+	canvasContext.restore();
+			*/
+	drawBackground();
+	var endStr, endColor;
+	if (playerVictory){
+		endStr = 'You won!!';
+		endColor = playerColor;
+		
+		var conditionStr;
+		switch(condition){
+			default:
+				conditionStr = '';
+				break;
+			case winConditions.generalCaptured:
+				conditionStr = 'The enemy general has been captured!';
+				break;
+			case winConditions.unitsRouting:
+				conditionStr = 'The enemy is routing!';
+				break;
+			case winConditions.unitsCaptured:
+				conditionStr = 'The enemy has surrendered!';
+				break;
+		}
+	}
+	else{
+		endStr = 'You lost.';
+		endColor = enemyColor;
+
+		var conditionStr;
+		switch(condition){
+			default:
+				conditionStr = '';
+				break;
+			case winConditions.generalCaptured:
+				conditionStr = 'Your general has been captured.';
+				break;
+			case winConditions.unitsRouting:
+				conditionStr = 'Your soldiers are routing.';
+				break;
+			case winConditions.unitsCaptured:
+				conditionStr = 'Your soldiers have surrendered.';
+				break;
+		}
+	}
+
+	canvasContext.save();
+	canvasContext.fillStyle = endColor;
+	canvasContext.font = '20px sans-serif';
+	canvasContext.textAlign = 'center';
+	canvasContext.fillText(endStr, canvas.width/2 , 30 + canvas.height/2);
+	canvasContext.restore();
+
+	canvasContext.save();
+	canvasContext.fillStyle = endColor;
+	canvasContext.font = '20px sans-serif';
+	canvasContext.textAlign = 'center';
+	canvasContext.fillText(conditionStr, canvas.width/2 , -30 + canvas.height/2);
+	canvasContext.restore();
 
 }
 

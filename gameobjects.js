@@ -3,7 +3,6 @@
 class GameBoard{
 	constructor(rows, columns){
 		this.grid = new Grid(rows, columns, canvas.width, canvas.height);
-		this.debug = true;
 		this.collisionCheckTime = 200;
 		this.collisionTimer = Date.now();
 	}
@@ -13,7 +12,7 @@ class GameBoard{
 	}
 
 	update(dt){
-		if (this.debug){
+		if (debugState){
 			var newDate = Date.now();
 			if (newDate - this.collisionTimer > this.collisionCheckTime){
 				CollisionEngine.broadCheck();
@@ -53,7 +52,6 @@ class GameBoard{
 		for (var id in enemyArtilleryList){
 			enemyCavalryList[id].update(dt);
 		}
-
 	}
 
 }
@@ -90,7 +88,7 @@ class Unit{
 		this.rerouting = false;
 		this.friendlyCollisionList = [];
 		this.enemyCollisionList = []; //Enemies checked against this frame
-		this.combatCollisionList = []; //Enemies in combat range this frame
+		this.combatCollisionList = []; //Enemies in combat range this frame 
 		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
 	}
 
@@ -106,7 +104,10 @@ class Unit{
 		//rotate and move, isRotating and isMoving indicate whether the unit moved this frame.
 		this.isRotating = this.rotate(dt);
 		this.isMoving = this.move(dt);
-		
+
+		//clean up lists
+		this.combatCollisionList = []; //Enemies in combat range this frame 
+		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
 	}
 
 	getNextWaypoint(){
@@ -314,13 +315,17 @@ class InfantryUnit extends Unit{
 		this.derivativeSpeed = unitSpeeds.infantry;
 		this.element = element;
 		this.strength =	initializeElement(this.element);
+		this.attackCooldown = new Timer(2000, true);
+		this.attackCooldown.start();
+		this.multiplierCombat = 1/500;
+		this.multiplierSkirmish = 1/3000;
 		this.combatRadius = 30;
 		this.skirmishRadius = 65;
 		this.state = unitStates.braced;
 		this.bracedTimer = new Timer(5000, false);
 		this.bracedTimer.start();
 		this.unitType = unitTypes.infantry;
-		this.halted = false;
+		this.inBattle = false;
 	}
 	update(dt){
 		// below will likely be the means of halting a unit on enemy collision
@@ -329,8 +334,11 @@ class InfantryUnit extends Unit{
 			return;
 		}
 		*/
-		super.update(dt);
 		this.updateState();
+		this.checkCombatState();
+		this.attack();
+
+		super.update(dt);
 	}
 
 	updateState(){
@@ -351,6 +359,86 @@ class InfantryUnit extends Unit{
 			}
 		}
 	}
+
+	attack(){
+		if (!this.attackCooldown.checkTime()){
+			return;
+		}
+
+		var enemyList;
+		switch(this.army){
+			case armies.blue:
+				enemyList = enemyUnitList;
+				break;
+			
+			case armies.red:
+				enemyList = playerUnitList;
+				break;
+
+			default:
+				console.log('Nonexistent army.');
+				break;
+		}
+		//The inBattle bool is set elsewhere for drawing purposes. I dont want the skirmish radius drawn if a unit is in combat
+		//And this needs to happen always, not just when the attackCooldown is up
+		if (this.inBattle){
+			var damage = Math.floor(this.strength * this.multiplierCombat / this.combatCollisionList.length);
+			damage = Math.max(damage, 1);
+			for (var i = 0; i < this.combatCollisionList.length; i++){
+				var enemy = enemyList[this.combatCollisionList[i]];
+				enemy.takefire(damage);
+			}
+		}
+		else{
+			var damage = Math.floor(this.strength * this.multiplierSkirmish / this.skirmishCollisionList.length);
+			damage = Math.max(damage, 1);
+			for (var i = 0; i < this.skirmishCollisionList.length; i++){
+				var enemy = enemyList[this.skirmishCollisionList[i]];
+				enemy.takefire(damage);
+			}
+		}
+	}
+	
+	takefire(damage){
+		this.strength -= damage;
+		this.checkVitals();
+	}
+
+	checkVitals(){
+		if (this.strength < 1){
+			switch(this.army){
+			case armies.blue:
+				delete playerInfantryList[this.id];
+				delete playerUnitList[this.id];
+				delete unitList[this.id];
+				break;
+			
+			case armies.red:
+				delete enemyInfantryList[this.id];
+				delete enemyUnitList[this.id];
+				delete unitList[this.id];
+				break;
+
+			default:
+				console.log('Nonexistent army.');
+				break;
+		}
+		}
+	}
+
+	checkCombatState(){
+		//this.combatCollisionList = []; //Enemies in combat range this frame
+		//this.skirmishCollisionList = []; //Enemies in skirmish range this frame
+		if (this.combatCollisionList.length > 0){
+			//combat, no skirmish
+			this.inBattle = true;
+		}
+		else{
+			//skirmish
+			this.inBattle = false;
+		}
+	}
+
 	adjustAngle(angle){
 		if (this.command == commandTypes.fallback){
 			angle += 180;
@@ -389,6 +477,7 @@ class General extends Unit{
 		this.combatRadius = 30;
 		this.courierCount = courierCount;
 		this.unitType = unitTypes.general;
+		this.captured = false;
 	}
 	issueCommand(target, command){
 		if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
