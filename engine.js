@@ -102,9 +102,6 @@ class CollisionEngine{
 		if (!unitA.auxiliaryUnit && unitA.skirmishCollisionList.length < 1){
 			unitA.isSkirmishing = false;
 		}
-		if (!unitB.auxiliaryUnit && unitB.skirmishCollisionList.length < 1){
-			unitB.isSkirmishing = false;
-		}
 	}
 	static checkFriendlyCollision(unitA, idA, friendlyList){
 		//Check unitA against friendlies.
