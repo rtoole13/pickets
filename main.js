@@ -90,7 +90,7 @@ function main(){
 	currentFrame = new Date();
 	dt = (currentFrame - lastFrame)/1000.0;
 	lastFrame = currentFrame;
-
+	count = 0;
 	//Game over?
 	if(checkWinCondition()){
         return;

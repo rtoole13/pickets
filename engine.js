@@ -50,20 +50,14 @@ class CollisionEngine{
 	static checkEnemyCollision(unitA, idA, enemyList){
 		//Check unitA against enemies
 		for (var idB in enemyList){
-			if (unitA.enemyCollisionList.includes(idB)){
+			var unitB = enemyList[idB];
+			if (unitB.enemyCollisionList.includes(idA)){
 				//I think this ought to properly skip over a collision that's already been checked entirely
 				continue;
 			}
-
+			
 			unitA.enemyCollisionList.push(idB);
-			/*
-			if (unitA.combatCollisionList.includes(idB) || unitA.skirmishCollisionList.includes(idB)){
-				// these units have already collided this frame!
-				//NOTE: This really means that collision has already been checked and this pair IS colliding
-				continue;
-			}
-			*/
-			var unitB = enemyList[idB];
+
 			var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 			switch(unitA.command){
 				case commandTypes.move:
@@ -111,7 +105,6 @@ class CollisionEngine{
 		if (!unitB.auxiliaryUnit && unitB.skirmishCollisionList.length < 1){
 			unitB.isSkirmishing = false;
 		}
-
 	}
 	static checkFriendlyCollision(unitA, idA, friendlyList){
 		//Check unitA against friendlies.
@@ -241,8 +234,9 @@ class CollisionEngine{
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
 		}
+		unitA.isSkirmishing = true;
 		unitA.skirmishCollisionList.push(idB);
-		
+
 		radiusA = unitA.combatRadius;
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
@@ -270,7 +264,6 @@ class CollisionEngine{
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
 		}
-
 		unitA.skirmishCollisionList.push(idB);
 		if (unitA.isSkirmishing){
 			if (!this.attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq)){

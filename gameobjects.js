@@ -103,9 +103,6 @@ class Unit{
 		this.isRotating = this.rotate(dt);
 		this.isMoving = this.move(dt);
 
-		//clean up lists
-		this.combatCollisionList = []; //Enemies in combat range this frame 
-		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
 	}
 
 	getNextWaypoint(){
