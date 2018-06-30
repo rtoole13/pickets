@@ -63,7 +63,6 @@ class Unit{
 		this.currentSpeed = 0;
 		this.isMoving = false;
 		this.isRotating = false;
-		this.isSkirmishing = false;
 		this.angle = angle;
 		this.rotationRate = 85;
 		this.dirX = Math.cos((this.angle) * Math.PI/180);
@@ -100,7 +99,6 @@ class Unit{
 			}
 		}
 		this.updateTargetParameters();
-
 		//rotate and move, isRotating and isMoving indicate whether the unit moved this frame.
 		this.isRotating = this.rotate(dt);
 		this.isMoving = this.move(dt);
@@ -117,19 +115,19 @@ class Unit{
 		}
 		else{
 			this.targetPosition = null;
-			this.updateCommand();
+			this.updateCommand(null);
 		}
 		this.updateTargetParameters();
 		return this.targetPosition;
 	}
 
 	move(dt){
+
 		var moved = false;
 		if (this.targetPosition == null){
 			this.currentSpeed = 0;
 			return moved;
 		}
-
 		this.baseSpeed = this.adjustSpeed();
 		if (this.rerouting){
 			if (this.targetDistance < this.targetSigma){
@@ -209,6 +207,7 @@ class Unit{
 		this.updateAngle();
 		return rotating;
 	}
+	
 	updateCommand(order){
 		// Called on being given a command, and also on command completion
 		if (order == null){
@@ -239,32 +238,7 @@ class Unit{
 			
 		}
 	}
-	executeMoveOrder(location, angle, target){
-		this.targetAngleFinal = angle;
-		this.target = target;
-		if (target != null){
-			this.path = Pathfinder.findPath(this.x, this.y, target.x, target.y, this);
-			this.updateRouteTimer.start();
-		}
-		else{
-			this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
-		}
-		this.getNextWaypoint();
-	}
-	executeAttackMoveOrder(location, angle, target){
-		//currently behaves exactly like a move order. The difference is really just that the 
-		//unit's command is 'attackmove'
-		//Add any additional logic here
-		this.executeMoveOrder(location, angle, target);
-	}
 
-	executeFallBackOrder(location){
-		//FIXME need to make the movement behavior reversed, basically. move and rotation.
-		this.targetAngleFinal = null;
-		this.target = null;
-		this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
-		this.getNextWaypoint();
-	}
 	updateTargetParameters(){
 		if (this.targetPosition != null){
 			this.targetDistance = getDistance(this.x, this.y, this.targetPosition.x, this.targetPosition.y);
@@ -309,7 +283,103 @@ class Unit{
 	}
 }
 
-class InfantryUnit extends Unit{
+class CombatUnit extends Unit{
+	constructor(x, y, angle, army){
+		super(x, y, angle, army);
+		this.auxiliaryUnit = false;
+		this.isRotating = false;
+		this.isSkirmishing = false;
+		this.combatTargetProximityTol = 40;
+		this.command = null;
+		this.friendlyCollisionList = [];
+		this.enemyCollisionList = []; //Enemies checked against this frame
+		this.combatCollisionList = []; //Enemies in combat range this frame 
+		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
+	}
+
+	update(dt){
+		super.update(dt);
+
+		//clean up lists
+		this.combatCollisionList = []; //Enemies in combat range this frame 
+		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
+	}
+
+	attack(){
+
+	}
+
+	updateState(){
+		var previousState = this.state;
+		if (this.isRotating || this.isMoving){
+			this.state = unitStates.marching;
+		}
+		else{
+			if (this.state == unitStates.entrenched){
+				return;
+			}
+			else if (previousState == unitStates.marching){
+				this.state = unitStates.braced;
+				this.bracedTimer.start();
+			}
+			else{
+				this.state = (this.bracedTimer.checkTime()) ? unitStates.entrenched : unitStates.braced; 
+			}
+		}
+	}
+
+	
+
+	executeMoveOrder(location, angle, target){
+		this.targetAngleFinal = angle;
+		this.target = target;
+		if (target != null){
+			this.path = Pathfinder.findPath(this.x, this.y, target.x, target.y, this);
+			this.updateRouteTimer.start();
+		}
+		else{
+			this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
+		}
+		this.getNextWaypoint();
+	}
+	executeAttackMoveOrder(location, angle, target){
+		//currently behaves exactly like a move order. The difference is really just that the 
+		//unit's command is 'attackmove'
+		//Add any additional logic here
+		this.executeMoveOrder(location, angle, target);
+	}
+
+	executeFallBackOrder(location){
+		//FIXME need to make the movement behavior reversed, basically. move and rotation.
+		this.targetAngleFinal = null;
+		this.target = null;
+		this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
+		this.getNextWaypoint();
+	}
+
+	checkCombatState(){
+		//this.combatCollisionList = []; //Enemies in combat range this frame
+		//this.skirmishCollisionList = []; //Enemies in skirmish range this frame
+		if (this.combatCollisionList.length > 0){
+			//combat, no skirmish
+			this.inBattle = true;
+		}
+		else{
+			//skirmish
+			this.inBattle = false;
+		}
+	}
+
+}
+
+class AuxiliaryUnit extends Unit{
+	constructor(x, y, angle, army){
+		super(x, y, angle, army);
+		this.auxiliaryUnit = true;
+	}
+}
+
+class InfantryUnit extends CombatUnit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, army);
 		this.derivativeSpeed = unitSpeeds.infantry;
@@ -386,15 +456,20 @@ class InfantryUnit extends Unit{
 			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.combatCollisionList.length; i++){
 				var enemy = enemyList[this.combatCollisionList[i]];
-				enemy.takefire(damage);
+				if (~enemy.auxiliaryUnit){
+					enemy.takefire(damage);
+				}
 			}
 		}
 		else{
+			//skirmishing
 			var damage = Math.floor(this.strength * this.multiplierSkirmish / this.skirmishCollisionList.length);
 			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.skirmishCollisionList.length; i++){
 				var enemy = enemyList[this.skirmishCollisionList[i]];
-				enemy.takefire(damage);
+				if (~enemy.auxiliaryUnit){
+					enemy.takefire(damage);
+				}
 			}
 		}
 	}
@@ -469,12 +544,13 @@ class CavalryUnit extends Unit{
 	}
 }
 
-class General extends Unit{
+class General extends AuxiliaryUnit{
 	constructor(x, y, angle, courierCount, army){
 		super(x, y, angle, army);
 		this.derivativeSpeed = unitSpeeds.general;
 		this.commandRadius = 500;
-		this.combatRadius = 30;
+		this.combatRadius = 15;
+		this.rotationRate = 85;
 		this.courierCount = courierCount;
 		this.unitType = unitTypes.general;
 		this.captured = false;
@@ -484,13 +560,30 @@ class General extends Unit{
 			target.updateCommand(command);
 		}
 		else{
-
 			addPlayerCourier(this.x, this.y, this.angle, this, target, command);
 		}
 	}
+	moveToLocation(xLoc, yLoc){
+		this.command = commandTypes.move;
+		this.path = Pathfinder.findPath(this.x, this.y, xLoc, yLoc, this, []);
+		this.updateRouteTimer.start();
+		this.getNextWaypoint();
+	}
+
+	updateCommand(){
+		this.command = null;
+		this.targetPosition = null;
+		this.targetAngle = null;
+		this.target = null;
+		this.path = [];
+		return;
+	}
+	update(dt){
+		super.update(dt);
+	}
 }
 
-class Courier extends Unit{
+class Courier extends AuxiliaryUnit{
 	constructor(x, y, angle, general, target, order, army){
 		super(x, y, angle, army);
 		this.derivativeSpeed = unitSpeeds.courier;
@@ -518,7 +611,7 @@ class Courier extends Unit{
 		
 		if (this.deliveryDistance < this.orderRange){
 			if (this.returning){
-				this.reportToGeneral();
+				this.reportToGeneral(true);
 			}
 			else{
 				this.deliverOrder();
@@ -550,7 +643,8 @@ class Courier extends Unit{
 		this.updateRoute();
 	}
 
-	reportToGeneral(){
+	reportToGeneral(success){
+		//if success, add back to courier count total
 		delete playerCourierList[this.id];
 		delete playerUnitList[this.id];
 		delete unitList[this.id];

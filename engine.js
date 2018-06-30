@@ -42,12 +42,6 @@ class CollisionEngine{
 				//General doesn't have a 'command'. Still want to check coll, however
 				continue;
 			}
-			/*
-			if (unitA.command == null && unitA.unitType != unitTypes.general){
-				//General doesn't have a 'command'. Still want to check coll, however
-				continue;
-			}
-			*/
 
 			this.checkFriendlyCollision(unitA, idA, friendlyList);
 		}
@@ -56,13 +50,19 @@ class CollisionEngine{
 	static checkEnemyCollision(unitA, idA, enemyList){
 		//Check unitA against enemies
 		for (var idB in enemyList){
-			unitA.enemyCollisionList.push(idB);
+			if (unitA.enemyCollisionList.includes(idB)){
+				//I think this ought to properly skip over a collision that's already been checked entirely
+				continue;
+			}
 
+			unitA.enemyCollisionList.push(idB);
+			/*
 			if (unitA.combatCollisionList.includes(idB) || unitA.skirmishCollisionList.includes(idB)){
 				// these units have already collided this frame!
 				//NOTE: This really means that collision has already been checked and this pair IS colliding
 				continue;
 			}
+			*/
 			var unitB = enemyList[idB];
 			var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 			switch(unitA.command){
@@ -105,10 +105,10 @@ class CollisionEngine{
 		//check lists to determine whether skirmishing or not
 		//cannot reset the skirmish flag at engine.broadcheck() call. If that were the case,
 		//unit's will always 'enter' skirmish state every frame
-		if (unitA.skirmishCollisionList.length < 1){
+		if (!unitA.auxiliaryUnit && unitA.skirmishCollisionList.length < 1){
 			unitA.isSkirmishing = false;
 		}
-		if (unitB.skirmishCollisionList.length < 1){
+		if (!unitB.auxiliaryUnit && unitB.skirmishCollisionList.length < 1){
 			unitB.isSkirmishing = false;
 		}
 
@@ -206,7 +206,7 @@ class CollisionEngine{
 				
 				unitA.rerouteTargetX = unitA.x + unitA.rerouteDistance * redirectDir.x;
 				unitA.rerouteTargetY = unitA.y + unitA.rerouteDistance * redirectDir.y;
-
+				
 				if (velB.x != 0 && velB.y != 0){
 					unitB.rerouteTargetX = unitB.x + unitB.rerouteDistance * -redirectDir.x;
 					unitB.rerouteTargetY = unitB.y + unitB.rerouteDistance * -redirectDir.y;
@@ -221,6 +221,20 @@ class CollisionEngine{
 	}
 
 	static staticCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
+		
+		if (unitA.auxiliaryUnit && unitB.auxiliaryUnit){
+			// No collision between opposing auxiliary units
+			return;
+		}
+		else if (unitA.auxiliaryUnit){
+			this.auxiliaryUnitCollision(unitA, idA, unitB, idB, distanceSq);
+			return;
+		}
+		else if (unitB.auxiliaryUnit){
+			this.auxiliaryUnitCollision(unitB, idB, unitA, idA, distanceSq);
+			return;
+		}
+
 		var radiusA = unitA.skirmishRadius;
 		var radiusB = unitB.combatRadius;
 
@@ -238,6 +252,18 @@ class CollisionEngine{
 
 	static moveCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
 		// Unit was moving from out of skirmish into it, considering it's a move order. halt the unit in place.
+		if (unitA.auxiliaryUnit && unitB.auxiliaryUnit){
+			// No collision between opposing auxiliary units
+			return;
+		}
+		else if (unitA.auxiliaryUnit){
+			this.auxiliaryUnitCollision(unitA, idA, unitB, idB, distanceSq);
+			return;
+		}
+		else if (unitB.auxiliaryUnit){
+			this.auxiliaryUnitCollision(unitB, idB, unitA, idA, distanceSq);
+			return;
+		}
 		var radiusA = unitA.skirmishRadius;
 		var radiusB = unitB.combatRadius;
 
@@ -258,8 +284,28 @@ class CollisionEngine{
 		return true;
 		
 	}
+	static auxiliaryUnitCollision(unitAux, idAux, unitOther, idOther, distanceSq){
+		//general collision
+		var radiusA = unitAux.combatRadius;
+		var radiusB = unitOther.combatRadius;
+
+		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+			return;
+		}
+
+		if (unitAux.unitType == unitTypes.general){
+			unitAux.captured = true;
+		}
+		else if (unitAux.unitType == unitTypes.courier){
+			unitAux.reportToGeneral(false);
+		}
+	}
 
 	static attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
+		if (unitB.auxiliaryUnit){
+			this.auxiliaryUnitCollision(unitB, idB, unitA, idA, distanceSq);
+			return;
+		}
 		var radiusA = unitA.combatRadius;
 		var radiusB = unitB.combatRadius;
 
@@ -299,10 +345,14 @@ class CollisionEngine{
 	}
 
 	static resolveCombatCollision(unit, otherUnit, otherID){
-		var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
-
-		unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
-		unit.updateCommand(null);
+		if (unit.inBattle){
+			unit.updateCommand(null);
+		}
+		else{
+			var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
+			unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
+			unit.updateCommand(null);
+		}
 	}
 
 	static fallBackCollisionEnemy(unitA, idA, unitB, idB){

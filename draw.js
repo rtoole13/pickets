@@ -83,28 +83,42 @@ function drawOrder(){
 		return;
 	}
 	var dist;
-	if (commandType == commandTypes.fallback){
-		dist = getDistance(activeUnit.x, activeUnit.y, mouseX, mouseY);
-		if (dist < minDragDrawDistance){
-			return;
-		}
+	if (activeUnit.inBattle){
+			dist = getDistance(activeUnit.x, activeUnit.y, mouseX, mouseY);
+			if (dist < minDragDrawDistance){
+				return;
+			}
 
-		var unit, dirX, dirY;
-		unit = {x: activeUnit.x, y: activeUnit.y, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0};
-		dirX = (mouseX - activeUnit.x) / dist;
-		dirY = (mouseY - activeUnit.y) / dist;
+			var unit, dirX, dirY;
+			unit = {x: activeUnit.x, y: activeUnit.y, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0};
+			dirX = (mouseX - activeUnit.x) / dist;
+			dirY = (mouseY - activeUnit.y) / dist;
 	}
 	else{
-		dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
-		if (dist < minDragDrawDistance){
-			return;
-		}
+		if (commandType == commandTypes.fallback){
+			dist = getDistance(activeUnit.x, activeUnit.y, mouseX, mouseY);
+			if (dist < minDragDrawDistance){
+				return;
+			}
 
-		var unit, dirX, dirY;
-		unit = {x: targetOriginX, y: targetOriginY, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0};
-		dirX = (mouseX - targetOriginX) / dist;
-		dirY = (mouseY - targetOriginY) / dist;
-	}	
+			var unit, dirX, dirY;
+			unit = {x: activeUnit.x, y: activeUnit.y, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0};
+			dirX = (mouseX - activeUnit.x) / dist;
+			dirY = (mouseY - activeUnit.y) / dist;
+		}
+		else{
+			dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
+			if (dist < minDragDrawDistance){
+				return;
+			}
+
+			var unit, dirX, dirY;
+			unit = {x: targetOriginX, y: targetOriginY, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0};
+			dirX = (mouseX - targetOriginX) / dist;
+			dirY = (mouseY - targetOriginY) / dist;
+		}	
+	}
+	
 	unit.angle = getAngleFromDir(dirX, dirY);
 	var color = orderColor;
 

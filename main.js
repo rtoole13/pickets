@@ -9,6 +9,7 @@ var canvas = document.getElementById('gameCanvas'),
 	mouseX,
 	mouseY,
     debugState = false;
+    var count = 0;
 
 //Game Objects//
 var gameBoard,
@@ -216,7 +217,7 @@ function selectEnemyUnit(x, y){
 function handleRightClickDown(){
 	if (activeUnit != undefined || null){
 		if (activeUnit == playerGeneral){
-			playerGeneral.targetPosition = {x: mouseX, y: mouseY};
+			playerGeneral.moveToLocation(mouseX, mouseY);
 			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
 		}
 		else{
