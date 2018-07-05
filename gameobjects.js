@@ -281,20 +281,41 @@ class Unit{
 }
 
 class CombatUnit extends Unit{
-	constructor(x, y, angle, army){
+	constructor(x, y, angle, element, army){
 		super(x, y, angle, army);
+		this.element = element;
+		this.strength =	initializeElement(this.element);
 		this.auxiliaryUnit = false;
 		this.isRotating = false;
 		this.isSkirmishing = false;
+		this.inBattle = false;
 		this.combatTargetProximityTol = 40;
 		this.command = null;
+		this.flankAngle = 90; //Angle range to left and right of unit's direction vector, defining unit's flanks
+		this.cosFlankAngle = Math.cos(this.flankAngle * Math.PI/180);
 		this.friendlyCollisionList = [];
 		this.enemyCollisionList = []; //Enemies checked against this frame
 		this.combatCollisionList = []; //Enemies in combat range this frame 
 		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
+
+		//Reference enemy list
+		switch(this.army){
+			case armies.blue:
+				this.enemyList = enemyUnitList;
+				break;
+			
+			case armies.red:
+				this.enemyList = playerUnitList;
+				break;
+
+			default:
+				console.log('Nonexistent army.');
+				break;
+		}
 	}
 
 	update(dt){
+		this.attack();
 		super.update(dt);
 
 		//clean up lists
@@ -303,7 +324,7 @@ class CombatUnit extends Unit{
 	}
 
 	attack(){
-
+		throw 'CombatUnit\s attack() function currently must be overriden by subclass!';
 	}
 
 	updateState(){
@@ -378,21 +399,20 @@ class AuxiliaryUnit extends Unit{
 
 class InfantryUnit extends CombatUnit{
 	constructor(x, y, angle, element, army){
-		super(x, y, angle, army);
+		super(x, y, angle, element, army);
 		this.derivativeSpeed = unitSpeeds.infantry;
-		this.element = element;
-		this.strength =	initializeElement(this.element);
 		this.attackCooldown = new Timer(2000, true);
 		this.attackCooldown.start();
 		this.multiplierCombat = 1/500;
 		this.multiplierSkirmish = 1/3000;
+		this.flankedModifier = 1.5;
 		this.combatRadius = 30;
 		this.skirmishRadius = 65;
 		this.state = unitStates.braced;
 		this.bracedTimer = new Timer(5000, false);
 		this.bracedTimer.start();
 		this.unitType = unitTypes.infantry;
-		this.inBattle = false;
+		
 	}
 	update(dt){
 		// below will likely be the means of halting a unit on enemy collision
@@ -403,7 +423,6 @@ class InfantryUnit extends CombatUnit{
 		*/
 		this.updateState();
 		this.checkCombatState();
-		this.attack();
 
 		super.update(dt);
 	}
@@ -432,29 +451,15 @@ class InfantryUnit extends CombatUnit{
 			return;
 		}
 
-		var enemyList;
-		switch(this.army){
-			case armies.blue:
-				enemyList = enemyUnitList;
-				break;
-			
-			case armies.red:
-				enemyList = playerUnitList;
-				break;
-
-			default:
-				console.log('Nonexistent army.');
-				break;
-		}
 		//The inBattle bool is set elsewhere for drawing purposes. I dont want the skirmish radius drawn if a unit is in combat
 		//And this needs to happen always, not just when the attackCooldown is up
 		if (this.inBattle){
 			var damage = Math.floor(this.strength * this.multiplierCombat / this.combatCollisionList.length);
 			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.combatCollisionList.length; i++){
-				var enemy = enemyList[this.combatCollisionList[i]];
+				var enemy = this.enemyList[this.combatCollisionList[i]];
 				if (~enemy.auxiliaryUnit){
-					enemy.takefire(damage);
+					enemy.takefire(damage, this.inBattle, this.x, this.y);
 				}
 			}
 		}
@@ -463,16 +468,33 @@ class InfantryUnit extends CombatUnit{
 			var damage = Math.floor(this.strength * this.multiplierSkirmish / this.skirmishCollisionList.length);
 			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.skirmishCollisionList.length; i++){
-				var enemy = enemyList[this.skirmishCollisionList[i]];
+				var enemy = this.enemyList[this.skirmishCollisionList[i]];
 				if (~enemy.auxiliaryUnit){
-					enemy.takefire(damage);
+					enemy.takefire(damage, this.inBattle, this.x, this.y);
 				}
 			}
 		}
 	}
-	
-	takefire(damage){
-		this.strength -= damage;
+
+	getFlankModifier(inBattle, xLoc, yLoc){
+		if (inBattle){
+			//get dir to xLoc, yLoc
+			//dot product of this.dir and above vector
+			// if negative, return 1
+			//else flankedModifier.
+			var dir, cosTheta;
+			dir = {x: xLoc - this.x, y: yLoc - this.y};
+			cosTheta = dotProduct(this.dirX, this.dirY, dir.x, dir.y) / getVectorMag(dir.x, dir.y); //Dot product relation. No need to get mag of this.dir as it's 1.
+			
+			if (cosTheta < this.cosFlankAngle){
+				return this.flankedModifier;
+			}
+		}
+		return 1;
+	}
+
+	takefire(damage, inBattle, xLoc, yLoc){
+		this.strength -= (damage * this.getFlankModifier(inBattle, xLoc, yLoc));
 		this.checkVitals();
 	}
 
@@ -494,7 +516,7 @@ class InfantryUnit extends CombatUnit{
 			default:
 				console.log('Nonexistent army.');
 				break;
-		}
+			}
 		}
 	}
 
@@ -533,9 +555,7 @@ class InfantryUnit extends CombatUnit{
 
 class CavalryUnit extends Unit{
 	constructor(x, y, angle, element, army){
-		super(x, y, angle, army);
-		this.element = element;
-		this.strength = initializeElement(this.element);
+		super(x, y, angle, element, army);
 		this.derivativeSpeed = unitSpeeds.cavalry;
 		this.unitType = unitTypes.cavalry;
 	}
