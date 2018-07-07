@@ -234,9 +234,12 @@ class Unit{
 				break;
 			
 			case commandTypes.fallback:
-				this.executeMoveOrder({x: order.x, y: order.y});	
+				this.executeMoveOrder({x: order.x, y: order.y});
 				break;
 			
+			case commandTypes.retreat:
+				this.executeRetreatOrder(order.target);	
+				break;
 		}
 	}
 
@@ -292,7 +295,7 @@ class CombatUnit extends Unit{
 		this.invMaxStrength = 1 / this.maxStrength;
 		this.strength = this.maxStrength;
 		this.retreatThreshold = 0.25; //Currently just checking relative strength
-		this.retreatChance = 10; //out of 1000, checked each frame if below threshold
+		this.retreatChance = 5; //out of 1000, checked each frame if below threshold
 		this.rallyChance = 5; //out of 100
 		this.rallyTimer = new Timer(3000, true); //Arbitrarily potentially rallying whenever timer is up.
 		this.auxiliaryUnit = false;
@@ -386,15 +389,9 @@ class CombatUnit extends Unit{
 		this.getNextWaypoint();
 	}
 
-	executeRetreatOrder(){
+	executeRetreatOrder(target){
 		this.targetAngleFinal = null;
-		if (this.army == armies.blue){
-			this.target = playerGeneral;
-		}
-		else{
-			//Assumed red army
-			this.target = enemyGeneral;
-		}
+		this.target = target;
 		var ignoreList = [];
 		ignoreList.push(this.target);
 		this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, ignoreList);
@@ -433,15 +430,24 @@ class CombatUnit extends Unit{
 			}
 		}
 		else{
+			var thisGeneral;
+			if (this.army == armies.blue){
+				thisGeneral = playerGeneral;
+			}
+			else{
+				//assumed red army
+				thisGeneral = enemyGeneral;
+			}
 			if (this.strength * this.invMaxStrength < this.retreatThreshold){
 				//current hacky approach just checks for a retreat when below a strength threshold
-				if (getRandomInt(1,1000) < this.retreatChance){
+				if (getRandomInt(1,1000) <= this.retreatChance){
 					this.retreating = true;
 					this.rallyTimer.start();
-					this.executeRetreatOrder();
+					this.updateCommand({type: commandTypes.retreat, target: thisGeneral, date: Date.now()})
 					return;
 				}
 			}
+			//ugly to check this again..
 			if (this.army == armies.blue){
 				fullRetreatPlayer = false;
 			}
@@ -598,7 +604,7 @@ class InfantryUnit extends CombatUnit{
 	}
 
 	adjustAngle(angle){
-		if (this.command == commandTypes.fallback){
+		if ((this.command == commandTypes.fallback) || (this.command == commandTypes.retreat)){
 			angle += 180;
 			if (angle < -180){
 				angle += 360;
@@ -612,6 +618,9 @@ class InfantryUnit extends CombatUnit{
 	adjustSpeed(){
 		if (this.command == commandTypes.fallback){
 			return -0.4 * this.derivativeSpeed;
+		}
+		else if (this.command == commandTypes.retreat){
+			return -0.75 * this.derivativeSpeed;
 		}
 		return this.derivativeSpeed;
 	}

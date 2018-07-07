@@ -69,7 +69,7 @@ window.onload = function(){
 function init(){
 
 	//Enums 
-	commandTypes  = Object.freeze({move:1, attackmove:2, fallback:3});
+	commandTypes  = Object.freeze({move:1, attackmove:2, fallback:3, retreat:4});
 	unitTypes     = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
 	unitSpeeds	  = Object.freeze({infantry:15, general:30, courier:75, artillery:12, cavalry:30})
     winConditions = Object.freeze({generalCaptured:1, unitsRouting:2, unitsCaptured:3})
