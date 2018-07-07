@@ -8,8 +8,8 @@ var canvas = document.getElementById('gameCanvas'),
 	dt,
 	mouseX,
 	mouseY,
-    debugState = false;
-    var count = 0;
+    debugState = false,
+    count = 0;
 
 //Game Objects//
 var gameBoard,
@@ -46,6 +46,8 @@ var gameBoard,
 	targetOriginX,
 	targetOriginY,
 	minDragDrawDistance = 5,
+	fullRetreatPlayer = false,
+	fullRetreatEnemy = false,
 
 	givingOrder = false,
 	selector = 0;
@@ -124,6 +126,15 @@ function checkWinCondition(){
     else if (Object.keys(enemyInfantryList) < 1 && Object.keys(enemyCavalryList) < 1 && Object.keys(enemyArtilleryList) < 1){
         gameOver = true;
         condition = winConditions.unitsCaptured;
+        playerVictory = true;
+    }
+    else if (fullRetreatPlayer){
+    	gameOver = true;
+        condition = winConditions.unitsRouting;
+    }
+    else if (fullRetreatEnemy){
+    	gameOver = true;
+        condition = winConditions.unitsRouting;
         playerVictory = true;
     }
 

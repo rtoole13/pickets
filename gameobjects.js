@@ -23,6 +23,10 @@ class GameBoard{
 			CollisionEngine.broadCheck();
 		}
 
+		//reset full retreat win condition bools
+		fullRetreatPlayer = true;
+		fullRetreatEnemy = true;
+
 		//Player updates first
 		playerGeneral.update(dt);
 		for (var id in playerCourierList){
@@ -284,10 +288,17 @@ class CombatUnit extends Unit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, army);
 		this.element = element;
-		this.strength =	initializeElement(this.element);
+		this.maxStrength =	initializeElement(this.element);
+		this.invMaxStrength = 1 / this.maxStrength;
+		this.strength = this.maxStrength;
+		this.retreatThreshold = 0.25; //Currently just checking relative strength
+		this.retreatChance = 10; //out of 1000, checked each frame if below threshold
+		this.rallyChance = 5; //out of 100
+		this.rallyTimer = new Timer(3000, true); //Arbitrarily potentially rallying whenever timer is up.
 		this.auxiliaryUnit = false;
 		this.isRotating = false;
 		this.isSkirmishing = false;
+		this.retreating = false;
 		this.inBattle = false;
 		this.combatTargetProximityTol = 40;
 		this.command = null;
@@ -315,6 +326,7 @@ class CombatUnit extends Unit{
 	}
 
 	update(dt){
+		this.checkMorale();
 		this.attack();
 		super.update(dt);
 
@@ -368,10 +380,24 @@ class CombatUnit extends Unit{
 	}
 
 	executeFallBackOrder(location){
-		//FIXME need to make the movement behavior reversed, basically. move and rotation.
 		this.targetAngleFinal = null;
 		this.target = null;
 		this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
+		this.getNextWaypoint();
+	}
+
+	executeRetreatOrder(){
+		this.targetAngleFinal = null;
+		if (this.army == armies.blue){
+			this.target = playerGeneral;
+		}
+		else{
+			//Assumed red army
+			this.target = enemyGeneral;
+		}
+		var ignoreList = [];
+		ignoreList.push(this.target);
+		this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, ignoreList);
 		this.getNextWaypoint();
 	}
 
@@ -388,6 +414,44 @@ class CombatUnit extends Unit{
 		}
 	}
 
+	checkMorale(){
+		//To check:
+		//	current strength vs orig
+		//	enemy proximity
+		//	flanked?
+		//	proximity of allies
+		//	proximity of general
+		
+		if (this.retreating){
+			if (this.rallyTimer.checkTime()){
+				if (getRandomInt(1,100) <= this.rallyChance){
+					this.retreating = false;
+					//lower the unit's chance for retreat after having rallied once
+					//because why not
+					this.retreatChance = Math.floor(this.retreatChance / 2);
+				}
+			}
+		}
+		else{
+			if (this.strength * this.invMaxStrength < this.retreatThreshold){
+				//current hacky approach just checks for a retreat when below a strength threshold
+				if (getRandomInt(1,1000) < this.retreatChance){
+					this.retreating = true;
+					this.rallyTimer.start();
+					this.executeRetreatOrder();
+					return;
+				}
+			}
+			if (this.army == armies.blue){
+				fullRetreatPlayer = false;
+			}
+			else{
+				//assumed red army
+				fullRetreatEnemy = false;
+
+			}
+		}
+	}
 }
 
 class AuxiliaryUnit extends Unit{
@@ -573,6 +637,10 @@ class General extends AuxiliaryUnit{
 		this.captured = false;
 	}
 	issueCommand(target, command){
+		if (target.retreating){
+			console.log('That unit is retreating!');
+			return;
+		}
 		if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
 			target.updateCommand(command);
 		}
