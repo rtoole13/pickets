@@ -36,6 +36,9 @@ var gameBoard,
 	unitSpeeds,
     winConditions,
 	commandType,
+	commandColors,
+	waypointColors,
+	targetPosColors,
 
 	playerColor = "#5F9EA0",
 	enemyColor  = "#8B0000",
@@ -69,13 +72,19 @@ window.onload = function(){
 function init(){
 
 	//Enums 
-	commandTypes  = Object.freeze({move:1, attackmove:2, fallback:3, retreat:4});
-	unitTypes     = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
-	unitSpeeds	  = Object.freeze({infantry:15, general:30, courier:75, artillery:12, cavalry:30})
-    winConditions = Object.freeze({generalCaptured:1, unitsRouting:2, unitsCaptured:3})
-	unitStates    = Object.freeze({marching:1, braced:2, entrenched:3});
-	armies        = Object.freeze({blue:1, red:2});
-	//Initialize colors
+	commandTypes    = Object.freeze({move:1, attackmove:2, fallback:3, retreat:4});
+	commandColors   = Object.freeze({move: '#008000', attackmove: '#FF0000', fallback: '#FF00FF'});
+	waypointColors  = Object.freeze({move: hexToRGB(commandColors.move, 0.15), attackmove: hexToRGB(commandColors.attackmove, 0.15), 
+									fallback: hexToRGB(commandColors.fallback, 0.15)});
+	targetPosColors = Object.freeze({move: hexToRGB(commandColors.move, 0.35), attackmove: hexToRGB(commandColors.attackmove, 0.35), 
+									fallback: hexToRGB(commandColors.fallback, 0.35)});
+	unitTypes       = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
+	unitSpeeds	    = Object.freeze({infantry:15, general:30, courier:75, artillery:12, cavalry:30})
+    winConditions   = Object.freeze({generalCaptured:1, unitsRouting:2, unitsCaptured:3})
+	unitStates      = Object.freeze({marching:1, braced:2, entrenched:3});
+	armies          = Object.freeze({blue:1, red:2});
+	
+	//Initialize player order color
 	orderColor = hexToRGB(playerColor, 0.25);
 
 	//Initialize stuff

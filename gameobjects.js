@@ -463,6 +463,7 @@ class CombatUnit extends Unit{
 class AuxiliaryUnit extends Unit{
 	constructor(x, y, angle, army){
 		super(x, y, angle, army);
+		this.combatRadius = 15;
 		this.auxiliaryUnit = true;
 	}
 }
@@ -638,10 +639,15 @@ class General extends AuxiliaryUnit{
 	constructor(x, y, angle, courierCount, army){
 		super(x, y, angle, army);
 		this.derivativeSpeed = unitSpeeds.general;
-		this.commandRadius = 500;
-		this.combatRadius = 15;
+		this.commandRadius = 100;
 		this.rotationRate = 85;
-		this.courierCount = courierCount;
+		this.maxCourierCount = courierCount;
+		this.courierCount = this.maxCourierCount;
+		this.issuedCourierCount = 0;
+		this.courierRecharge = new Timer(10000, true);
+		this.courierRecharge.start();
+		this.courierCooldown = new Timer(1000, true);
+		this.courierCooldown.start();
 		this.unitType = unitTypes.general;
 		this.captured = false;
 	}
@@ -654,7 +660,7 @@ class General extends AuxiliaryUnit{
 			target.updateCommand(command);
 		}
 		else{
-			addPlayerCourier(this.x, this.y, this.angle, this, target, command);
+			this.sendCourier(target, command);
 		}
 	}
 	moveToLocation(xLoc, yLoc){
@@ -673,7 +679,36 @@ class General extends AuxiliaryUnit{
 		return;
 	}
 	update(dt){
+		this.refreshCouriers();
 		super.update(dt);
+	}
+
+	refreshCouriers(){
+		if (this.courierRecharge.checkTime()){
+			this.addCourier();
+		}
+	}
+
+	addCourier(){
+		if ((this.courierCount + this.issuedCourierCount) < this.maxCourierCount){
+			this.courierCount += 1;
+		}
+	}
+
+	sendCourier(target, command){
+		if (this.courierCount > 0){
+			if (this.courierCooldown.checkTime()){
+				addPlayerCourier(this.x, this.y, this.angle, this, target, command);
+				this.courierCount -= 1;
+				this.issuedCourierCount += 1;
+			}
+			else{
+				console.log('Courier sending on cooldown!');
+			}	
+		}
+		else{
+			console.log('No couriers available!');
+		}
 	}
 }
 
@@ -698,7 +733,6 @@ class Courier extends AuxiliaryUnit{
 		this.ignoreList.push(this.general);
 		this.ignoreList.push(this.target);
 		this.updateRoute();
-		
 	}
 	update(dt){
 		this.deliveryDistance = getDistance(this.x, this.y, this.target.x, this.target.y);
@@ -739,8 +773,14 @@ class Courier extends AuxiliaryUnit{
 
 	reportToGeneral(success){
 		//if success, add back to courier count total
+		//need to make general for enemy
 		delete playerCourierList[this.id];
 		delete playerUnitList[this.id];
 		delete unitList[this.id];
+
+		if (success){
+			this.general.addCourier();
+		}
+		this.general.issuedCourierCount -= 1;
 	}
 }

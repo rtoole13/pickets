@@ -156,19 +156,19 @@ function drawSelection(){
 	var color;
 	switch(commandType){
 		default:
-			color = 'green';
+			color = commandColors.move;
 			break;
 		
 		case commandTypes.move:
-			color = 'green';
+			color = commandColors.move;
 			break;
 		
 		case commandTypes.attackmove:
-			color = 'red';
+			color = commandColors.attackmove;
 			break;
 		
 		case commandTypes.fallback:
-			color = 'magenta';
+			color = commandColors.fallback;
 			break;
 		
 	}
@@ -179,6 +179,55 @@ function drawSelection(){
 	canvasContext.arc(activeUnit.x, activeUnit.y, radius, selector * 2 * Math.PI, selector * 2 * Math.PI + Math.PI / 3);
 	canvasContext.stroke();
 	canvasContext.restore();
+
+	drawActiveUnitPath();
+}
+function drawActiveUnitPath(){
+	if (activeUnit.path != null && activeUnit.path.length > 0){
+		var colors = getPathColors(activeUnit);
+		//draw intermediate waypoints
+		for (var i = 0; i < activeUnit.path.length - 1; i++){
+			var point = activeUnit.path[i];
+			drawCircle(point.x, point.y, 5, colors.mid, colors.mid);
+		}
+		var finalPoint = activeUnit.path[activeUnit.path.length - 1];
+		drawCircle(finalPoint.x, finalPoint.y, 5, colors.last, colors.last);
+	}
+	else if (activeUnit.targetPosition != null){
+		var colors = getPathColors(activeUnit);
+		//draw final location
+		drawCircle(activeUnit.targetPosition.x, activeUnit.targetPosition.y, 5, colors.last, colors.last);
+	}
+	
+}
+function getPathColors(unit){
+
+	var colors = {mid: 'magenta', last: 'magenta'}; 
+	switch(unit.command){
+		case commandTypes.move:
+			colors.mid = waypointColors.move;
+			colors.last = targetPosColors.move;
+			break;
+		case commandTypes.attackmove:
+			colors.mid = waypointColors.attackmove;
+			colors.last = targetPosColors.attackmove;
+			break;
+		case commandTypes.fallback:
+			colors.mid = waypointColors.fallback;
+			colors.last = targetPosColors.fallback;
+			break;
+	}
+	return colors;
+}
+
+function drawCircle(xLoc, yLoc, radius, strokeColor, fillColor){
+	canvasContext.save();
+	canvasContext.strokeStyle = strokeColor;
+	canvasContext.fillStyle = fillColor;
+	canvasContext.beginPath();
+	canvasContext.arc(xLoc, yLoc, radius, 0, 2 * Math.PI);
+	canvasContext.fill();
+	canvasContext.stroke();
 }
 
 function drawInfantryUnit(unit, drawRadii, color){
@@ -258,14 +307,9 @@ function drawGeneral(general, showCommandRadius){
 	else{
 		color = enemyColor;
 	}
-	canvasContext.save();
-	canvasContext.strokeStyle = color;
-	canvasContext.fillStyle = color;
-	canvasContext.beginPath();
-	canvasContext.arc(general.x, general.y, radius, 0, 2 * Math.PI);
-	canvasContext.fill();
-	canvasContext.stroke();
-
+	//draw general as a circle..
+	drawCircle(general.x, general.y, radius, color, color);
+	
 	if (showCommandRadius){
 		canvasContext.beginPath();
 		canvasContext.arc(general.x, general.y, general.commandRadius, 0, 2 * Math.PI);
