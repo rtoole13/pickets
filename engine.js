@@ -345,8 +345,15 @@ class CollisionEngine{
 		}
 	}
 
-	static fallBackCollisionEnemy(unitA, idA, unitB, idB){
+	static fallBackCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
 		//TODO fallback collision logic
+		// if unitB is in front of unitA, do nothing.
+		if (dotProduct(unitA.dirX, unitA.dirY, unitB.x - unitA.x, unitB.y - unitB.y) > 0){
+			return;
+		}
+		else{
+			this.attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
+		}
 	}
 
 	static pointInCircle(x, y, xt, yt, radius){

@@ -110,7 +110,7 @@ function main(){
 	//Updates
 	gameBoard.update(dt);
 	draw(dt);
-
+	
 	requestAnimationFrame(main);
 }
 

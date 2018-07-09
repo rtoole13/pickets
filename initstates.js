@@ -8,7 +8,8 @@ function initBoardEmptyPlain(){
 	//addPlayerInfantry(400, 200, -135, "Brigade");
 	addPlayerInfantry(200, 400, 45, "Brigade");
 
-	addEnemyInfantry(275, 300, -135, "Brigade");
+	var enemyUnit = addEnemyInfantry(600, 200, -135, "Brigade");
+	enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
 	//addEnemyInfantry(600, 100, -135, "Brigade");
 }
 
@@ -51,12 +52,11 @@ function addEnemyGeneral(x, y, angle, courierCount){
 function addEnemyInfantry(x, y, angle, element){
 	var id = getUniqueID(5, unitList);
 	var unit = new InfantryUnit(x, y, angle, element, armies.red);
-	unit.path = Pathfinder.findPath(unit.x, unit.y, 100, unit.y, unit, unit.ignoreList);	
-	unit.getNextWaypoint();
 	unit.id = id;
 	enemyInfantryList[id] = unit;
 	enemyUnitList[id] = unit;
 	unitList[id] = unit;
+	return unit;
 }
 
 
