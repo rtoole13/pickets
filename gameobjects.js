@@ -569,7 +569,6 @@ class InfantryUnit extends CombatUnit{
 			cosTheta = dotProduct(this.dirX, this.dirY, dir.x, dir.y) / getVectorMag(dir.x, dir.y); //Dot product relation. No need to get mag of this.dir as it's 1.
 			
 			if (cosTheta < this.cosFlankAngle){
-                console.log('we in there');
 		  		return this.flankedModifier;
 			}
 		}
