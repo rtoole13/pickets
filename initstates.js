@@ -8,7 +8,7 @@ function initBoardEmptyPlain(){
 	//addPlayerInfantry(400, 200, -135, "Brigade");
 	addPlayerInfantry(200, 400, 45, "Brigade");
 
-	var enemyUnit = addEnemyInfantry(600, 200, -135, "Brigade");
+	var enemyUnit = addEnemyInfantry(400, 300, -135, "Brigade");
 	enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
 	//addEnemyInfantry(600, 100, -135, "Brigade");
 }
@@ -57,6 +57,24 @@ function addEnemyInfantry(x, y, angle, element){
 	enemyUnitList[id] = unit;
 	unitList[id] = unit;
 	return unit;
+}
+
+function createSkirmishAnimation(unit, skirmishTargets, animationTime){
+	var id = getUniqueID(5, animationList);
+	var anim = new SkirmishAnimation(id, unit.x, unit.y, 1000/animationTime, 1, unit.id, skirmishTargets);
+	animationList[id] = anim;
+}
+
+function terminateSkirmishAnimation(id){
+	for (var i = 0; i < animationList[id].circles.length; i++){
+		delete animationList[id].circles[i];
+	}
+	animationList[id].targets = [];
+	animationList[id].targets = null;
+	animationList[id].circles = [];
+	animationList[id].circles = null;
+	delete animationList[id];
+	return;
 }
 
 

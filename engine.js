@@ -439,4 +439,7 @@ class Timer{
 		}
 		return false;
 	}
+	getElapsedTime(){
+		return (Date.now() - this.startTime);
+	}
 }

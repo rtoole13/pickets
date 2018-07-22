@@ -28,6 +28,8 @@ var gameBoard,
 	enemyUnitList = {},
 	enemyGeneral,
 
+	animationList = {},
+
 	//Enums
 	commandTypes,
 	unitStates,
@@ -39,11 +41,13 @@ var gameBoard,
 	commandColors,
 	waypointColors,
 	targetPosColors,
+	animationTypes,
 
 	playerColor = "#5F9EA0",
 	enemyColor  = "#8B0000",
 	
 	orderColor,
+	enemyOrderColor,
 
 	activeUnit,
 	targetOriginX,
@@ -83,9 +87,11 @@ function init(){
     winConditions   = Object.freeze({generalCaptured:1, unitsRouting:2, unitsCaptured:3})
 	unitStates      = Object.freeze({marching:1, braced:2, entrenched:3});
 	armies          = Object.freeze({blue:1, red:2});
+	animationTypes  = Object.freeze({skirmish:1, battle:2});
 	
 	//Initialize player order color
 	orderColor = hexToRGB(playerColor, 0.25);
+	enemyOrderColor = hexToRGB(enemyColor, 0.25);
 
 	//Initialize stuff
 	commandType = commandTypes.move;

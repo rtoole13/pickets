@@ -6,6 +6,12 @@ function getRandomInt(min, max){
 	return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function getRandomFloat(min, max){
+	min = Math.ceil(min);
+	max = Math.ceil(max);
+	return Math.random() * (max - min) + min;
+}
+
 function getRandomID(idLength) {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

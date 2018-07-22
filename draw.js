@@ -1,14 +1,241 @@
 "use strict";
 
+class SpriteSheet {
+	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, loopAnimation){
+		this.image = image;
+		this.x = x;
+		this.y = y;
+		this.frameWidth = frameWidth;
+		this.frameHeight = frameHeight;
+		this.frameIndex = [[],[]];
+		this.rows = rows;
+		this.columns = columns;
+
+		this.frameRate = frameRate;
+		this.ticksPerFrame = 1 / this.frameRate;
+		this.ticks = 0;
+		this.loopAnimation = loopAnimation;
+		this.animationComplete = false;
+
+		for(var i=0;i<rows;i++){
+			this.frameIndex[i] = [];
+			for(var j=0;j<columns;j++){
+				this.frameIndex[i][j] = {sx:i*frameWidth,sy:j*frameHeight};
+
+			}
+		}
+		this.XframeIndex = 0;
+		this.YframeIndex = 0;
+	}
+	move(x,y){
+		this.x = x;
+		this.y = y;
+	}
+	changeFrame(x,y){
+		this.XframeIndex = x;
+		this.YframeIndex = y;
+	}
+	update(dt){
+		this.ticks += dt/1000;
+		if (this.ticks > this.ticksPerFrame){
+			this.ticks = 0;
+			if (this.XframeIndex < this.columns - 1){
+				this.XframeIndex += 1;
+				return;
+			}
+			if (this.loopAnimation){
+				this.XframeIndex = 0;
+			}
+			else{
+				this.animationComplete = true;
+			}
+		}
+	}
+	draw(width,height){
+		gameContext.drawImage(this.image,this.frameIndex[this.XframeIndex][this.YframeIndex].sx,this.frameIndex[this.XframeIndex][this.YframeIndex].sy,this.frameWidth,this.frameHeight,this.x-(width/2),this.y-(height/2),width,height);
+	}
+}
+
+class Animation {
+	constructor(id, x, y, frameRate, frameCount, loopAnimation){
+		this.id = id;
+		this.x = x;
+		this.y = y;
+		this.frameRate = frameRate;
+		this.frameCount = frameCount;
+		this.currentFrame = 1;
+		this.lastFrame = 0;
+		this.loopAnimation = loopAnimation;
+		this.ticksPerFrame = 1 / this.frameRate;
+		this.ticks = this.ticksPerFrame + 1; //first frame plays immediately
+		this.animationComplete = false;
+
+	}
+	update(dt){
+		this.ticks += dt;
+		var newFrame = false;
+		if (this.ticks > this.ticksPerFrame){
+			newFrame = true;
+			this.ticks = 0;
+			if (this.currentFrame <= this.frameCount){
+				this.currentFrame += 1;
+
+				return newFrame;
+			}
+			else if (this.loopAnimation){
+				this.currentFrame = 0;
+			}
+			else{
+				this.animationComplete = true;
+			}
+		}
+		return newFrame;
+	}
+	move(x, y){
+		this.x = x;
+		this.y = y;
+	}
+
+	draw(){
+		throw 'Animation\s draw() function currently must be overriden by subclass!';
+	}
+}
+
+class SkirmishAnimation extends Animation {
+	constructor(id, x, y, frameRate, frameCount, unitID, targets){
+		super(id, x, y, frameRate, frameCount, false);
+		this.type = animationTypes.skirmish;
+		this.unitID = unitID;
+		this.targets = targets;
+		this.circlesPerUnitPerFrame = 2;
+		this.circles = [];
+		this.minCircleDist = 20; //hardcoded infantry unit width currently
+		this.angleVariance = 30; //plus or minus
+		this.circleRadius = 10;
+		this.circleLifeTime = 900;
+		this.circleDelayMax = 500;
+		this.delayIter = this.circleDelayMax / this.circlesPerUnitPerFrame;
+
+		var unit = unitList[this.unitID];
+		switch(unit.army){
+			default:
+				this.color = playerColor;
+				break;
+			case armies.blue:
+				this.color = playerColor;
+				break;
+			case armies.red:
+				this.color = enemyColor;
+				break;
+		}
+	}
+	draw(isNewFrame, dt){
+		if (this.animationComplete){
+			return;
+		}
+		if (isNewFrame){
+			//iterate over targets and create circles at random
+			//locations between each target and this unit
+			//draw circles
+			var unit = unitList[this.unitID];
+			for (var i = 0; i < this.targets.length; i++){
+				var target = unit.enemyList[this.targets[i]];
+				var dist = getDistance(unit.x, unit.y, target.x, target.y);
+				var dir = {x: (target.x - unit.x) / dist, y: (target.y - unit.y) / dist};
+				var maxDist = dist - 20; 
+				for (var j = 0; j < this.circlesPerUnitPerFrame; j++){	
+					var circleDist = getRandomFloat(this.minCircleDist, (maxDist>this.minCircleDist)?maxDist:this.minCircleDist); //returns this.minCircleDist if maxDist <min
+					var circleDir = rotateVector(dir.x, dir.y, getRandomFloat(-this.angleVariance, this.angleVariance), true);
+					var spawnDelay = j * this.delayIter;
+					var circle = new SkirmishAnimationCircle(unit.x + circleDist * circleDir.x, unit.y + circleDist * circleDir.y, this.circleRadius, this.color, this.circleLifeTime, spawnDelay)
+					this.circles.push(circle);
+				}
+
+			}
+			
+		}
+
+		for (var i = 0; i < this.circles.length; i++){
+			//draw circles instantiated previously
+			this.circles[i].draw();
+		}
+	}
+}
+
+class SkirmishAnimationCircle {
+	constructor(x, y, radius, color, lifetime, delay){
+		this.x = x;
+		this.y = y;
+		this.radius = radius;
+		this.baseColor = color;
+		this.delay = delay;
+		this.delayTimer = new Timer(delay, false);
+		this.delayTimer.start();
+		this.lifetime = lifetime;
+		this.lifeTimer = new Timer(lifetime, false);
+		this.baseAlpha = 0.75;
+		this.begun = false;
+	}
+	draw(){
+		if (!this.begun){
+			if (this.delayTimer.checkTime()){
+				delete this.delayTimer;
+				this.begun = true;
+				this.lifeTimer.start();
+				drawCircle(this.x, this.y, this.radius, this.baseColor, this.baseColor);
+				return false;
+			}
+			return false;
+		}
+
+		if (this.lifeTimer.checkTime()){
+			delete this.delayTimer;
+			return true;
+		}
+		var newColor = hexToRGB(this.baseColor, this.baseAlpha * (this.lifetime - this.lifeTimer.getElapsedTime()) / this.lifetime);
+		drawCircle(this.x, this.y, this.radius, newColor, newColor);
+		return false;
+	}
+}
 function draw(dt){
 	drawBackground();
 	drawDebug();
 	drawTerrain();
 	drawPlayerUnits();
 	drawEnemyUnits();
+	drawAnimations(dt);
 	drawSelection();
 	drawOrder();
 }
+
+function drawAnimations(dt){
+	for (var id in animationList){
+		if (animationList[id] == null){
+			continue;
+		}
+		drawAnimation(animationList[id], dt);
+	}
+}
+
+function drawAnimation(animation, dt){
+	switch(animation.type){
+		default:
+			return;
+		case animationTypes.skirmish:
+			drawSkirmish(animation, dt);
+			break;
+		case animationTypes.battle:
+			break;
+	}
+}
+function drawSkirmish(skirmish, dt){
+	if (skirmish.animationComplete){
+		return terminateSkirmishAnimation(skirmish.id);
+	}
+	var isNewFrame = skirmish.update(dt);
+	skirmish.draw(isNewFrame, dt);
+}
+
 function drawDebug(){
 	drawTextDebug();
 	//drawGridDebug();
@@ -221,13 +448,13 @@ function getPathColors(unit){
 }
 
 function drawCircle(xLoc, yLoc, radius, strokeColor, fillColor){
+	
 	canvasContext.save();
-	canvasContext.strokeStyle = strokeColor;
 	canvasContext.fillStyle = fillColor;
 	canvasContext.beginPath();
 	canvasContext.arc(xLoc, yLoc, radius, 0, 2 * Math.PI);
 	canvasContext.fill();
-	canvasContext.stroke();
+	canvasContext.restore();
 }
 
 function drawInfantryUnit(unit, drawRadii, color){

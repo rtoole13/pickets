@@ -472,7 +472,8 @@ class InfantryUnit extends CombatUnit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, element, army);
 		this.derivativeSpeed = unitSpeeds.infantry;
-		this.attackCooldown = new Timer(2000, true);
+		this.attackCooldownTime = 2000;
+		this.attackCooldown = new Timer(this.attackCooldownTime, true);
 		this.attackCooldown.start();
 		this.multiplierCombat = 1/500;
 		this.multiplierSkirmish = 1/3000;
@@ -535,7 +536,13 @@ class InfantryUnit extends CombatUnit{
 			}
 		}
 		else{
-			//skirmishing
+			//isSkirmishing
+			
+			if (this.skirmishCollisionList.length > 0){
+				createSkirmishAnimation(this, this.skirmishCollisionList, this.attackCooldownTime);
+			} 
+			
+			
 			var damage = Math.floor(this.strength * this.multiplierSkirmish / this.skirmishCollisionList.length);
 			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.skirmishCollisionList.length; i++){
