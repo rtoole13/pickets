@@ -522,7 +522,6 @@ class InfantryUnit extends CombatUnit{
 		if (!this.reloaded){
 			return;
 		}
-
 		//The inBattle bool is set elsewhere for drawing purposes. I dont want the skirmish radius drawn if a unit is in combat
 		//And this needs to happen always, not just when the attackCooldown is up
 		if (this.inBattle){

@@ -52,6 +52,7 @@ var gameBoard,
 	enemyOrderColor,
 
 	activeUnit,
+	hoverUnit,
 	targetOriginX,
 	targetOriginY,
 	minDragDrawDistance = 5,
@@ -100,6 +101,7 @@ function init(){
 	combatTextList = new FloatingText();
 	gameBoard = new GameBoard(30,40);
 	gameBoard.initializeBoard();
+	hoverUnit = {};
 	//Enter main game loop
 	main();
 }
@@ -176,6 +178,44 @@ function handleMouseDown(e){
 			break;
 		
 	}
+}
+
+function checkMouseOver(){
+	for (var id in playerInfantryList){
+		var unit = playerInfantryList[id];
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
+			setHoverUnit(unit);
+			return;
+		}
+		else{
+			hoverUnit.hovered = false;
+			continue;
+		}
+	}
+	for (var id in enemyInfantryList){
+		var unit = enemyInfantryList[id];
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
+			setHoverUnit(unit);
+			return;
+		}
+		else{
+			hoverUnit.hovered = false;
+			continue;
+		}
+	}
+}
+
+function setHoverUnit(unit){
+	if (hoverUnit == null || hoverUnit == undefined){
+		return;
+	}
+	hoverUnit.hovered = true;
+	hoverUnit.army = unit.army;
+	hoverUnit.strength = unit.strength;
+	hoverUnit.maxStrength = unit.maxStrength;
+	hoverUnit.unitType = unit.unitType;
+	hoverUnit.state = unit.state;
+	hoverUnit.element = unit.element;
 }
 
 function handleLeftClick(){
@@ -326,4 +366,6 @@ function getMousePosition(e){
 
 	mouseX = e.pageX - rect.left - root.scrollLeft;
 	mouseY = e.pageY - rect.top - root.scrollTop;
+
+	//checkMouseOver();
 }
