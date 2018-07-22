@@ -564,24 +564,22 @@ class InfantryUnit extends CombatUnit{
 
 	getFlankModifier(inBattle, xLoc, yLoc){
 		if (inBattle){
-			//get dir to xLoc, yLoc
-			//dot product of this.dir and above vector
-			// if negative, return 1
-			//else flankedModifier.
 			var dir, cosTheta;
 			dir = {x: xLoc - this.x, y: yLoc - this.y};
 			cosTheta = dotProduct(this.dirX, this.dirY, dir.x, dir.y) / getVectorMag(dir.x, dir.y); //Dot product relation. No need to get mag of this.dir as it's 1.
 			
 			if (cosTheta < this.cosFlankAngle){
-				return this.flankedModifier;
+                console.log('we in there');
+		  		return this.flankedModifier;
 			}
 		}
 		return 1;
 	}
 
 	takefire(damage, inBattle, xLoc, yLoc){
-        addCombatText("-" + parseFloat(damage).toFixed(1), this.x, this.y - 5, damageColor);
-		this.strength -= (damage * this.getFlankModifier(inBattle, xLoc, yLoc));
+        var damage = Math.floor(damage * this.getFlankModifier(inBattle, xLoc, yLoc));
+        addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+		this.strength -= damage;
 		this.checkVitals();
 	}
 
