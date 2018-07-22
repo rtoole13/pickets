@@ -29,6 +29,7 @@ var gameBoard,
 	enemyGeneral,
 
 	animationList = {},
+	combatTextList = {},
 
 	//Enums
 	commandTypes,
@@ -45,6 +46,7 @@ var gameBoard,
 
 	playerColor = "#5F9EA0",
 	enemyColor  = "#8B0000",
+	damageColor = "#ff0000",
 	
 	orderColor,
 	enemyOrderColor,
@@ -95,6 +97,7 @@ function init(){
 
 	//Initialize stuff
 	commandType = commandTypes.move;
+	combatTextList = new FloatingText();
 	gameBoard = new GameBoard(30,40);
 	gameBoard.initializeBoard();
 	//Enter main game loop

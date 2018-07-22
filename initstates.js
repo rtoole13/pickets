@@ -78,3 +78,4 @@ function terminateSkirmishAnimation(id){
 }
 
 
+

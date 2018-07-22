@@ -56,6 +56,50 @@ class SpriteSheet {
 	}
 }
 
+class FloatingText {
+	constructor(font, velX, velY, duration, color){
+		this.font = '20px sans-serif';
+		this.velX = velX || -0.5;
+		this.velY = velY || -1;
+		this.accel = 0.03;
+		this.duration = duration || 600;
+		this.color = color || damageColor;
+		this.baseAlpha = 1;
+		this.textList = []; 
+	}
+	add(text, x, y){
+		var textObject = {};
+		textObject.text = text;
+		textObject.x = x;
+		textObject.y = y;
+		if (getRandomInt(0, 1) > 0){
+			textObject.velX = -1 * this.velX;
+		}
+		else{
+			textObject.velX = this.velX;
+		}
+		textObject.velY = this.velY;
+		textObject.lifeTimer = new Timer(this.duration, false);
+		textObject.lifeTimer.start();
+		this.textList.unshift(textObject);
+	}
+	draw(dt){
+		for (var i = 0; i < this.textList.length; i++){
+			var thisText = this.textList[i];
+			if (thisText.lifeTimer.checkTime()){
+				this.textList.splice(i,1);
+				i -= 1;
+				continue;
+			}
+			thisText.velY += this.accel;
+			thisText.x += thisText.velX;
+			thisText.y += thisText.velY;
+
+			var newColor = hexToRGB(this.color, this.baseAlpha * (this.duration - thisText.lifeTimer.getElapsedTime()) / this.duration);
+			drawText(thisText.text, thisText.x, thisText.y, newColor, this.font);
+		}
+	}
+}
 class Animation {
 	constructor(id, x, y, frameRate, frameCount, loopAnimation){
 		this.id = id;
@@ -98,6 +142,12 @@ class Animation {
 
 	draw(){
 		throw 'Animation\s draw() function currently must be overriden by subclass!';
+	}
+}
+
+class BattleAnimation extends Animation {
+	constructor(id, x, y, frameRate, frameCount, unitID, targets){
+		super(id, x, y, frameRate, frameCount, false);
 	}
 }
 
@@ -206,6 +256,7 @@ function draw(dt){
 	drawAnimations(dt);
 	drawSelection();
 	drawOrder();
+	combatTextList.draw(dt);
 }
 
 function drawAnimations(dt){
@@ -248,6 +299,18 @@ function drawTextDebug(){
 	canvasContext.font = '20px sans-serif';
 	canvasContext.fillText("fps: " + fps, 10, 50);
 	canvasContext.restore();
+}
+
+function drawText(text, x, y, color, font){
+	canvasContext.save();
+	canvasContext.fillStyle = color;
+	canvasContext.font = font;
+	canvasContext.fillText(text, x, y);
+	canvasContext.restore();
+}
+
+function addCombatText(text, x, y){
+	combatTextList.add(text, x, y); //Globally defined
 }
 
 function drawGridDebug(){
@@ -298,11 +361,13 @@ function drawGridPoint(gridNode, pathNode, color){
 
 }
 function drawRay(originX, originY, directionX, directionY, length, color){
+	canvasContext.save();
 	canvasContext.beginPath();
 	canvasContext.moveTo(originX, originY);
 	canvasContext.lineTo(originX + (length * directionX), originY + (length * directionY));
 	canvasContext.strokeStyle = color;
 	canvasContext.stroke();
+	canvasContext.restore();
 }
 
 function drawOrder(){
@@ -482,19 +547,22 @@ function drawInfantryUnit(unit, drawRadii, color){
 	}
 
 	//draw 'combat' radius
+	canvasContext.save();
 	canvasContext.strokeStyle = 'blue';
 	canvasContext.beginPath();
 	canvasContext.arc(unit.x, unit.y, unit.combatRadius, 0, 2 * Math.PI);
 	canvasContext.stroke();
-
+	canvasContext.restore();
 	if (unit.inBattle){
 		return;
 	}
 	//draw skirmish radius
+	canvasContext.save();
 	canvasContext.strokeStyle = 'green';
 	canvasContext.beginPath();
 	canvasContext.arc(unit.x, unit.y, unit.skirmishRadius, 0, 2 * Math.PI);
 	canvasContext.stroke();
+	canvasContext.restore();
 }
 
 function drawCavalryUnit(){
@@ -538,25 +606,19 @@ function drawGeneral(general, showCommandRadius){
 	drawCircle(general.x, general.y, radius, color, color);
 	
 	if (showCommandRadius){
+		canvasContext.save();
+		canvasContext.strokeStyle = color;
 		canvasContext.beginPath();
 		canvasContext.arc(general.x, general.y, general.commandRadius, 0, 2 * Math.PI);
 		canvasContext.stroke();
+		canvasContext.restore();
 	}
-	canvasContext.restore();
 
 
 
 }
 function drawEndGame(playerVictory, condition){
-	/*switch(commandType){
-		var fps = 1/dt;
-	fps = fps.toFixed(1);
-	canvasContext.save();
-	canvasContext.fillStyle = 'magenta';
-	canvasContext.font = '20px sans-serif';
-	canvasContext.fillText("fps: " + fps, 10, 50);
-	canvasContext.restore();
-			*/
+	
 	drawBackground();
 	var endStr, endColor;
 	if (playerVictory){

@@ -473,8 +473,8 @@ class InfantryUnit extends CombatUnit{
 		super(x, y, angle, element, army);
 		this.derivativeSpeed = unitSpeeds.infantry;
 		this.attackCooldownTime = 2000;
-		this.attackCooldown = new Timer(this.attackCooldownTime, true);
-		this.attackCooldown.start();
+		this.attackCooldown = new Timer(this.attackCooldownTime, false);
+        this.reloaded = true;
 		this.multiplierCombat = 1/500;
 		this.multiplierSkirmish = 1/3000;
 		this.flankedModifier = 1.5;
@@ -519,7 +519,7 @@ class InfantryUnit extends CombatUnit{
 	}
 
 	attack(){
-		if (!this.attackCooldown.checkTime()){
+		if (!this.reloaded){
 			return;
 		}
 
@@ -534,12 +534,14 @@ class InfantryUnit extends CombatUnit{
 					enemy.takefire(damage, this.inBattle, this.x, this.y);
 				}
 			}
+            this.reload();
 		}
 		else{
 			//isSkirmishing
 			
 			if (this.skirmishCollisionList.length > 0){
 				createSkirmishAnimation(this, this.skirmishCollisionList, this.attackCooldownTime);
+                this.reload();
 			} 
 			
 			
@@ -552,7 +554,13 @@ class InfantryUnit extends CombatUnit{
 				}
 			}
 		}
+        
 	}
+
+    reload(){
+        this.reloaded = false;
+        this.attackCooldown.start();
+    }
 
 	getFlankModifier(inBattle, xLoc, yLoc){
 		if (inBattle){
@@ -572,6 +580,7 @@ class InfantryUnit extends CombatUnit{
 	}
 
 	takefire(damage, inBattle, xLoc, yLoc){
+        addCombatText("-" + parseFloat(damage).toFixed(1), this.x, this.y - 5, damageColor);
 		this.strength -= (damage * this.getFlankModifier(inBattle, xLoc, yLoc));
 		this.checkVitals();
 	}
@@ -609,6 +618,9 @@ class InfantryUnit extends CombatUnit{
 			//skirmish
 			this.inBattle = false;
 		}
+        if (this.attackCooldown.checkTime()){
+            this.reloaded = true;
+        }
 	}
 
 	adjustAngle(angle){
