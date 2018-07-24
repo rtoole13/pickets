@@ -98,7 +98,7 @@ function init(){
 	
 	unitTypeNames   = Object.keys(unitTypes);
 	unitStateNames  = Object.keys(unitStates);
-	
+
 	//Initialize player order color
 	orderColor = hexToRGB(playerColor, 0.25);
 	enemyOrderColor = hexToRGB(enemyColor, 0.25);
@@ -106,7 +106,7 @@ function init(){
 	//Initialize stuff
 	commandType = commandTypes.move;
 	combatTextList = new FloatingText();
-	unitToolTip = new UnitToolTip(canvas.width/4, canvas.height/5, 20, 'black', 'hoverUnit');
+	unitToolTip = new UnitToolTip(canvas.width/4, canvas.height/6, 20, 'black', 'hoverUnit');
 	gameBoard = new GameBoard(30,40);
 	gameBoard.initializeBoard();
 	hoverUnit = {};
@@ -189,10 +189,29 @@ function handleMouseDown(e){
 }
 
 function checkMouseOver(){
+	var hitRadius = 25;
+	//Check Generals
+	if (CollisionEngine.pointInCircle(mouseX, mouseY, playerGeneral.x, playerGeneral.y, hitRadius)){
+		setHoverUnitAndToolTip(playerGeneral, false);
+		return;
+	}
+	else{
+		hoverUnit.hovered = false;
+	}
+
+	if (CollisionEngine.pointInCircle(mouseX, mouseY, enemyGeneral.x, enemyGeneral.y, hitRadius)){
+		setHoverUnitAndToolTip(enemyGeneral, false);
+		return;
+	}
+	else{
+		hoverUnit.hovered = false;
+	}
+
+	//Check Infantry
 	for (var id in playerInfantryList){
 		var unit = playerInfantryList[id];
-		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
-			setHoverUnitAndToolTip(unit);
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, hitRadius)){
+			setHoverUnitAndToolTip(unit, true);
 			return;
 		}
 		else{
@@ -202,8 +221,33 @@ function checkMouseOver(){
 	}
 	for (var id in enemyInfantryList){
 		var unit = enemyInfantryList[id];
-		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
-			setHoverUnitAndToolTip(unit);
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, hitRadius)){
+			setHoverUnitAndToolTip(unit, true);
+			return;
+		}
+		else{
+			hoverUnit.hovered = false;
+			continue;
+		}
+	}
+
+	//Check Couriers
+	for (var id in playerCourierList){
+		var unit = playerCourierList[id];
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, hitRadius)){
+			setHoverUnitAndToolTip(unit, false);
+			return;
+		}
+		else{
+			hoverUnit.hovered = false;
+			continue;
+		}
+	}
+
+	for (var id in enemyCourierList){
+		var unit = enemyCourierList[id];
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, hitRadius)){
+			setHoverUnitAndToolTip(unit, false);
 			return;
 		}
 		else{
@@ -213,17 +257,23 @@ function checkMouseOver(){
 	}
 }
 
-function setHoverUnitAndToolTip(unit){
+function setHoverUnitAndToolTip(unit, combat){
 	if (hoverUnit == null || hoverUnit == undefined){
 		return;
 	}
+	
 	hoverUnit.hovered = true;
 	hoverUnit.army = unit.army;
-	hoverUnit.strength = unit.strength;
-	hoverUnit.maxStrength = unit.maxStrength;
 	hoverUnit.unitType = unit.unitType;
-	hoverUnit.state = unit.state;
-	hoverUnit.element = unit.element;
+	hoverUnit.combat = combat;
+
+	if (combat){
+		hoverUnit.strength = unit.strength;
+		hoverUnit.maxStrength = unit.maxStrength;	
+		hoverUnit.state = unit.state;
+		hoverUnit.element = unit.element;
+	}
+	
 	
 	//May end up not displaying hover unit info on tooltip, but rather activeUnit
 }
