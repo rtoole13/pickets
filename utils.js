@@ -58,6 +58,9 @@ function hexToRGB(hex, alpha){
 	
 }
 
+function capitalizeFirstLetter(string){
+	return string.charAt(0).toUpperCase() + string.slice(1);
+}
 // Unit functions
 function initializeElement(elementType){
 	var strength;

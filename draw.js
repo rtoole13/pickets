@@ -247,6 +247,155 @@ class SkirmishAnimationCircle {
 		return false;
 	}
 }
+
+class UnitToolTip {
+	constructor(width, height, canvasPadding, color, unit){
+		//unit is meant to be hoverUnit or activeUnit
+		this.width = width;
+		this.height = height;
+		this.canvasPadding = canvasPadding;
+		this.color = color;
+		this.x = canvas.width - (this.width + canvasPadding); //TOP LEFT CORNER X
+		this.y = canvas.height - (this.height + canvasPadding); //TOP LEFT CORNER Y
+		this.textPaddingX = 2; //Text padding from edges
+		this.textPaddingY = 22; //Text padding from edges
+		this.font = '20px sans-serif';
+		this.italicFont = 'italic 18px sans-serif';
+		this.boldFont = 'bold ' + this.font;
+		this.boldItalicFont = 'bold ' + this.italicFont;
+		this.rowHeight = 22;
+
+		switch (unit){
+			default:
+				this.hoverUnit = true;
+				break;
+			case 'hoverUnit':
+				this.hoverUnit = true;
+				break;
+			case 'activeUnit':
+				this.hoverUnit = false;
+				break;
+		}
+	}
+	draw(){
+		if (this.hoverUnit){
+			//hoverUnit
+			if (!hoverUnit.hovered){
+				return;
+			}
+
+			this.drawToolTip();
+		}
+		else{
+			//activeUnit
+			throw 'toolTip doesn\'t currently support activeUnit! Just hoverUnit';
+		}
+		
+	}
+	drawToolTip(){
+		var friendly, combatUnit, name;
+		switch(hoverUnit.army){
+			default:
+				break;
+			case armies.blue:
+				this.color = orderColor;
+				friendly = true;
+				break;
+			case armies.red:
+				this.color = enemyOrderColor;
+				friendly = false;
+				break;
+		}
+
+		switch(hoverUnit.unitType){
+			default:
+				combatUnit = true;
+				break;
+			case unitTypes.infantry:
+				combatUnit = true;
+				break;
+			case unitTypes.cavalry:
+				combatUnit = true;
+				break;
+			case unitTypes.artillery:
+				combatUnit = true;
+				break;
+			case unitTypes.general:
+				if (friendly){
+					name = 'Friendly General';
+				}
+				else{
+					name = 'Enemy General';	
+				}
+				combatUnit = false;
+				break;
+			case unitTypes.courier:
+				if (friendly){
+					name = 'Friendly Courier';
+				}
+				else{
+					name = 'Enemy Courier';	
+				}
+				combatUnit = false;
+				break;
+		}
+
+		canvasContext.save()
+		canvasContext.fillStyle = this.color;
+		canvasContext.translate(this.x, this.y);
+		canvasContext.fillRect(0, 0, this.width, this.height);
+		canvasContext.restore();
+
+		if (combatUnit){
+			this.drawCombatUnitTooltip(friendly);
+		}
+		else{
+			this.drawAuxiliaryUnitTooltip();
+		}
+	}
+	drawCombatUnitTooltip(friendly){
+		/*
+		hoverUnit.hovered = true;
+		hoverUnit.army = unit.army;
+		hoverUnit.strength = unit.strength;
+		hoverUnit.maxStrength = unit.maxStrength;
+		hoverUnit.unitType = unit.unitType;
+		hoverUnit.state = unit.state;
+		hoverUnit.element = unit.element;
+		*/
+
+		var xLoc, yLoc, name, state, strength;
+
+		if (friendly){
+			 //should probably fix this indexing..
+			name = 'Friendly ' + capitalizeFirstLetter(unitTypeNames[hoverUnit.unitType - 1]);
+		}
+		else{
+			//should probably fix this indexing..
+			name = 'Enemy ' + capitalizeFirstLetter(unitTypeNames[hoverUnit.unitType - 1]);
+		}
+		state = hoverUnit.element + ', ' + capitalizeFirstLetter(unitStateNames[hoverUnit.state - 1]);
+
+		strength = parseInt(hoverUnit.strength) + ' / ' + hoverUnit.maxStrength;
+
+		//Unit Name
+		xLoc = this.x + this.textPaddingX;
+		yLoc = this.y + this.textPaddingY;
+		drawText(name, xLoc, yLoc, 'black', this.font);
+
+		//Unit Type
+		yLoc += this.rowHeight;
+		drawText(state, xLoc, yLoc, 'black', this.italicFont);
+
+		//Unit Strength
+		yLoc += this.rowHeight;
+		drawText(strength, xLoc, yLoc, 'black', this.font);
+	}
+
+	drawAuxiliaryUnitTooltip(){
+		throw 'toolTip doesn\'t currently support auxiliary units, just combat units!';
+	}
+}
 function draw(dt){
 	drawBackground();
 	drawDebug();
@@ -257,8 +406,12 @@ function draw(dt){
 	drawSelection();
 	drawOrder();
 	combatTextList.draw(dt);
+	drawHUD();
 }
 
+function drawHUD(){
+	unitToolTip.draw();
+}
 function drawAnimations(dt){
 	for (var id in animationList){
 		if (animationList[id] == null){

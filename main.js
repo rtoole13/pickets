@@ -30,6 +30,7 @@ var gameBoard,
 
 	animationList = {},
 	combatTextList = {},
+	unitToolTip = {},
 
 	//Enums
 	commandTypes,
@@ -43,6 +44,9 @@ var gameBoard,
 	waypointColors,
 	targetPosColors,
 	animationTypes,
+
+	unitTypeNames,
+	unitStateNames,
 
 	playerColor = "#5F9EA0",
 	enemyColor  = "#8B0000",
@@ -92,6 +96,9 @@ function init(){
 	armies          = Object.freeze({blue:1, red:2});
 	animationTypes  = Object.freeze({skirmish:1, battle:2});
 	
+	unitTypeNames   = Object.keys(unitTypes);
+	unitStateNames  = Object.keys(unitStates);
+	
 	//Initialize player order color
 	orderColor = hexToRGB(playerColor, 0.25);
 	enemyOrderColor = hexToRGB(enemyColor, 0.25);
@@ -99,6 +106,7 @@ function init(){
 	//Initialize stuff
 	commandType = commandTypes.move;
 	combatTextList = new FloatingText();
+	unitToolTip = new UnitToolTip(canvas.width/4, canvas.height/5, 20, 'black', 'hoverUnit');
 	gameBoard = new GameBoard(30,40);
 	gameBoard.initializeBoard();
 	hoverUnit = {};
@@ -184,7 +192,7 @@ function checkMouseOver(){
 	for (var id in playerInfantryList){
 		var unit = playerInfantryList[id];
 		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
-			setHoverUnit(unit);
+			setHoverUnitAndToolTip(unit);
 			return;
 		}
 		else{
@@ -195,7 +203,7 @@ function checkMouseOver(){
 	for (var id in enemyInfantryList){
 		var unit = enemyInfantryList[id];
 		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
-			setHoverUnit(unit);
+			setHoverUnitAndToolTip(unit);
 			return;
 		}
 		else{
@@ -205,7 +213,7 @@ function checkMouseOver(){
 	}
 }
 
-function setHoverUnit(unit){
+function setHoverUnitAndToolTip(unit){
 	if (hoverUnit == null || hoverUnit == undefined){
 		return;
 	}
@@ -216,6 +224,8 @@ function setHoverUnit(unit){
 	hoverUnit.unitType = unit.unitType;
 	hoverUnit.state = unit.state;
 	hoverUnit.element = unit.element;
+	
+	//May end up not displaying hover unit info on tooltip, but rather activeUnit
 }
 
 function handleLeftClick(){
@@ -367,5 +377,5 @@ function getMousePosition(e){
 	mouseX = e.pageX - rect.left - root.scrollLeft;
 	mouseY = e.pageY - rect.top - root.scrollTop;
 
-	//checkMouseOver();
+	checkMouseOver();
 }
