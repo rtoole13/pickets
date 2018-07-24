@@ -263,6 +263,10 @@ class HoverHealth {
 			return;
 		}
 
+		if ((activeUnit != undefined || null) && activeUnit.id == hoverUnit.id){
+			return;
+		}
+
 		//Border
 		canvasContext.save()
 		canvasContext.fillStyle = this.borderColor;
@@ -272,6 +276,18 @@ class HoverHealth {
 
 		//Bar
 		var ratio = hoverUnit.strength / hoverUnit.maxStrength;
+
+		switch(hoverUnit.army){
+			default:
+				this.color = greenAlpha;
+				break;
+			case armies.blue:
+				this.color = greenAlpha;
+				break;
+			case armies.red:
+				this.color = crimsonAlpha;
+				break;
+		}
 		canvasContext.save()
 		canvasContext.fillStyle = this.color;
 		canvasContext.translate(hoverUnit.x, hoverUnit.y - 20);
@@ -279,6 +295,33 @@ class HoverHealth {
 		canvasContext.restore();
 	}
 }
+
+class ActiveHealth extends HoverHealth{
+	constructor(width, height, border, color, borderColor){
+		super(width, height, border, color, borderColor);
+	}
+	draw(){
+		if (activeUnit == undefined || null){
+			return;
+		}
+
+		//Border
+		canvasContext.save()
+		canvasContext.fillStyle = this.borderColor;
+		canvasContext.translate(activeUnit.x, activeUnit.y - 20);
+		canvasContext.fillRect(-this.borderWidth / 2,  -this.borderHeight / 2, this.borderWidth, this.borderHeight);
+		canvasContext.restore();
+
+		//Bar
+		var ratio = hoverUnit.strength / hoverUnit.maxStrength;
+		canvasContext.save()
+		canvasContext.fillStyle = this.color;
+		canvasContext.translate(activeUnit.x, activeUnit.y - 20);
+		canvasContext.fillRect(-this.width / 2,  -this.height / 2, this.width * ratio, this.height);
+		canvasContext.restore();
+	}
+}
+
 class UnitToolTip {
 	constructor(width, height, canvasPadding, color, unit){
 		//unit is meant to be hoverUnit or activeUnit
@@ -429,6 +472,7 @@ function draw(dt){
 
 function drawHUD(){
 	unitToolTip.draw();
+	activeHealth.draw();
 	hoverHealth.draw();
 }
 
