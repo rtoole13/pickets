@@ -248,6 +248,37 @@ class SkirmishAnimationCircle {
 	}
 }
 
+class HoverHealth {
+	constructor(width, height, border, color, borderColor){
+		this.width = width;
+		this.height = height;
+		this.border = border;
+		this.borderWidth  = this.width + 2 * this.border;
+		this.borderHeight = this.height + 2 * this.border;
+		this.color = color;
+		this.borderColor = borderColor;
+	}
+	draw(){
+		if (!hoverUnit.hovered || !hoverUnit.combat){
+			return;
+		}
+
+		//Border
+		canvasContext.save()
+		canvasContext.fillStyle = this.borderColor;
+		canvasContext.translate(hoverUnit.x, hoverUnit.y - 20);
+		canvasContext.fillRect(-this.borderWidth / 2,  -this.borderHeight / 2, this.borderWidth, this.borderHeight);
+		canvasContext.restore();
+
+		//Bar
+		var ratio = hoverUnit.strength / hoverUnit.maxStrength;
+		canvasContext.save()
+		canvasContext.fillStyle = this.color;
+		canvasContext.translate(hoverUnit.x, hoverUnit.y - 20);
+		canvasContext.fillRect(-this.width / 2,  -this.height / 2, this.width * ratio, this.height);
+		canvasContext.restore();
+	}
+}
 class UnitToolTip {
 	constructor(width, height, canvasPadding, color, unit){
 		//unit is meant to be hoverUnit or activeUnit
@@ -398,7 +429,9 @@ function draw(dt){
 
 function drawHUD(){
 	unitToolTip.draw();
+	hoverHealth.draw();
 }
+
 function drawAnimations(dt){
 	for (var id in animationList){
 		if (animationList[id] == null){

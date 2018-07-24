@@ -31,6 +31,7 @@ var gameBoard,
 	animationList = {},
 	combatTextList = {},
 	unitToolTip = {},
+	hoverHealth = {},
 
 	//Enums
 	commandTypes,
@@ -51,9 +52,13 @@ var gameBoard,
 	playerColor = "#5F9EA0",
 	enemyColor  = "#8B0000",
 	damageColor = "#ff0000",
+	crimson     = "#DC143C",
+	gray        = "#696969",
 	
 	orderColor,
 	enemyOrderColor,
+	crimsonAlpha,
+	grayAlpha,
 
 	activeUnit,
 	hoverUnit,
@@ -99,14 +104,18 @@ function init(){
 	unitTypeNames   = Object.keys(unitTypes);
 	unitStateNames  = Object.keys(unitStates);
 
-	//Initialize player order color
+	//Initialize some colors
 	orderColor = hexToRGB(playerColor, 0.25);
 	enemyOrderColor = hexToRGB(enemyColor, 0.25);
+	crimsonAlpha = hexToRGB(crimson, 0.5);
+	grayAlpha = hexToRGB(gray, 0.5);
 
 	//Initialize stuff
 	commandType = commandTypes.move;
 	combatTextList = new FloatingText();
 	unitToolTip = new UnitToolTip(canvas.width/4, canvas.height/6, 20, 'black', 'hoverUnit');
+	hoverHealth = new HoverHealth(40, 5, 2, crimsonAlpha, grayAlpha);
+
 	gameBoard = new GameBoard(30,40);
 	gameBoard.initializeBoard();
 	hoverUnit = {};
@@ -268,6 +277,8 @@ function setHoverUnitAndToolTip(unit, combat){
 	hoverUnit.combat = combat;
 
 	if (combat){
+		hoverUnit.x = unit.x;
+		hoverUnit.y = unit.y;
 		hoverUnit.strength = unit.strength;
 		hoverUnit.maxStrength = unit.maxStrength;	
 		hoverUnit.state = unit.state;
