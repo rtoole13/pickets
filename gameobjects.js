@@ -574,8 +574,27 @@ class InfantryUnit extends CombatUnit{
 		return 1;
 	}
 
+	getFortificationModifier(){
+		var modifier;
+		switch(this.state){
+			default:
+				modifier = fortifyModifiers.braced;
+				break;
+			case unitStates.marching:
+				modifier = fortifyModifiers.marching;
+				break;
+			case unitStates.braced:
+				modifier = fortifyModifiers.braced;
+				break;
+			case unitStates.entrenched:
+				modifier = fortifyModifiers.entrenched;
+				break;
+		}
+		return modifier;
+	}
+
 	takefire(damage, inBattle, xLoc, yLoc){
-        var damage = Math.floor(damage * this.getFlankModifier(inBattle, xLoc, yLoc));
+        var damage = Math.floor(damage * this.getFlankModifier(inBattle, xLoc, yLoc) * this.getFortificationModifier());
         addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
 		this.strength -= damage;
 		this.checkVitals();

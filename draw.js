@@ -301,7 +301,7 @@ class ActiveHealth extends HoverHealth{
 		super(width, height, border, color, borderColor);
 	}
 	draw(){
-		if (activeUnit == undefined || null){
+		if ((activeUnit == undefined || null) || (activeUnit.auxiliaryUnit)){
 			return;
 		}
 
@@ -313,7 +313,7 @@ class ActiveHealth extends HoverHealth{
 		canvasContext.restore();
 
 		//Bar
-		var ratio = hoverUnit.strength / hoverUnit.maxStrength;
+		var ratio = activeUnit.strength / activeUnit.maxStrength;
 		canvasContext.save()
 		canvasContext.fillStyle = this.color;
 		canvasContext.translate(activeUnit.x, activeUnit.y - 20);
