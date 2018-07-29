@@ -314,7 +314,7 @@ class CollisionEngine{
 				var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
 
 				unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
-				unit.updateCommand(null);
+				unit.updateCommand(null, true);
 				
 			}
 			else{
@@ -330,18 +330,18 @@ class CollisionEngine{
 			}
 		}
 		if (!isSkirmishing){
-			unit.updateCommand(null);
+			unit.updateCommand(null, true);
 		}
 	}
 
 	static resolveCombatCollision(unit, otherUnit, otherID){
 		if (unit.inBattle){
-			unit.updateCommand(null);
+			unit.updateCommand(null, true);
 		}
 		else{
 			var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
 			unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
-			unit.updateCommand(null);
+			unit.updateCommand(null, true);
 		}
 	}
 

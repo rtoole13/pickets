@@ -83,6 +83,7 @@ class Unit{
 		this.targetAngleSigma = 3; //deg 
 		this.turnAngleTol = 90;
 		this.command = null;
+		this.commandQueue = [];
 		this.army = army;
 		this.path = [];
 		this.rerouteTargetX = null;
@@ -116,7 +117,7 @@ class Unit{
 		}
 		else{
 			this.targetPosition = null;
-			this.updateCommand(null);
+			this.updateCommand(null, false);
 		}
 		this.updateTargetParameters();
 		return this.targetPosition;
@@ -209,16 +210,34 @@ class Unit{
 		return rotating;
 	}
 	
-	updateCommand(order){
+	updateCommand(order, clearQueue){
 		// Called on being given a command, and also on command completion
 		if (order == null){
-			this.command = null;
-			this.targetPosition = null;
-			this.targetAngle = null;
-			this.target = null;
-			this.path = [];
+			if (clearQueue){
+				this.commandQueue = [];
+			}
+
+			if (this.commandQueue.length > 0){
+				order = this.commandQueue.shift();
+			}
+			else{
+				this.command = null;
+				this.targetPosition = null;
+				this.targetAngle = null;
+				this.target = null;
+				this.path = [];
+				return;
+			}
+		}
+		else if (this.command != null && order.queue){
+			//queued command first hits unit here. Add it to command queue
+			this.commandQueue.push(order);
 			return;
 		}
+		else{
+			this.commandQueue = [];
+		}
+
 		this.command = order.type;
 		switch(this.command){
 			default:
@@ -443,7 +462,7 @@ class CombatUnit extends Unit{
 				if (getRandomInt(1,1000) <= this.retreatChance){
 					this.retreating = true;
 					this.rallyTimer.start();
-					this.updateCommand({type: commandTypes.retreat, target: thisGeneral, date: Date.now()})
+					this.updateCommand({type: commandTypes.retreat, target: thisGeneral, date: Date.now()}, true)
 					return;
 				}
 			}
@@ -691,13 +710,13 @@ class General extends AuxiliaryUnit{
 			return;
 		}
 		if (getDistanceSq(target.x, target.y, this.x, this.y) <= Math.pow(this.commandRadius,2)){
-			target.updateCommand(command);
+			target.updateCommand(command, false);
 		}
 		else{
 			this.sendCourier(target, command);
 		}
 	}
-	moveToLocation(xLoc, yLoc){
+	moveToLocation(xLoc, yLoc, queuingOrders){
 		this.command = commandTypes.move;
 		this.path = Pathfinder.findPath(this.x, this.y, xLoc, yLoc, this, []);
 		this.updateRouteTimer.start();
@@ -720,10 +739,12 @@ class General extends AuxiliaryUnit{
 	refreshCouriers(){
 		if (this.courierRecharge.checkTime()){
 			this.addCourier();
+
 		}
 	}
 
 	addCourier(){
+
 		if ((this.courierCount + this.issuedCourierCount) < this.maxCourierCount){
 			this.courierCount += 1;
 		}
@@ -798,7 +819,7 @@ class Courier extends AuxiliaryUnit{
 	}
 
 	deliverOrder(){
-		this.target.updateCommand(this.order);
+		this.target.updateCommand(this.order, false);
 		this.returning = true;
 		this.target = this.general;
 		this.faceTarget();

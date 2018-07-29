@@ -232,7 +232,7 @@ class SkirmishAnimationCircle {
 				delete this.delayTimer;
 				this.begun = true;
 				this.lifeTimer.start();
-				drawCircle(this.x, this.y, this.radius, this.baseColor, this.baseColor);
+				drawCircle(this.x, this.y, this.radius, this.baseColor);
 				return false;
 			}
 			return false;
@@ -243,7 +243,7 @@ class SkirmishAnimationCircle {
 			return true;
 		}
 		var newColor = hexToRGB(this.baseColor, this.baseAlpha * (this.lifetime - this.lifeTimer.getElapsedTime()) / this.lifetime);
-		drawCircle(this.x, this.y, this.radius, newColor, newColor);
+		drawCircle(this.x, this.y, this.radius, newColor);
 		return false;
 	}
 }
@@ -587,6 +587,16 @@ function drawRay(originX, originY, directionX, directionY, length, color){
 	canvasContext.restore();
 }
 
+function drawSegment(originX, originY, destinationX, destinationY, color){
+	canvasContext.save();
+	canvasContext.beginPath();
+	canvasContext.moveTo(originX, originY);
+	canvasContext.lineTo(destinationX, destinationY);
+	canvasContext.strokeStyle = color;
+	canvasContext.stroke();
+	canvasContext.restore();	
+}
+
 function drawOrder(){
 	if (!givingOrder || activeUnit == playerGeneral){
 		return;
@@ -692,27 +702,72 @@ function drawSelection(){
 	drawActiveUnitPath();
 }
 function drawActiveUnitPath(){
-	if (activeUnit.path != null && activeUnit.path.length > 0){
-		var colors = getPathColors(activeUnit);
-		//draw intermediate waypoints
-		for (var i = 0; i < activeUnit.path.length - 1; i++){
-			var point = activeUnit.path[i];
-			drawCircle(point.x, point.y, 5, colors.mid, colors.mid);
+	var colors, previousPoint, finalPoint;
+	if ((activeUnit.path != null) && (activeUnit.path.length > 0)){
+		if (activeUnit.path.length > 1){
+			//path has at least 2 points
+			colors = getPathColors(activeUnit.command);
+			
+			//draw intermediate waypoints
+			previousPoint = activeUnit.path[0];
+			drawSegment(activeUnit.x, activeUnit.y, previousPoint.x, previousPoint.y, colors.last);
+			drawCircle(previousPoint.x, previousPoint.y, 5, colors.last);
+
+			for (var i = 1; i < activeUnit.path.length - 1; i++){
+				var point = activeUnit.path[i];
+				drawSegment(previousPoint.x, previousPoint.y, point.x, point.x, color);
+				drawCircle(point.x, point.y, 5, colors.mid);
+
+				//set new previousPoint
+				previousPoint = point;
+			}
+			finalPoint = activeUnit.path[activeUnit.path.length - 1];
+			drawSegment(previousPoint.x, previousPoint.y, finalPoint.x, finalPoint.y, colors.last);
+			drawCircle(finalPoint.x, finalPoint.y, 5, colors.last);
 		}
-		var finalPoint = activeUnit.path[activeUnit.path.length - 1];
-		drawCircle(finalPoint.x, finalPoint.y, 5, colors.last, colors.last);
+		else{
+			//path is of length 1
+			colors = getPathColors(activeUnit.command);
+			finalPoint = activeUnit.path[0];
+			drawSegment(activeUnit.x, activeUnit.y, finalPoint.x, finalPoint.y, colors.last);
+			drawCircle(finalPoint.x, finalPoint.y, 5, colors.last);
+		}
 	}
 	else if (activeUnit.targetPosition != null){
-		var colors = getPathColors(activeUnit);
+		//no path, just target pos
+		colors = getPathColors(activeUnit.command);
 		//draw final location
-		drawCircle(activeUnit.targetPosition.x, activeUnit.targetPosition.y, 5, colors.last, colors.last);
+		finalPoint = activeUnit.targetPosition;
+		drawSegment(activeUnit.x, activeUnit.y, finalPoint.x, finalPoint.y, colors.last);
+		drawCircle(finalPoint.x, finalPoint.y, 5, colors.last);
+	}
+	else{
+		finalPoint = {x: activeUnit.x, y: activeUnit.y};
+	}
+
+	if (activeUnit.commandQueue.length == 0){
+		return;
+	}
+
+	previousPoint = activeUnit.commandQueue[0];
+	drawSegment(finalPoint.x, finalPoint.y, previousPoint.x, previousPoint.y, colors.last);
+	drawCircle(previousPoint.x, previousPoint.y, 5, colors.last);
+
+	for (var i = 1; i < activeUnit.commandQueue.length; i++){
+		var command = activeUnit.commandQueue[i];
+		colors = getPathColors(command.type);
+		drawSegment(previousPoint.x, previousPoint.y, command.x, command.y, colors.last);
+		drawCircle(command.x, command.y, 5, colors.last);
+
+		//set new previousPoint
+		previousPoint = command;
 	}
 	
 }
-function getPathColors(unit){
+function getPathColors(command){
 
 	var colors = {mid: 'magenta', last: 'magenta'}; 
-	switch(unit.command){
+	switch(command){
 		case commandTypes.move:
 			colors.mid = waypointColors.move;
 			colors.last = targetPosColors.move;
@@ -729,7 +784,7 @@ function getPathColors(unit){
 	return colors;
 }
 
-function drawCircle(xLoc, yLoc, radius, strokeColor, fillColor){
+function drawCircle(xLoc, yLoc, radius, fillColor){
 	
 	canvasContext.save();
 	canvasContext.fillStyle = fillColor;
@@ -820,7 +875,7 @@ function drawGeneral(general, showCommandRadius){
 		color = enemyColor;
 	}
 	//draw general as a circle..
-	drawCircle(general.x, general.y, radius, color, color);
+	drawCircle(general.x, general.y, radius, color);
 	
 	if (showCommandRadius){
 		canvasContext.save();

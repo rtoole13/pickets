@@ -72,7 +72,9 @@ var gameBoard,
 	fullRetreatPlayer = false,
 	fullRetreatEnemy = false,
 
+
 	givingOrder = false,
+	queuingOrders = false,
 	selector = 0;
 
 
@@ -85,6 +87,7 @@ window.onload = function(){
 	canvas.addEventListener("mousemove", getMousePosition, false);
 
 	window.addEventListener("keydown", handleKeyPress, false);
+	window.addEventListener("keyup", handleKeyRelease, false);
 	init();
 
 }
@@ -145,7 +148,7 @@ function main(){
 	//Updates
 	gameBoard.update(dt);
 	draw(dt);
-	
+
 	requestAnimationFrame(main);
 }
 
@@ -365,7 +368,7 @@ function selectEnemyUnit(x, y){
 function handleRightClickDown(){
 	if (activeUnit != undefined || null){
 		if (activeUnit == playerGeneral){
-			playerGeneral.moveToLocation(mouseX, mouseY);
+			playerGeneral.moveToLocation(mouseX, mouseY, queuingOrders);
 			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
 		}
 		else{
@@ -375,7 +378,7 @@ function handleRightClickDown(){
 			var target;
 			target = selectEnemyUnit(mouseX, mouseY);
 			if (target != null){
-				playerGeneral.issueCommand(activeUnit, {type: commandType, target: target, x: targetOriginX, y: targetOriginY, angle: null, date: Date.now()});
+				playerGeneral.issueCommand(activeUnit, {type: commandType, target: target, x: targetOriginX, y: targetOriginY, angle: null, date: Date.now(), queue: queuingOrders});
 			}
 			else{
 			givingOrder = true;
@@ -401,7 +404,7 @@ function handleRightClickUp(e){
 		else{
 			targetAngle = null;
 		}
-		playerGeneral.issueCommand(activeUnit, {type: commandType, target: null, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now()});
+		playerGeneral.issueCommand(activeUnit, {type: commandType, target: null, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now(), queue: queuingOrders});
 	}
 }
 
@@ -436,6 +439,24 @@ function handleKeyPress(e){
 			}
 			break;
 		
+		case 16:
+			//Shift
+			queuingOrders = true;
+			break;
+		
+		default:
+			return;
+	}
+}
+
+function handleKeyRelease(e){
+	var keyCode = e.keyCode;
+	switch(keyCode){
+		case 16: 
+			queuingOrders = false;
+			break;
+		default:
+			return;
 	}
 }
 
