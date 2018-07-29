@@ -38,8 +38,7 @@ class CollisionEngine{
 			}
 			this.checkEnemyCollision(unitA, idA, enemyList);
 			
-			if (unitA.command == null){
-				//General doesn't have a 'command'. Still want to check coll, however
+			if ((unitA.command == null) || (unitA.unitType == unitTypes.courier)){
 				continue;
 			}
 
@@ -115,6 +114,9 @@ class CollisionEngine{
 			}
 			var unitB = friendlyList[idB];
 
+			if (unitB.unitType == unitTypes.courier){
+				continue;
+			}
 			this.collisionDynamicFriendly(unitA, idA, unitB, idB);
 		}
 	}
