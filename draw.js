@@ -750,6 +750,7 @@ function drawActiveUnitPath(){
 	}
 
 	previousPoint = activeUnit.commandQueue[0];
+	colors = getPathColors(previousPoint.type);
 	drawSegment(finalPoint.x, finalPoint.y, previousPoint.x, previousPoint.y, colors.last);
 	drawCircle(previousPoint.x, previousPoint.y, 5, colors.last);
 
