@@ -587,10 +587,10 @@ class InfantryUnit extends CombatUnit{
 			cosTheta = dotProduct(this.dirX, this.dirY, dir.x, dir.y) / getVectorMag(dir.x, dir.y); //Dot product relation. No need to get mag of this.dir as it's 1.
 			
 			if (cosTheta < this.cosFlankAngle){
-		  		return this.flankedModifier;
+		  		return true;
 			}
 		}
-		return 1;
+		return false;
 	}
 
 	getFortificationModifier(){
@@ -613,8 +613,14 @@ class InfantryUnit extends CombatUnit{
 	}
 
 	takefire(damage, inBattle, xLoc, yLoc){
-        var damage = Math.floor(damage * this.getFlankModifier(inBattle, xLoc, yLoc) * this.getFortificationModifier());
-        addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+		if (this.getFlankModifier(inBattle, xLoc, yLoc)){
+			damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
+			addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
+		}
+		else{
+			damage = Math.floor(damage * this.getFortificationModifier());
+        	addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+		}
 		this.strength -= damage;
 		this.checkVitals();
 	}

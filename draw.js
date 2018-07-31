@@ -809,10 +809,21 @@ function drawInfantryUnit(unit, drawRadii, color){
 	}
 
 	canvasContext.save();
+	
+	//main body
 	canvasContext.fillStyle = color;
 	canvasContext.translate(unit.x, unit.y);
 	canvasContext.rotate((90 - unit.angle) * Math.PI/180);
 	canvasContext.fillRect(-width/2, -height/2, width, height);
+	
+	//arrow
+	canvasContext.beginPath();
+	canvasContext.moveTo(-5, -10);
+	canvasContext.lineTo(0, -15);
+	canvasContext.lineTo(5, -10);
+	canvasContext.closePath();
+	canvasContext.fill();
+
 	canvasContext.restore();
 
 	if (!drawRadii){
