@@ -85,6 +85,30 @@ class Grid{
 			thisNode.impassable = false;
 		}
 	}
+
+	save(){
+		var str = this.elem[0][0].tileType;
+		for (var i = 0; i < this.rows; i++){
+			var start;
+			if (i == 0){
+				start = 1;
+			}
+			else{
+				start = 0;
+			}
+
+			for (var j = start; j < this.columns - 1; j++){
+				if (j == 0){
+					str += parseInt(this.elem[j][i].tileType);
+				}
+				else{
+					str += (', ' + parseInt(this.elem[j][i].tileType));
+				}
+			}
+			str += (', ' + parseInt(this.elem[j][i].tileType) + '\n');
+		}
+		console.log(str);
+	}
 }
 class GridNode{
 	constructor(x, y, width, height, indX, indY, walkable, tileType){

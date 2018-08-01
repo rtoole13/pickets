@@ -91,7 +91,10 @@ function handleRightRelease(e){
 
 function handleKeyPress(e){
 	var keyCode = e.keyCode;
-	console.log(keyCode);
+	if (keyCode == 32){
+		console.log("Saved to file");
+		grid.save();
+	}
 	return;
 }
 

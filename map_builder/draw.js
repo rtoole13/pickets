@@ -54,7 +54,7 @@ function drawGridPoint(gridNode){
 			color = "green";
 			break;
 		case brushes.road:
-			color = "gray";
+			color = "black";
 			break;
 		case brushes.mountain:
 			color = "brown";
