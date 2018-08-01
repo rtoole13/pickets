@@ -134,7 +134,7 @@ class Grid{
 			var rowArray = [];
 			for (var j = 0; j < this.rows; j++){
 				var yLoc = this.gridSpacing.y / 2 + this.gridSpacing.y * j;
-				rowArray.push(new GridNode(xLoc, yLoc, this.gridSpacing.x, this.gridSpacing.y, i, j, true));
+				rowArray.push(new GridNode(xLoc, yLoc, this.gridSpacing.x, this.gridSpacing.y, i, j, true, 0));
 			}
 			this.elem.push(rowArray);
 		}
@@ -198,7 +198,7 @@ class Grid{
 	}
 }
 class GridNode{
-	constructor(x, y, width, height, indX, indY, walkable){
+	constructor(x, y, width, height, indX, indY, walkable, tileType){
 		this.x = x;
 		this.y = y;
 		this.indX = indX;
@@ -207,7 +207,13 @@ class GridNode{
 		this.width = width;
 		this.height = height;
 		this.walkable = walkable;
-
+		
+		if (this.tileType == tileTypes.mountain){
+        	this.impassable = true; //Reserved for permanantly unwalkable terrain
+		}
+		else{
+			this.impassable = false;
+		}
 		this.parent = null;
 		this.gcost = 0;
 		this.hcost = 0;

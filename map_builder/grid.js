@@ -78,6 +78,12 @@ class Grid{
 	paintGrid(x, y){
 		var thisNode = this.getNodeFromLocation(x, y);
 		thisNode.tileType = activeBrush;
+		if (thisNode.tileType == brushes.mountain){
+			thisNode.impassable = true;
+		}
+		else{
+			thisNode.impassable = false;
+		}
 	}
 }
 class GridNode{

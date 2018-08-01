@@ -47,6 +47,7 @@ var gameBoard,
 	waypointColors,
 	targetPosColors,
 	animationTypes,
+	tileTypes,
 
 	unitTypeNames,
 	unitStateNames,
@@ -108,6 +109,7 @@ function init(){
 	fortifyModifiers = Object.freeze({marching:1.5, braced:1, entrenched:0.8})
 	armies           = Object.freeze({blue:1, red:2});
 	animationTypes   = Object.freeze({skirmish:1, battle:2});
+	tileTypes        = Object.freeze({plain:0, road:1, mountain:2});
 	
 	unitTypeNames    = Object.keys(unitTypes);
 	unitStateNames   = Object.keys(unitStates);
