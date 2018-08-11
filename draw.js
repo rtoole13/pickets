@@ -506,7 +506,7 @@ function drawSkirmish(skirmish, dt){
 
 function drawDebug(){
 	drawTextDebug();
-	//drawGridDebug();
+	drawGridDebug();
 }
 function drawTextDebug(){
 	var fps = 1/dt;
@@ -536,7 +536,7 @@ function drawGridDebug(){
 			drawGridPoint(gameBoard.grid.elem[i][j], false);
 		}
 	}
-
+	/*
 	if (gameBoard.grid.pathOrig != null){
 		for (var i = 0; i < gameBoard.grid.pathOrig.length; i++){
 			drawGridPoint(gameBoard.grid.pathOrig[i], true, 'yellow');
@@ -548,6 +548,7 @@ function drawGridDebug(){
 			drawGridPoint(gameBoard.grid.path[i], true);
 		}
 	}
+	*/
 }
 
 function drawGridPoint(gridNode, pathNode, color){
@@ -555,16 +556,19 @@ function drawGridPoint(gridNode, pathNode, color){
 	
 	if (color == null){
 		var color;
-		if (pathNode){
-			color = 'cyan';
-		}
-		else{
-			if (gridNode.walkable){
-				color = 'green';
-			}
-			else{
-				color = 'red';
-			}
+		switch(gridNode.tileType){
+			case tileTypes.plain:
+				color = "green";
+				break;
+			case tileTypes.road:
+				color = "black";
+				break;
+			case tileTypes.mountain:
+				color = "brown";
+				break;
+			default:
+				color  = "magenta";
+				break;
 		}
 	}
 	
@@ -715,7 +719,7 @@ function drawActiveUnitPath(){
 
 			for (var i = 1; i < activeUnit.path.length - 1; i++){
 				var point = activeUnit.path[i];
-				drawSegment(previousPoint.x, previousPoint.y, point.x, point.x, color);
+				drawSegment(previousPoint.x, previousPoint.y, point.x, point.x, colors.mid);
 				drawCircle(point.x, point.y, 5, colors.mid);
 
 				//set new previousPoint

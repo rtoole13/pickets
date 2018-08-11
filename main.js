@@ -94,7 +94,6 @@ window.onload = function(){
 }
 
 function init(){
-
 	//Enums 
 	commandTypes     = Object.freeze({move:1, attackmove:2, fallback:3, retreat:4});
 	commandColors    = Object.freeze({move: '#008000', attackmove: '#FF0000', fallback: '#FF00FF'});
@@ -303,6 +302,7 @@ function setHoverUnitAndToolTip(unit, combat){
 }
 
 function handleLeftClick(){
+	console.log(gameBoard.grid.getNodeFromLocation(mouseX, mouseY));
 	if (CollisionEngine.pointInCircle(mouseX, mouseY, playerGeneral.x, playerGeneral.y, 13)){
 		activeUnit = playerGeneral;
 		console.log("Selected general at " + "(" + playerGeneral.x + ", " + playerGeneral.y + ")");
