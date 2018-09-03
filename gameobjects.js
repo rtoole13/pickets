@@ -544,6 +544,12 @@ class InfantryUnit extends CombatUnit{
 		//The inBattle bool is set elsewhere for drawing purposes. I dont want the skirmish radius drawn if a unit is in combat
 		//And this needs to happen always, not just when the attackCooldown is up
 		if (this.inBattle){
+
+			if (this.combatCollisionList.length > 0){
+				createBattleAnimation(this, this.combatCollisionList, this.attackCooldownTime);
+                this.reload();
+			} 
+
 			var damage = Math.floor(this.strength * this.multiplierCombat / this.combatCollisionList.length);
 			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.combatCollisionList.length; i++){
