@@ -234,6 +234,13 @@ class Grid{
 		j = Math.floor(y / this.gridSpacing.y);
 		return this.elem[i][j];
 	}
+
+	isLocationWalkable(x, y){
+		var i,j;
+		i = Math.floor(x / this.gridSpacing.x);
+		j = Math.floor(y / this.gridSpacing.y);
+		return this.elem[i][j].walkable;
+	}
 }
 class GridNode{
 	constructor(x, y, width, height, indX, indY, walkable, tileType){

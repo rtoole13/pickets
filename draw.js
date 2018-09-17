@@ -1058,6 +1058,13 @@ function drawEndGame(playerVictory, condition){
 	canvasContext.fillText(conditionStr, canvas.width/2 , -30 + canvas.height/2);
 	canvasContext.restore();
 
+	canvasContext.save();
+	canvasContext.fillStyle = endColor;
+	canvasContext.font = '20px sans-serif';
+	canvasContext.textAlign = 'center';
+	canvasContext.fillText('Press \"R\" to restart.', canvas.width/2 , 60 + canvas.height/2);
+	canvasContext.restore();
+
 }
 
 function drawBackground(){

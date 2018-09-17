@@ -195,7 +195,7 @@ class CollisionEngine{
 				}
 				
 				redirectDir = normalizeVector(redirectDir.x, redirectDir.y);
-				
+					
 				unitA.rerouteTargetX = unitA.x + unitA.rerouteDistance * redirectDir.x;
 				unitA.rerouteTargetY = unitA.y + unitA.rerouteDistance * redirectDir.y;
 				
