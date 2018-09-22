@@ -88,15 +88,24 @@ class Pathfinder{
 	}
 
 	static getDistance(nodeA, nodeB){
-		var xDist, yDist;
+		var xDist, yDist, diagonalCost, straightCost;
 		xDist = Math.abs(nodeB.indX - nodeA.indX);
 		yDist = Math.abs(nodeB.indY - nodeA.indY);
-
-		if (xDist > yDist){
-			return 12 * yDist + 10 * (xDist - yDist);
+		/*
+		if (nodeB.tileType == tileTypes.road){
+			diagonalCost = 6;
+			straightCost = 5;
 		}
 		else{
-			return 12 * xDist + 10 * (yDist - xDist);	
+			diagonalCost = 12;
+			straightCost = 10;
+		}
+		*/
+		if (xDist > yDist){
+			return diagonalCost * yDist + straightCost * (xDist - yDist);
+		}
+		else{
+			return diagonalCost * xDist + straightCost * (yDist - xDist);	
 		}
 	}
 
@@ -112,6 +121,8 @@ class Grid{
 		this.gridSpacing = {x:null, y:null};
 		this.minDim = null;
 		this.elem = [];
+		this.passableElem = [];
+		this.impassableElem = [];
 		this.initializeNodes();
 
 		this.path = null;
@@ -121,14 +132,14 @@ class Grid{
 
 		this.gridSpacing.x = canvas.width / this.columns;
 		this.gridSpacing.y = canvas.height / this.rows;
-
+		
 		if (this.gridSpacing.x < this.gridSpacing.y){
 			this.minDim = this.gridSpacing.x;
 		}
 		else{
 			this.minDim = this.gridSpacing.y;
 		}
-
+		
 		for (var i = 0; i < this.columns; i++){
 			var xLoc = this.gridSpacing.x/2 + this.gridSpacing.x * i;
 			var rowArray = [];
@@ -138,11 +149,41 @@ class Grid{
 			}
 			this.elem.push(rowArray);
 		}
+
+		var elemInfo = mapData.split(';');
+		elemInfo.pop(1);
+		var rowOne, rowCount, colCount;
+		rowOne = elemInfo[0].split(',');
+		rowCount = elemInfo.length;
+		colCount = rowOne.length;
+
+		if ((rowCount != this.rows) || (colCount != this.columns)){
+			throw 'Read-in map\'s dimensions do not match expected dimensions';
+		}
+
+		for (var i = 0; i < this.rows; i++){
+			var thisRow = elemInfo[i].split(',');
+			for (var j = 0; j < this.columns; j++){
+				var thisElem = this.elem[j][i];
+				thisElem.tileType = parseInt(thisRow[j]);
+				if (thisElem.tileType == tileTypes.mountain){
+		        	thisElem.impassable = true; //Reserved for permanantly unwalkable terrain
+		        	thisElem.walkable = false;
+					this.impassableElem.push(thisElem);
+				}
+				else{
+					thisElem.impassable = false;
+					thisElem.walkable = true;
+					this.passableElem.push(thisElem);
+				}
+			}
+		}
 	}
 
 	update(currentUnit, ignoreList){
 		this.reset();
 		
+		/*
 		//Doing a basic point in circle collision check temporarily.
 		for (var id in unitList){
 			var unit = unitList[id];
@@ -152,23 +193,20 @@ class Grid{
 			//NOTE: This line adds only  static units in unit's army the impassable list. Removing at the moment for debug purposes
 			//if (unit.command != null) continue;
 			continue;
-			for (var i = 0; i < this.columns; i++){
-				for (var j = 0; j < this.rows; j++){
-					var elem = this.elem[i][j];
-
-					if (CollisionEngine.pointInCircle(elem.x, elem.y, unit.x, unit.y, 2 * this.minDim + unit.rerouteDistance)){
-						elem.walkable = false;
-					}
+			for (var i = 0; i < this.passableElem.length; i++){
+				var elem = this.passableElem[i];
+				if (CollisionEngine.pointInCircle(elem.x, elem.y, unit.x, unit.y, 2 * this.minDim + unit.rerouteDistance)){
+					elem.walkable = false;
 				}
+				
 			}
 		}
+		*/
 	}
 
 	reset(){
-		for (var i = 0; i < this.columns; i++){
-			for (var j = 0; j < this.rows; j++){
-				this.elem[i][j].walkable = true;
-			}
+		for (var i = 0; i < this.passableElem.length; i++){
+			this.passableElem[i].walkable = true;
 		}
 	}
 
@@ -195,6 +233,13 @@ class Grid{
 		i = Math.floor(x / this.gridSpacing.x);
 		j = Math.floor(y / this.gridSpacing.y);
 		return this.elem[i][j];
+	}
+
+	isLocationWalkable(x, y){
+		var i,j;
+		i = Math.floor(x / this.gridSpacing.x);
+		j = Math.floor(y / this.gridSpacing.y);
+		return this.elem[i][j].walkable;
 	}
 }
 class GridNode{

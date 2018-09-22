@@ -87,6 +87,8 @@ class Grid{
 	}
 
 	save(){
+		var jsonContent = "data:text/javascript;charset=utf-8,";
+		
 		var str = this.elem[0][0].tileType;
 		for (var i = 0; i < this.rows; i++){
 			var start;
@@ -102,12 +104,21 @@ class Grid{
 					str += parseInt(this.elem[j][i].tileType);
 				}
 				else{
-					str += (', ' + parseInt(this.elem[j][i].tileType));
+					str += (',' + parseInt(this.elem[j][i].tileType));
 				}
 			}
-			str += (', ' + parseInt(this.elem[j][i].tileType) + '\n');
+			str += (',' + parseInt(this.elem[j][i].tileType) + ';');
 		}
-		console.log(str);
+		var link;
+		jsonContent += 'var mapData = \'';
+		jsonContent += encodeURIComponent(str);
+		jsonContent += '\'';
+		link = document.createElement("a");
+		link.setAttribute("href", jsonContent);
+		link.setAttribute("download", "map.js");
+		link.innerHTML= "Click to download";
+		document.body.appendChild(link); // Required for FF
+		link.click();
 	}
 }
 class GridNode{

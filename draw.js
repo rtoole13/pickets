@@ -148,6 +148,61 @@ class Animation {
 class BattleAnimation extends Animation {
 	constructor(id, x, y, frameRate, frameCount, unitID, targets){
 		super(id, x, y, frameRate, frameCount, false);
+		this.type = animationTypes.battle;
+		this.unitID = unitID;
+		this.targets = targets;
+		this.circlesPerUnitPerFrame = 3;
+		this.circles = [];
+		this.distVariance = 3; //hardcoded infantry unit width currently
+		this.angleVariance = 45; //plus or minus
+		this.circleRadius = 10;
+		this.circleLifeTime = 900;
+		this.circleDelayMax = 500;
+		this.delayIter = this.circleDelayMax / this.circlesPerUnitPerFrame;
+
+		var unit = unitList[this.unitID];
+		switch(unit.army){
+			default:
+				this.color = playerColor;
+				break;
+			case armies.blue:
+				this.color = playerColor;
+				break;
+			case armies.red:
+				this.color = enemyColor;
+				break;
+		}
+		this.baseRadius = unit.combatRadius;
+	}
+
+	draw(isNewFrame, dt){
+		if (this.animationComplete){
+			return;
+		}
+		if (isNewFrame){
+			//iterate over targets and create circles at positions on the combat radius +/- a dist of each target within +/- angle variance from each line drawn
+			//from this unit to each target.
+			var unit = unitList[this.unitID];
+			for (var i = 0; i < this.targets.length; i++){
+				var target = unit.enemyList[this.targets[i]];
+				var dist = getDistance(unit.x, unit.y, target.x, target.y);
+				var dir = {x: (unit.x - target.x) / dist, y: (unit.y - target.y) / dist}; //from target to unit
+				for (var j = 0; j < this.circlesPerUnitPerFrame; j++){	
+					var circleDist = this.baseRadius + getRandomFloat(-this.distVariance, this.distVariance); 
+					var circleDir = rotateVector(dir.x, dir.y, getRandomFloat(-this.angleVariance, this.angleVariance), true);
+					var spawnDelay = j * this.delayIter;
+					var circle = new SkirmishAnimationCircle(target.x + circleDist * circleDir.x, target.y + circleDist * circleDir.y, this.circleRadius, this.color, this.circleLifeTime, spawnDelay);
+					this.circles.push(circle);
+				}
+
+			}
+			
+		}
+
+		for (var i = 0; i < this.circles.length; i++){
+			//draw circles instantiated previously
+			this.circles[i].draw();
+		}
 	}
 }
 
@@ -197,7 +252,7 @@ class SkirmishAnimation extends Animation {
 					var circleDist = getRandomFloat(this.minCircleDist, (maxDist>this.minCircleDist)?maxDist:this.minCircleDist); //returns this.minCircleDist if maxDist <min
 					var circleDir = rotateVector(dir.x, dir.y, getRandomFloat(-this.angleVariance, this.angleVariance), true);
 					var spawnDelay = j * this.delayIter;
-					var circle = new SkirmishAnimationCircle(unit.x + circleDist * circleDir.x, unit.y + circleDist * circleDir.y, this.circleRadius, this.color, this.circleLifeTime, spawnDelay)
+					var circle = new SkirmishAnimationCircle(unit.x + circleDist * circleDir.x, unit.y + circleDist * circleDir.y, this.circleRadius, this.color, this.circleLifeTime, spawnDelay);
 					this.circles.push(circle);
 				}
 
@@ -461,6 +516,7 @@ function draw(dt){
 	drawBackground();
 	drawDebug();
 	drawTerrain();
+	drawFortifications();
 	drawPlayerUnits();
 	drawEnemyUnits();
 	drawAnimations(dt);
@@ -493,6 +549,7 @@ function drawAnimation(animation, dt){
 			drawSkirmish(animation, dt);
 			break;
 		case animationTypes.battle:
+			drawBattle(animation, dt);
 			break;
 	}
 }
@@ -502,6 +559,14 @@ function drawSkirmish(skirmish, dt){
 	}
 	var isNewFrame = skirmish.update(dt);
 	skirmish.draw(isNewFrame, dt);
+}
+
+function drawBattle(battle, dt){
+	if (battle.animationComplete){
+		return terminateBattleAnimation(battle.id);
+	}
+	var isNewFrame = battle.update(dt);
+	battle.draw(isNewFrame, dt);
 }
 
 function drawDebug(){
@@ -536,7 +601,7 @@ function drawGridDebug(){
 			drawGridPoint(gameBoard.grid.elem[i][j], false);
 		}
 	}
-
+	/*
 	if (gameBoard.grid.pathOrig != null){
 		for (var i = 0; i < gameBoard.grid.pathOrig.length; i++){
 			drawGridPoint(gameBoard.grid.pathOrig[i], true, 'yellow');
@@ -548,6 +613,7 @@ function drawGridDebug(){
 			drawGridPoint(gameBoard.grid.path[i], true);
 		}
 	}
+	*/
 }
 
 function drawGridPoint(gridNode, pathNode, color){
@@ -555,16 +621,19 @@ function drawGridPoint(gridNode, pathNode, color){
 	
 	if (color == null){
 		var color;
-		if (pathNode){
-			color = 'cyan';
-		}
-		else{
-			if (gridNode.walkable){
-				color = 'green';
-			}
-			else{
-				color = 'red';
-			}
+		switch(gridNode.tileType){
+			case tileTypes.plain:
+				color = "green";
+				break;
+			case tileTypes.road:
+				color = "black";
+				break;
+			case tileTypes.mountain:
+				color = "brown";
+				break;
+			default:
+				color  = "magenta";
+				break;
 		}
 	}
 	
@@ -715,7 +784,7 @@ function drawActiveUnitPath(){
 
 			for (var i = 1; i < activeUnit.path.length - 1; i++){
 				var point = activeUnit.path[i];
-				drawSegment(previousPoint.x, previousPoint.y, point.x, point.x, color);
+				drawSegment(previousPoint.x, previousPoint.y, point.x, point.x, colors.mid);
 				drawCircle(point.x, point.y, 5, colors.mid);
 
 				//set new previousPoint
@@ -792,6 +861,35 @@ function drawCircle(xLoc, yLoc, radius, fillColor){
 	canvasContext.beginPath();
 	canvasContext.arc(xLoc, yLoc, radius, 0, 2 * Math.PI);
 	canvasContext.fill();
+	canvasContext.restore();
+}
+
+function drawInfantryState(xLoc, yLoc, angle, state){
+	var baseWidth = 40;
+	var baseHeight = 10;
+	var border, width, height;
+
+	switch(state){
+		default:
+			return;
+		case unitStates.marching:
+			return;
+		case unitStates.braced:
+			border = 2;
+			break;
+		case unitStates.entrenched:
+			border = 4;
+			break;
+	}
+
+	width  = baseWidth + (2 * border);
+	height = baseHeight + (2 * border);
+
+	canvasContext.save();	
+	canvasContext.fillStyle = '#787878';
+	canvasContext.translate(xLoc, yLoc);
+	canvasContext.rotate((90 - angle) * Math.PI/180);
+	canvasContext.fillRect(-width/2, -height/2, width, height);
 	canvasContext.restore();
 }
 
@@ -960,6 +1058,13 @@ function drawEndGame(playerVictory, condition){
 	canvasContext.fillText(conditionStr, canvas.width/2 , -30 + canvas.height/2);
 	canvasContext.restore();
 
+	canvasContext.save();
+	canvasContext.fillStyle = endColor;
+	canvasContext.font = '20px sans-serif';
+	canvasContext.textAlign = 'center';
+	canvasContext.fillText('Press \"R\" to restart.', canvas.width/2 , 60 + canvas.height/2);
+	canvasContext.restore();
+
 }
 
 function drawBackground(){
@@ -971,6 +1076,16 @@ function drawTerrain(){
 
 }
 
+function drawFortifications(){
+	for(var id in playerInfantryList){
+		var unit = playerInfantryList[id];
+		drawInfantryState(unit.x, unit.y, unit.angle, unit.state);
+	}
+	for(var id in enemyInfantryList){
+		var unit = enemyInfantryList[id];
+		drawInfantryState(unit.x, unit.y, unit.angle, unit.state);
+	}
+}
 function drawPlayerUnits(){
 	drawCouriers(playerCourierList);
 	drawGeneral(playerGeneral, true);

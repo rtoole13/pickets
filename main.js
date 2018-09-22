@@ -70,6 +70,7 @@ var gameBoard,
 	targetOriginX,
 	targetOriginY,
 	minDragDrawDistance = 5,
+	gameOver = false,
 	fullRetreatPlayer = false,
 	fullRetreatEnemy = false,
 
@@ -81,19 +82,18 @@ var gameBoard,
 
 window.onload = function(){
 	canvasContext = canvas.getContext('2d');
-	
 	canvas.style.cursor = "crosshair";
+	init();
+}
+
+function init(){
+	//Event listeners
 	canvas.addEventListener("mousedown", handleMouseDown, false);
 	canvas.addEventListener("contextmenu", handleRightClickUp, false);
 	canvas.addEventListener("mousemove", getMousePosition, false);
 
 	window.addEventListener("keydown", handleKeyPress, false);
 	window.addEventListener("keyup", handleKeyRelease, false);
-	init();
-
-}
-
-function init(){
 
 	//Enums 
 	commandTypes     = Object.freeze({move:1, attackmove:2, fallback:3, retreat:4});
@@ -144,6 +144,7 @@ function main(){
 	count = 0;
 	//Game over?
 	if(checkWinCondition()){
+        gameOver = true;
         return;
     }
 
@@ -156,43 +157,93 @@ function main(){
 
 function checkWinCondition(){
 	//Check win conditions
-    var gameOver = false;
+    var ending = false;
     var playerVictory = false;
     var condition;
     if (playerGeneral.captured){
-        gameOver = true;
+        ending = true;
         condition = winConditions.generalCaptured;
     }
     else if (enemyGeneral.captured){
-        gameOver = true;
+        ending = true;
         condition = winConditions.generalCaptured;
         playerVictory = true;
     }
     else if (Object.keys(playerInfantryList) < 1 && Object.keys(playerCavalryList) < 1 && Object.keys(playerArtilleryList) < 1){
-        gameOver = true;
+        ending = true;
         condition = winConditions.unitsCaptured;
     }
     else if (Object.keys(enemyInfantryList) < 1 && Object.keys(enemyCavalryList) < 1 && Object.keys(enemyArtilleryList) < 1){
-        gameOver = true;
+        ending = true;
         condition = winConditions.unitsCaptured;
         playerVictory = true;
     }
     else if (fullRetreatPlayer){
-    	gameOver = true;
+    	ending = true;
         condition = winConditions.unitsRouting;
     }
     else if (fullRetreatEnemy){
-    	gameOver = true;
+    	ending = true;
         condition = winConditions.unitsRouting;
         playerVictory = true;
     }
 
 
-    if (gameOver){
-        //Game's over, go to end screen.
+    if (ending){
+        //Game's over, remove event listeners
+        canvas.removeEventListener("mousedown", handleMouseDown, false);
+		canvas.removeEventListener("contextmenu", handleRightClickUp, false);
+		canvas.removeEventListener("mousemove", getMousePosition, false);
+
+		window.removeEventListener("keydown", handleKeyPress, false);
+		window.removeEventListener("keyup", handleKeyRelease, false);
+
+		//Add a restart game key event listener
+		window.addEventListener("keydown", handleEndGameKeyPress, false);
+		//Go to end screen.
         drawEndGame(playerVictory, condition);
     }
-    return gameOver;
+    return ending;
+}
+
+function restart(){
+	//Remove end game listeners
+	window.removeEventListener("keydown", handleEndGameKeyPress, false);
+	//Zero out dicts
+	unitList = {},
+	playerCourierList = {},
+	playerCavalryList = {},
+	playerInfantryList = {},
+	playerArtilleryList = {},
+	playerUnitList = {},
+
+	enemyCourierList = {},
+	enemyCavalryList = {},
+	enemyInfantryList = {},
+	enemyArtilleryList = {},
+	enemyUnitList = {},
+
+	animationList = {},
+	combatTextList = {},
+	unitToolTip = {},
+	hoverHealth = {},
+	activeHealth = {},
+
+	//Clear active and hover units
+	activeUnit = undefined,
+	hoverUnit = undefined,
+
+	//Reset win conditions
+	fullRetreatPlayer = false,
+	fullRetreatEnemy = false,
+	gameOver = false;
+
+	givingOrder = false,
+	queuingOrders = false,
+	selector = 0;
+
+	//initialize game
+	init();
 }
 
 //Event Handlers
@@ -303,6 +354,7 @@ function setHoverUnitAndToolTip(unit, combat){
 }
 
 function handleLeftClick(){
+	console.log(mouseX)
 	if (CollisionEngine.pointInCircle(mouseX, mouseY, playerGeneral.x, playerGeneral.y, 13)){
 		activeUnit = playerGeneral;
 		console.log("Selected general at " + "(" + playerGeneral.x + ", " + playerGeneral.y + ")");
@@ -451,6 +503,16 @@ function handleKeyPress(e){
 	}
 }
 
+function handleEndGameKeyPress(e){
+	var keyCode = e.keyCode;
+	switch (keyCode){
+		case 82:
+			//R
+			restart();
+		default:
+			return;
+	}
+}
 function handleKeyRelease(e){
 	var keyCode = e.keyCode;
 	switch(keyCode){
