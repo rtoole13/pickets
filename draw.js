@@ -1071,9 +1071,9 @@ function drawEndGame(playerVictory, condition){
 }
 
 function drawBackground(){
-	canvasContext.fillStyle = 'AntiqueWhite';
-	canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-    //canvasContext.drawImage(map_bg, 0, 0, 800, 600);
+	//canvasContext.fillStyle = 'AntiqueWhite';
+	//canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+    canvasContext.drawImage(map_bg, 0, 0, 800, 600);
 }
 
 function drawTerrain(){
