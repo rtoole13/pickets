@@ -1,5 +1,8 @@
 "use strict";
 
+var map_bg = new Image(800, 600);
+map_bg.src = '../main_map.png';
+
 function draw(){
 	drawBackground();
 	drawDebug();
@@ -86,6 +89,7 @@ function drawCircle(xLoc, yLoc, radius, fillColor){
 function drawBackground(){
 	canvasContext.fillStyle = 'AntiqueWhite';
 	canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+	canvasContext.drawImage(map_bg, 0, 0, 800, 600);
 }
 
 function drawTerrain(){
