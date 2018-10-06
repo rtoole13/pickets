@@ -146,7 +146,7 @@ class MouseObject extends GameObject {
 	constructor(x, y, radius, color){
 		super(x, y, radius, color);
 		this.attached = true;
-		this.spriteSheet = new SpriteSheet(unit, this.x, this.y, 400, 45, 10, 6);
+		this.spriteSheet = new SpriteSheet(unit, this.x, this.y, 200, 50, 10, 1);
 	}
 	update(dt){
 		this.x = mouseX;
