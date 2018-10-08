@@ -52,7 +52,7 @@ var gameBoard,
 	unitTypeNames,
 	unitStateNames,
 
-	playerColor = "#5F9EA0",
+	playerColor = "#30618C",
 	enemyColor  = "#8B0000",
 	damageColor = "#ff0000",
 	crimson     = "#DC143C",
@@ -128,9 +128,14 @@ function init(){
 	hoverHealth = new HoverHealth(40, 5, 2, crimsonAlpha, grayAlpha);
 	activeHealth = new ActiveHealth(40, 5, 2, greenAlpha, grayAlpha);
 
+	//reference external .svgs
+	initializeSpriteSheets();
+
 	gameBoard = new GameBoard(30,40);
 	gameBoard.initializeBoard();
 	hoverUnit = {};
+
+
 	//Enter main game loop
 	main();
 }
@@ -338,18 +343,7 @@ function setHoverUnitAndToolTip(unit, combat){
 	hoverUnit.army = unit.army;
 	hoverUnit.unitType = unit.unitType;
 	hoverUnit.combat = combat;
-	hoverUnit.id = unit.id;
-
-	if (combat){
-		hoverUnit.x = unit.x;
-		hoverUnit.y = unit.y;
-		hoverUnit.strength = unit.strength;
-		hoverUnit.maxStrength = unit.maxStrength;	
-		hoverUnit.state = unit.state;
-		hoverUnit.element = unit.element;
-	}
-	
-	
+	hoverUnit.id = unit.id;	
 	//May end up not displaying hover unit info on tooltip, but rather activeUnit
 }
 

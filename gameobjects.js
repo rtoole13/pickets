@@ -107,6 +107,7 @@ class Unit{
 		//rotate and move, isRotating and isMoving indicate whether the unit moved this frame.
 		this.isRotating = this.rotate(dt);
 		this.isMoving = this.move(dt);
+		this.spriteSheet.update(dt);
 
 	}
 
@@ -503,6 +504,7 @@ class InfantryUnit extends CombatUnit{
 		this.bracedTimer = new Timer(5000, false);
 		this.bracedTimer.start();
 		this.unitType = unitTypes.infantry;
+		this.spriteSheet = initializeSpriteSheet(this);
 		
 	}
 	update(dt){
@@ -715,6 +717,7 @@ class General extends AuxiliaryUnit{
 		this.courierCooldown.start();
 		this.unitType = unitTypes.general;
 		this.captured = false;
+		this.spriteSheet = initializeSpriteSheet(this);
 	}
 	issueCommand(target, command){
 		if (target.retreating){
@@ -794,6 +797,7 @@ class Courier extends AuxiliaryUnit{
 		this.rotationRate = 100;
 		this.returning = false;
 		this.unitType = unitTypes.courier;
+		this.spriteSheet = initializeSpriteSheet(this);
 		this.updateRouteTimer = new Timer(2000, true);
 		this.updateRouteTimer.start();
 		this.ignoreList = [];

@@ -1,10 +1,22 @@
 "use strict";
 var map_bg = new Image(800, 600);
-map_bg.src = 'main_map.png';
+map_bg.src = 'assets/main_map.png';
 
+var blue_infantry,
+	red_infantry,
+	blue_general,
+	red_general,
+	blue_courier,
+	red_courier,
+	blue_infantry_sheet,
+	red_infantry_sheet,
+	blue_general_sheet,
+	red_general_sheet,
+	blue_courier_sheet,
+	red_courier_sheet;
 
 class SpriteSheet {
-	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, loopAnimation){
+	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation){
 		this.image = image;
 		this.x = x;
 		this.y = y;
@@ -17,29 +29,30 @@ class SpriteSheet {
 		this.frameRate = frameRate;
 		this.ticksPerFrame = 1 / this.frameRate;
 		this.ticks = 0;
+		this.randomFrames = randomFrames;
 		this.loopAnimation = loopAnimation;
 		this.animationComplete = false;
 
 		for(var i=0;i<rows;i++){
 			this.frameIndex[i] = [];
 			for(var j=0;j<columns;j++){
-				this.frameIndex[i][j] = {sx:i*frameWidth,sy:j*frameHeight};
+				this.frameIndex[i][j] = {sx:j*frameWidth,sy:i*frameHeight};
 
 			}
 		}
 		this.XframeIndex = 0;
 		this.YframeIndex = 0;
 	}
-	move(x,y){
+	move(x, y){
 		this.x = x;
 		this.y = y;
 	}
-	changeFrame(x,y){
+	changeFrame(x, y){
 		this.XframeIndex = x;
 		this.YframeIndex = y;
 	}
 	update(dt){
-		this.ticks += dt/1000;
+		this.ticks += dt;
 		if (this.ticks > this.ticksPerFrame){
 			this.ticks = 0;
 			if (this.XframeIndex < this.columns - 1){
@@ -52,10 +65,13 @@ class SpriteSheet {
 			else{
 				this.animationComplete = true;
 			}
+			
 		}
 	}
-	draw(width,height){
-		gameContext.drawImage(this.image,this.frameIndex[this.XframeIndex][this.YframeIndex].sx,this.frameIndex[this.XframeIndex][this.YframeIndex].sy,this.frameWidth,this.frameHeight,this.x-(width/2),this.y-(height/2),width,height);
+	draw(width, height){
+		var width = (width != undefined) ? width : this.frameWidth;
+		var height = (height != undefined) ? height : this.frameHeight;
+		canvasContext.drawImage(this.image,this.frameIndex[this.YframeIndex][this.XframeIndex].sx,this.frameIndex[this.YframeIndex][this.XframeIndex].sy,this.frameWidth,this.frameHeight,this.x-(width/2),this.y-(height/2),width,height);
 	}
 }
 
@@ -325,17 +341,18 @@ class HoverHealth {
 			return;
 		}
 
+		var unit = unitList[hoverUnit.id];
 		//Border
 		canvasContext.save()
 		canvasContext.fillStyle = this.borderColor;
-		canvasContext.translate(hoverUnit.x, hoverUnit.y - 20);
+		canvasContext.translate(unit.x, unit.y - 20);
 		canvasContext.fillRect(-this.borderWidth / 2,  -this.borderHeight / 2, this.borderWidth, this.borderHeight);
 		canvasContext.restore();
 
 		//Bar
-		var ratio = hoverUnit.strength / hoverUnit.maxStrength;
+		var ratio = unit.strength / unit.maxStrength;
 
-		switch(hoverUnit.army){
+		switch(unit.army){
 			default:
 				this.color = greenAlpha;
 				break;
@@ -348,7 +365,7 @@ class HoverHealth {
 		}
 		canvasContext.save()
 		canvasContext.fillStyle = this.color;
-		canvasContext.translate(hoverUnit.x, hoverUnit.y - 20);
+		canvasContext.translate(unit.x, unit.y - 20);
 		canvasContext.fillRect(-this.width / 2,  -this.height / 2, this.width * ratio, this.height);
 		canvasContext.restore();
 	}
@@ -448,7 +465,7 @@ class UnitToolTip {
 		}
 	}
 	drawCombatUnitTooltip(friendly){
-		var xLoc, yLoc, name, state, strength, rows;
+		var xLoc, yLoc, name, state, strength, rows, unit;
 		
 		rows = 3;
 		this.height = rows * this.rowHeight + this.textPaddingBotY;
@@ -460,18 +477,18 @@ class UnitToolTip {
 		canvasContext.translate(this.x, this.y);
 		canvasContext.fillRect(0, 0, this.width, this.height);
 		canvasContext.restore();
-
+		unit = unitList[hoverUnit.id];
 		if (friendly){
 			 //should probably fix this indexing..
-			name = 'Friendly ' + capitalizeFirstLetter(unitTypeNames[hoverUnit.unitType - 1]);
+			name = 'Friendly ' + capitalizeFirstLetter(unitTypeNames[unit.unitType - 1]);
 		}
 		else{
 			//should probably fix this indexing..
-			name = 'Enemy ' + capitalizeFirstLetter(unitTypeNames[hoverUnit.unitType - 1]);
+			name = 'Enemy ' + capitalizeFirstLetter(unitTypeNames[unit.unitType - 1]);
 		}
-		state = hoverUnit.element + ', ' + capitalizeFirstLetter(unitStateNames[hoverUnit.state - 1]);
+		state = unit.element + ', ' + capitalizeFirstLetter(unitStateNames[unit.state - 1]);
 
-		strength = parseInt(hoverUnit.strength) + ' / ' + hoverUnit.maxStrength;
+		strength = parseInt(unit.strength) + ' / ' + unit.maxStrength;
 
 		//Unit Name
 		xLoc = this.x + this.textPaddingX;
@@ -488,7 +505,7 @@ class UnitToolTip {
 	}
 
 	drawAuxiliaryUnitTooltip(friendly){
-		var xLoc, yLoc, name, rows;
+		var xLoc, yLoc, name, rows, unit;
 		
 		rows = 1;
 		this.height = rows * this.rowHeight + this.textPaddingBotY;
@@ -500,13 +517,14 @@ class UnitToolTip {
 		canvasContext.fillRect(0, 0, this.width, this.height);
 		canvasContext.restore();
 
+		unit = unitList[hoverUnit.id];
 		if (friendly){
 			 //should probably fix this indexing..
-			name = 'Friendly ' + capitalizeFirstLetter(unitTypeNames[hoverUnit.unitType - 1]);
+			name = 'Friendly ' + capitalizeFirstLetter(unitTypeNames[unit.unitType - 1]);
 		}
 		else{
 			//should probably fix this indexing..
-			name = 'Enemy ' + capitalizeFirstLetter(unitTypeNames[hoverUnit.unitType - 1]);
+			name = 'Enemy ' + capitalizeFirstLetter(unitTypeNames[unit.unitType - 1]);
 		}
 
 		//Unit Name
@@ -527,6 +545,62 @@ function draw(dt){
 	drawOrder();
 	combatTextList.draw(dt);
 	drawHUD();
+}
+
+function initializeSpriteSheets(){
+	blue_infantry = new Image(200, 50);
+	blue_infantry.src = 'assets/blue_infantry.svg';
+
+	red_infantry = new Image(200, 50);
+	red_infantry.src = 'assets/red_infantry.svg';
+
+	blue_general = new Image(300, 30);
+	blue_general.src = 'assets/blue_general.svg';
+
+	red_general = new Image(300, 30);
+	red_general.src = 'assets/red_general.svg';
+
+	blue_courier = new Image(200, 25);
+	blue_courier.src = 'assets/blue_courier.svg';
+
+	red_courier = new Image(200, 25);
+	red_courier.src = 'assets/red_courier.svg';
+}
+function initializeSpriteSheet(unit){
+	switch(unit.unitType){
+		default:
+			if(unit.army == armies.blue){
+				return new SpriteSheet(blue_infantry, unit.x, unit.y, 20, 50, 6, 1, 10, true, true);
+			}
+			else{
+				return new SpriteSheet(red_infantry, unit.x, unit.y, 20, 50, 6, 1, 10, true, true);
+			}
+			break;
+		case unitTypes.courier:
+			if(unit.army == armies.blue){
+				return new SpriteSheet(blue_courier, unit.x, unit.y, 20, 25, 6, 1, 10, true, true);
+			}
+			else{
+				return new SpriteSheet(red_courier, unit.x, unit.y, 20, 25, 6, 1, 10, true, true);
+			}
+			break;
+		case unitTypes.general:
+			if(unit.army == armies.blue){
+				return new SpriteSheet(blue_general, unit.x, unit.y, 30, 30, 6, 1, 10, true, true);
+			}
+			else{
+				return new SpriteSheet(red_general, unit.x, unit.y, 30, 30, 6, 1, 10, true, true);
+			}
+			break;
+		case unitTypes.infantry:
+			if(unit.army == armies.blue){
+				return new SpriteSheet(blue_infantry, unit.x, unit.y, 20, 50, 6, 1, 10, true, true);
+			}
+			else{
+				return new SpriteSheet(red_infantry, unit.x, unit.y, 20, 50, 6, 1, 10, true, true);
+			}
+			break;
+	}
 }
 
 function drawHUD(){
@@ -887,38 +961,36 @@ function drawInfantryState(xLoc, yLoc, angle, state){
 
 	width  = baseWidth + (2 * border);
 	height = baseHeight + (2 * border);
-
+	
 	canvasContext.save();	
 	canvasContext.fillStyle = '#787878';
 	canvasContext.translate(xLoc, yLoc);
 	canvasContext.rotate((90 - angle) * Math.PI/180);
 	canvasContext.fillRect(-width/2, -height/2, width, height);
 	canvasContext.restore();
+	
 }
 
 function drawInfantryUnit(unit, drawRadii, color){
-	var width  = 40,
-		height = 10;
-
 	if (color == undefined){
-		if (unit.army == armies.blue){
-			color = playerColor;
-		}
-		else{
-			color = enemyColor;
-		}
+	    if (unit.army == armies.blue){
+	        color = playerColor;
+	    }
+	    else{
+	        color = enemyColor;
+	    }
 	}
-
 	canvasContext.save();
-	
-	//main body
-	canvasContext.fillStyle = color;
 	canvasContext.translate(unit.x, unit.y);
-	canvasContext.rotate((90 - unit.angle) * Math.PI/180);
-	canvasContext.fillRect(-width/2, -height/2, width, height);
-	
+	canvasContext.rotate(-unit.angle * Math.PI/180);
+	unit.spriteSheet.move(0,0);
+	unit.spriteSheet.draw();
+	//canvasContext.restore();
+
 	//arrow
+	canvasContext.rotate(90 * Math.PI/180);
 	canvasContext.beginPath();
+    canvasContext.fillStyle = color;
 	canvasContext.moveTo(-5, -10);
 	canvasContext.lineTo(0, -15);
 	canvasContext.lineTo(5, -10);
@@ -959,22 +1031,14 @@ function drawArtilleryUnit(){
 }
 
 function drawCourier(unit){
-	var width  = 10,
-		height = 15,
-		color;
-
-	if (unit.army == armies.blue){
-		color = playerColor;
-	}
-	else{
-		color = enemyColor;
-	}
+	
 	canvasContext.save();
-	canvasContext.fillStyle = color;
 	canvasContext.translate(unit.x, unit.y);
 	canvasContext.rotate((90 - unit.angle) * Math.PI/180);
-	canvasContext.fillRect(-width/2, -height/2, width, height);
+	unit.spriteSheet.move(0,0);
+	unit.spriteSheet.draw();
 	canvasContext.restore();
+
 }
 
 function drawGeneral(general, showCommandRadius){
@@ -987,8 +1051,12 @@ function drawGeneral(general, showCommandRadius){
 	else{
 		color = enemyColor;
 	}
-	//draw general as a circle..
-	drawCircle(general.x, general.y, radius, color);
+	
+	canvasContext.save();
+	canvasContext.translate(general.x, general.y);
+	general.spriteSheet.move(0,0);
+	general.spriteSheet.draw(40,40);
+	canvasContext.restore();
 	
 	if (showCommandRadius){
 		canvasContext.save();
