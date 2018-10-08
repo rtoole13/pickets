@@ -107,8 +107,7 @@ class Unit{
 		//rotate and move, isRotating and isMoving indicate whether the unit moved this frame.
 		this.isRotating = this.rotate(dt);
 		this.isMoving = this.move(dt);
-		this.spriteSheet.update(dt);
-
+		this.updateSpriteSheet(dt);
 	}
 
 	getNextWaypoint(){
@@ -305,6 +304,9 @@ class Unit{
 		// Any logic for terrain speed modifiers and such will go here. It's likely that classes will override
 		return this.derivativeSpeed;
 	}
+	updateSpriteSheet(dt){
+		this.spriteSheet.update(dt);
+	}
 }
 
 class CombatUnit extends Unit{
@@ -352,7 +354,6 @@ class CombatUnit extends Unit{
 		this.checkMorale();
 		this.attack();
 		super.update(dt);
-
 		//clean up lists
 		this.combatCollisionList = []; //Enemies in combat range this frame 
 		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
@@ -361,27 +362,6 @@ class CombatUnit extends Unit{
 	attack(){
 		throw 'CombatUnit\s attack() function currently must be overriden by subclass!';
 	}
-
-	updateState(){
-		var previousState = this.state;
-		if (this.isRotating || this.isMoving){
-			this.state = unitStates.marching;
-		}
-		else{
-			if (this.state == unitStates.entrenched){
-				return;
-			}
-			else if (previousState == unitStates.marching){
-				this.state = unitStates.braced;
-				this.bracedTimer.start();
-			}
-			else{
-				this.state = (this.bracedTimer.checkTime()) ? unitStates.entrenched : unitStates.braced; 
-			}
-		}
-	}
-
-	
 
 	executeMoveOrder(location, angle, target){
 		this.targetAngleFinal = angle;
@@ -524,17 +504,27 @@ class InfantryUnit extends CombatUnit{
 		var previousState = this.state;
 		if (this.isRotating || this.isMoving){
 			this.state = unitStates.marching;
+			this.spriteSheet.YframeIndex = 2;
 		}
 		else{
 			if (this.state == unitStates.entrenched){
+				this.spriteSheet.YframeIndex = 0;
 				return;
 			}
 			else if (previousState == unitStates.marching){
 				this.state = unitStates.braced;
 				this.bracedTimer.start();
+				this.spriteSheet.YframeIndex = 1;
 			}
 			else{
-				this.state = (this.bracedTimer.checkTime()) ? unitStates.entrenched : unitStates.braced; 
+				if (this.bracedTimer.checkTime()){
+					this.state = unitStates.entrenched;
+					this.spriteSheet.YframeIndex = 0;
+				}
+				else{
+					this.state = unitStates.braced;
+					this.spriteSheet.YframeIndex = 1;
+				}
 			}
 		}
 	}
@@ -691,6 +681,10 @@ class InfantryUnit extends CombatUnit{
 			return -0.75 * this.derivativeSpeed;
 		}
 		return this.derivativeSpeed;
+	}
+	updateSpriteSheet(dt){
+		//override unit's function		
+		this.spriteSheet.update(dt);
 	}
 }
 

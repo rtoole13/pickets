@@ -542,7 +542,7 @@ function draw(dt){
 	drawBackground();
 	drawDebug();
 	drawTerrain();
-	drawFortifications();
+	//drawFortifications();
 	drawPlayerUnits();
 	drawEnemyUnits();
 	drawAnimations(dt);
@@ -575,10 +575,10 @@ function initializeSpriteSheet(unit){
 	switch(unit.unitType){
 		default:
 			if(unit.army == armies.blue){
-				return new SpriteSheet(blue_infantry, unit.x, unit.y, 20, 50, 6, 1, 10, true, true);
+				return new SpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true);
 			}
 			else{
-				return new SpriteSheet(red_infantry, unit.x, unit.y, 20, 50, 6, 1, 10, true, true);
+				return new SpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true);
 			}
 			break;
 		case unitTypes.courier:
@@ -599,10 +599,10 @@ function initializeSpriteSheet(unit){
 			break;
 		case unitTypes.infantry:
 			if(unit.army == armies.blue){
-				return new SpriteSheet(blue_infantry, unit.x, unit.y, 20, 50, 6, 1, 10, true, true);
+				return new SpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true);
 			}
 			else{
-				return new SpriteSheet(red_infantry, unit.x, unit.y, 20, 50, 6, 1, 10, true, true);
+				return new SpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true);
 			}
 			break;
 	}
@@ -993,6 +993,7 @@ function drawInfantryUnit(unit, drawRadii, color){
 	//canvasContext.restore();
 
 	//arrow
+	/*
 	canvasContext.rotate(90 * Math.PI/180);
 	canvasContext.beginPath();
     canvasContext.fillStyle = color;
@@ -1001,7 +1002,7 @@ function drawInfantryUnit(unit, drawRadii, color){
 	canvasContext.lineTo(5, -10);
 	canvasContext.closePath();
 	canvasContext.fill();
-
+	*/
 	canvasContext.restore();
 
 	if (!drawRadii){
