@@ -792,7 +792,7 @@ function drawOrder(){
 	unit.angle = getAngleFromDir(dirX, dirY);
 	var color = orderColor;
 
-	drawInfantryUnit(unit, false, color);
+	drawfadedUnit(unit, color);
 
 	switch(commandType){
 		default:
@@ -974,6 +974,27 @@ function drawInfantryState(xLoc, yLoc, angle, state){
 	canvasContext.fillRect(-width/2, -height/2, width, height);
 	canvasContext.restore();
 	
+}
+
+function drawfadedUnit(unit, color){
+	var width = 40,
+		height = 10;
+
+	if (color == undefined){
+	    if (unit.army == armies.blue){
+	        color = playerColor;
+	    }
+	    else{
+	        color = enemyColor;
+	    }
+	}
+
+    canvasContext.save();
+    canvasContext.fillStyle = color;
+    canvasContext.translate(unit.x, unit.y);
+    canvasContext.rotate((90 - unit.angle) * Math.PI/180);
+    canvasContext.fillRect(-width/2, -height/2, width, height);
+    canvasContext.restore();
 }
 
 function drawInfantryUnit(unit, drawRadii, color){
