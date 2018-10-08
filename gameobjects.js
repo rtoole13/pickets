@@ -707,7 +707,7 @@ class General extends AuxiliaryUnit{
 		super(x, y, angle, army);
 		this.derivativeSpeed = unitSpeeds.general;
 		this.commandRadius = 100;
-		this.rotationRate = 85;
+		this.rotationRate = 120;
 		this.maxCourierCount = courierCount;
 		this.courierCount = this.maxCourierCount;
 		this.issuedCourierCount = 0;
@@ -794,7 +794,7 @@ class Courier extends AuxiliaryUnit{
 		this.closingRange = 100;
 		this.targetSigma = 15;
 		this.turnAngleTol = 60;
-		this.rotationRate = 100;
+		this.rotationRate = 120;
 		this.returning = false;
 		this.unitType = unitTypes.courier;
 		this.spriteSheet = initializeSpriteSheet(this);
