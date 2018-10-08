@@ -55,17 +55,22 @@ class SpriteSheet {
 		this.ticks += dt;
 		if (this.ticks > this.ticksPerFrame){
 			this.ticks = 0;
-			if (this.XframeIndex < this.columns - 1){
-				this.XframeIndex += 1;
-				return;
+			if (this.randomFrames){
+				//Ensure we get a new frame
+				var newFrame = this.XframeIndex + getRandomInt(1, this.columns - 2);
+				this.XframeIndex = newFrame % (this.columns - 1);
+			}else{
+				if (this.XframeIndex < this.columns - 1){
+					this.XframeIndex += 1;
+					return;
+				}
+				if (this.loopAnimation){
+					this.XframeIndex = 0;
+				}
+				else{
+					this.animationComplete = true;
+				}
 			}
-			if (this.loopAnimation){
-				this.XframeIndex = 0;
-			}
-			else{
-				this.animationComplete = true;
-			}
-			
 		}
 	}
 	draw(width, height){
