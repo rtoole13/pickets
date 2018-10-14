@@ -653,7 +653,7 @@ function drawBattle(battle, dt){
 
 function drawDebug(){
 	drawTextDebug();
-	//drawGridDebug();
+	drawGridDebug();
 }
 function drawTextDebug(){
 	var fps = 1/dt;

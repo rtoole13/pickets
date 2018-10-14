@@ -97,10 +97,12 @@ class Pathfinder{
 			straightCost = 5;
 		}
 		else{
-			diagonalCost = 12;
+			diagonalCost = 14;
 			straightCost = 10;
 		}
 		*/
+		diagonalCost = 14;
+		straightCost = 10;
 		if (xDist > yDist){
 			return diagonalCost * yDist + straightCost * (xDist - yDist);
 		}
