@@ -825,23 +825,28 @@ function drawSelection(){
 	var radius = 25;
 
 	var color;
-	switch(commandType){
-		default:
-			color = commandColors.move;
-			break;
-		
-		case commandTypes.move:
-			color = commandColors.move;
-			break;
-		
-		case commandTypes.attackmove:
-			color = commandColors.attackmove;
-			break;
-		
-		case commandTypes.fallback:
-			color = commandColors.fallback;
-			break;
-		
+	if (activeUnit == playerGeneral){
+		color = commandColors.move;
+	}
+	else{
+		switch(commandType){
+			default:
+				color = commandColors.move;
+				break;
+			
+			case commandTypes.move:
+				color = commandColors.move;
+				break;
+			
+			case commandTypes.attackmove:
+				color = commandColors.attackmove;
+				break;
+			
+			case commandTypes.fallback:
+				color = commandColors.fallback;
+				break;
+			
+		}
 	}
 	canvasContext.save();
 	canvasContext.strokeStyle = color;
