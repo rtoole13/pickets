@@ -783,7 +783,8 @@ function drawOrder(){
 			}
 
 			var unit, dirX, dirY;
-			unit = {x: targetOriginX, y: targetOriginY, angle: activeUnit.angle, skirmishRadius: 0, combatRadius: 0};
+			unit = {x: targetOriginX, y: targetOriginY, angle: activeUnit.angle, skirmishRadius: activeUnit.skirmishRadius, 
+				    combatRadius: activeUnit.combatRadius};
 			dirX = (mouseX - targetOriginX) / dist;
 			dirY = (mouseY - targetOriginY) / dist;
 		}	
@@ -977,6 +978,23 @@ function drawInfantryState(xLoc, yLoc, angle, state){
 }
 
 function drawfadedUnit(unit, color){
+	//draw radii
+	//combat radius
+	canvasContext.save();
+	canvasContext.strokeStyle = flankAlpha;
+	canvasContext.translate(unit.x, unit.y);
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.combatRadius, 0, 2 * Math.PI);
+	canvasContext.stroke();
+
+	//skirmish radius
+	canvasContext.strokeStyle = skirmishAlpha;
+	canvasContext.moveTo(0,0);
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.skirmishRadius, 0, 2 * Math.PI);
+	canvasContext.stroke();
+	canvasContext.restore();
+
 	var width = 40,
 		height = 10;
 
