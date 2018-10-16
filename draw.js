@@ -845,7 +845,7 @@ function drawSelection(){
 	}
 	canvasContext.save();
 	canvasContext.strokeStyle = color;
-	canvasContext.lineWidth = 3;
+	canvasContext.lineWidth = 2;
 	canvasContext.beginPath();
 	canvasContext.arc(activeUnit.x, activeUnit.y, radius, selector * 2 * Math.PI, selector * 2 * Math.PI + Math.PI / 3);
 	canvasContext.stroke();
