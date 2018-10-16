@@ -517,6 +517,10 @@ class InfantryUnit extends CombatUnit{
 				this.spriteSheet.YframeIndex = 1;
 			}
 			else{
+				if (this.inBattle){
+					this.bracedTimer.start();
+					return;
+				}
 				if (this.bracedTimer.checkTime()){
 					this.state = unitStates.entrenched;
 					this.spriteSheet.YframeIndex = 0;
