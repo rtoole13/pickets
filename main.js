@@ -58,12 +58,16 @@ var gameBoard,
 	crimson     = "#DC143C",
 	gray        = "#696969",
 	green       = "#90EE90",
+    forestGreen = "#336600",
 
 	orderColor,
 	enemyOrderColor,
 	crimsonAlpha,
 	grayAlpha,
 	greenAlpha,
+    flankAlpha,
+    frontAlpha,
+    skirmishAlpha,
 
 	activeUnit,
 	hoverUnit,
@@ -74,7 +78,7 @@ var gameBoard,
 	fullRetreatPlayer = false,
 	fullRetreatEnemy = false,
 
-
+    displayingCommandRadii = false,
 	givingOrder = false,
 	queuingOrders = false,
 	selector = 0;
@@ -120,6 +124,9 @@ function init(){
 	crimsonAlpha = hexToRGB(crimson, 0.85);
 	greenAlpha = hexToRGB(green, 0.85);
 	grayAlpha = hexToRGB(gray, 0.5);
+    flankAlpha = hexToRGB(crimson, 0.25);
+    frontAlpha = hexToRGB(forestGreen, 0.25);
+    skirmishAlpha = hexToRGB(forestGreen, 0.45);
 
 	//Initialize stuff
 	commandType = commandTypes.move;
@@ -466,7 +473,10 @@ function handleKeyPress(e){
 			}
 			commandType = commandTypes.move;
 			break;
-		
+		case 32:
+            //Space
+            displayingCommandRadii = true;
+            break;
 		case 65:
 			//A
 			if (commandType == commandTypes.attackmove){
@@ -513,6 +523,12 @@ function handleKeyRelease(e){
 		case 16: 
 			queuingOrders = false;
 			break;
+
+        case 32:
+            //Space
+            displayingCommandRadii = false;
+            break;
+
 		default:
 			return;
 	}

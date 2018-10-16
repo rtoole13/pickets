@@ -1006,43 +1006,50 @@ function drawInfantryUnit(unit, drawRadii, color){
 	        color = enemyColor;
 	    }
 	}
+
+	if (drawRadii){
+		drawInfantryEngagementRadii(unit);
+	}
+
 	canvasContext.save();
 	canvasContext.translate(unit.x, unit.y);
 	canvasContext.rotate(-unit.angle * Math.PI/180);
 	unit.spriteSheet.move(0,0);
 	unit.spriteSheet.draw();
-	//canvasContext.restore();
-
-	//arrow
-	/*
-	canvasContext.rotate(90 * Math.PI/180);
-	canvasContext.beginPath();
-    canvasContext.fillStyle = color;
-	canvasContext.moveTo(-5, -10);
-	canvasContext.lineTo(0, -15);
-	canvasContext.lineTo(5, -10);
-	canvasContext.closePath();
-	canvasContext.fill();
-	*/
 	canvasContext.restore();
+}
 
-	if (!drawRadii){
-		return;
-	}
-
+function drawInfantryEngagementRadii(unit){
+	var frontPadding = 4;
 	//draw 'combat' radius
 	canvasContext.save();
-	canvasContext.strokeStyle = 'blue';
+	
+	//front cone
+	canvasContext.fillStyle = frontAlpha;
+	canvasContext.translate(unit.x, unit.y);
+	canvasContext.rotate(-unit.angle * Math.PI/180);
 	canvasContext.beginPath();
-	canvasContext.arc(unit.x, unit.y, unit.combatRadius, 0, 2 * Math.PI);
-	canvasContext.stroke();
+	canvasContext.arc(0, 0, unit.combatRadius + frontPadding, -unit.flankAngle * Math.PI / 180, unit.flankAngle * Math.PI / 180);
+	canvasContext.lineTo(0, 0);
+	canvasContext.closePath();
+	canvasContext.fill();
+	
+	//flank cone
+	canvasContext.fillStyle = flankAlpha;
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.combatRadius, unit.flankAngle * Math.PI / 180, (360 - unit.flankAngle) * Math.PI / 180);
+	canvasContext.lineTo(0, 0);
+	canvasContext.closePath();
+	canvasContext.fill();
+
 	canvasContext.restore();
+
 	if (unit.inBattle){
 		return;
 	}
 	//draw skirmish radius
 	canvasContext.save();
-	canvasContext.strokeStyle = 'green';
+	canvasContext.strokeStyle = skirmishAlpha;
 	canvasContext.beginPath();
 	canvasContext.arc(unit.x, unit.y, unit.skirmishRadius, 0, 2 * Math.PI);
 	canvasContext.stroke();
@@ -1187,12 +1194,12 @@ function drawFortifications(){
 }
 function drawPlayerUnits(){
 	drawCouriers(playerCourierList);
-	drawGeneral(playerGeneral, true);
+	drawGeneral(playerGeneral, displayingCommandRadii);
 	drawInfantry(playerInfantryList);
 }
 
 function drawEnemyUnits(){
-	drawGeneral(enemyGeneral, false);
+	drawGeneral(enemyGeneral, displayingCommandRadii);
 	drawInfantry(enemyInfantryList);
 }
 
@@ -1204,7 +1211,7 @@ function drawCouriers(units){
 
 function drawInfantry(units){
 	for(var id in units){
-		drawInfantryUnit(units[id], true);
+		drawInfantryUnit(units[id], displayingCommandRadii);
 	}
 }
 

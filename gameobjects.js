@@ -16,7 +16,7 @@ class GameBoard{
 			var newDate = Date.now();
 			if (newDate - this.collisionTimer > this.collisionCheckTime){
 				CollisionEngine.broadCheck();
-				this.collisionTimer = newDate;
+				this.collisionTimer = newDate;  
 			}
 		}
 		else{
@@ -478,7 +478,7 @@ class InfantryUnit extends CombatUnit{
 		this.multiplierCombat = 1/500;
 		this.multiplierSkirmish = 1/3000;
 		this.flankedModifier = 1.5;
-		this.combatRadius = 30;
+		this.combatRadius = 22;
 		this.skirmishRadius = 65;
 		this.state = unitStates.braced;
 		this.bracedTimer = new Timer(5000, false);
