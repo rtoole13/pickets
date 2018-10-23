@@ -278,8 +278,18 @@ class CollisionEngine{
 	}
 	static auxiliaryUnitCollision(unitAux, idAux, unitOther, idOther, distanceSq){
 		//general collision
-		var radiusA = unitAux.combatRadius;
-		var radiusB = unitOther.combatRadius;
+		var radiusA, radiusB;
+		if (unitAux.unitType == unitTypes.general && unitAux.AIcontrolled){
+			radiusA = unitAux.flightRadius;
+			radiusB = unitOther.combatRadius;
+
+			if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+				unitAux.nearbyEnemies.push(idOther);
+			}
+		}
+
+		radiusA = unitAux.combatRadius;
+		radiusB = unitOther.combatRadius;
 
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
@@ -424,6 +434,20 @@ function normalizeVector(x, y){
 	return {x: x / magnitude, y: y / magnitude};
 }
 
+function getCenterOfMass(ids, unitDict){
+	//given a list of ids and a dictionary, find center of mass
+	var centerX = 0;
+    var centerY = 0;
+    for (var i = 0; i < ids.length; i++){
+        var unit = unitDict[ids[i]];
+        centerX += unit.x;
+        centerY += unit.y;
+    }
+    centerX /= ids.length;
+    centerY /= ids.length;
+
+    return {x: centerX, y: centerY}
+}
 class Timer{
 	constructor(duration, repeating){
 		this.duration = duration;

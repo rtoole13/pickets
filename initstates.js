@@ -2,9 +2,9 @@
 
 function initBoardEmptyPlain(){
 	addPlayerGeneral(150, 450, 45, 10);
-	addEnemyGeneral(700, 100, -135, 10);
+	addEnemyGeneral(600, 200, -135, 10);
 
-	addPlayerInfantry(300, 400, -135, "Brigade");
+	addPlayerInfantry(600, 300, -135, "Brigade");
 	//addPlayerInfantry(400, 200, -135, "Brigade");
 	addPlayerInfantry(200, 400, 0, "Brigade");
 
@@ -43,7 +43,7 @@ function addPlayerCourier(x, y, angle, general, target, order){
 //Enemy Unit Init
 function addEnemyGeneral(x, y, angle, courierCount){
 	var id = getUniqueID(5, unitList);
-	enemyGeneral = new General(x, y, angle, courierCount, armies.red);
+	enemyGeneral = new EnemyGeneral(x, y, angle, courierCount, armies.red);
 	enemyGeneral.id = id;
 	enemyUnitList[id] = enemyGeneral;
 	unitList[id] = enemyGeneral;

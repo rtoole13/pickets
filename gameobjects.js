@@ -717,6 +717,7 @@ class General extends AuxiliaryUnit{
 		this.unitType = unitTypes.general;
 		this.captured = false;
 		this.spriteSheet = initializeSpriteSheet(this);
+		this.AIcontrolled = false;
 	}
 	issueCommand(target, command){
 		if (target.retreating){

@@ -49,6 +49,7 @@ var gameBoard,
 	targetPosColors,
 	animationTypes,
 	tileTypes,
+    enemyGenStates,
 
 	unitTypeNames,
 	unitStateNames,
@@ -115,6 +116,7 @@ function init(){
 	armies           = Object.freeze({blue:1, red:2});
 	animationTypes   = Object.freeze({skirmish:1, battle:2});
 	tileTypes        = Object.freeze({plain:0, road:1, mountain:2});
+    enemyGenStates   = Object.freeze({surviving:0, rallying:1, commanding:2});
 	
 	unitTypeNames    = Object.keys(unitTypes);
 	unitStateNames   = Object.keys(unitStates);
