@@ -538,11 +538,58 @@ class UnitToolTip {
 		drawText(name, xLoc, yLoc, 'black', this.boldFont);
 	}
 }
+
+class Trail{
+	constructor(initialPosition, length, lineWidth, color, alphaStart){
+		this.vertices = [];
+		this.length = length;
+		for (var i = 0; i < this.length; i++){
+			this.vertices.push(initialPosition);
+		}
+		this.lineWidth = lineWidth;
+		this.alphaStart = alphaStart;
+		this.colorPrefix = getColorPrefix(color);
+		this.initialColor = this.colorPrefix + this.alphaStart.toString() + ')';
+		this.updateTimer = new Timer(5000, true);
+		this.updateTimer.start();
+	}
+	update(currentPosition){
+		if (this.updateTimer.checkTime()){
+			for (var i = this.length - 1; i > 0; i--){
+				this.vertices[i] = this.vertices[i-1];
+			}
+		}
+		this.vertices[0] = currentPosition;
+	}
+	draw(){
+		canvasContext.save();
+		canvasContext.beginPath();
+		canvasContext.lineWidth = this.lineWidth;
+		canvasContext.moveTo(this.vertices[0].x, this.vertices[0].y);
+		var previousColor = this.initialColor;
+		for (var i = 1; i < this.length; i++){
+			var lastPoint = this.vertices[i-1];
+			var point = this.vertices[i];
+			var gradient = canvasContext.createLinearGradient(lastPoint.x, lastPoint.y, point.x, point.y);
+			var alpha = Math.round(this.alphaStart * 100 * (this.length - 1 - i) / (this.length - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
+			var nextColor = this.colorPrefix + alpha.toString() + ')';
+			gradient.addColorStop(0, previousColor); //start color
+			gradient.addColorStop(1, nextColor); //end color
+			previousColor = nextColor;
+			canvasContext.strokeStyle = gradient;
+			canvasContext.lineTo(point.x, point.y);
+			canvasContext.stroke();
+		}
+		canvasContext.restore();
+	}
+}
+
 function draw(dt){
 	drawBackground();
 	drawDebug();
 	drawTerrain();
 	//drawFortifications();
+	drawInfantryTrails();
 	drawPlayerUnits();
 	drawEnemyUnits();
 	drawAnimations(dt);
@@ -1040,6 +1087,7 @@ function drawInfantryUnit(unit, drawRadii, color){
 	unit.spriteSheet.move(0,0);
 	unit.spriteSheet.draw();
 	canvasContext.restore();
+
 }
 
 function drawInfantryEngagementRadii(unit){
@@ -1220,18 +1268,20 @@ function drawPlayerUnits(){
 	drawGeneral(playerGeneral, displayingCommandRadii);
 	drawInfantry(playerInfantryList);
 }
-
 function drawEnemyUnits(){
 	drawGeneral(enemyGeneral, displayingCommandRadii);
 	drawInfantry(enemyInfantryList);
 }
-
+function drawInfantryTrails(){
+	unitTrails.forEach(function(element){
+		element.draw()
+	});
+}
 function drawCouriers(units){
 	for(var id in units){
 		drawCourier(units[id]);
 	}	
 }
-
 function drawInfantry(units){
 	for(var id in units){
 		drawInfantryUnit(units[id], displayingCommandRadii);

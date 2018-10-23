@@ -333,7 +333,6 @@ class CombatUnit extends Unit{
 		this.enemyCollisionList = []; //Enemies checked against this frame
 		this.combatCollisionList = []; //Enemies in combat range this frame 
 		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
-
 		//Reference enemy list
 		switch(this.army){
 			case armies.blue:
@@ -485,7 +484,8 @@ class InfantryUnit extends CombatUnit{
 		this.bracedTimer.start();
 		this.unitType = unitTypes.infantry;
 		this.spriteSheet = initializeSpriteSheet(this);
-		
+		this.trail = new Trail({x: this.x, y: this.y}, 2, 10, (this.army==armies.blue)?playerColor:enemyColor, 0.5);
+		unitTrails.push(this.trail);
 	}
 	update(dt){
 		// below will likely be the means of halting a unit on enemy collision
@@ -498,6 +498,7 @@ class InfantryUnit extends CombatUnit{
 		this.checkCombatState();
 
 		super.update(dt);
+		this.trail.update({x:this.x, y:this.y});
 	}
 
 	updateState(){

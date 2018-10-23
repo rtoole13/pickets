@@ -7,8 +7,6 @@ function getRandomInt(min, max){
 }
 
 function getRandomFloat(min, max){
-	min = Math.ceil(min);
-	max = Math.ceil(max);
 	return Math.random() * (max - min) + min;
 }
 
@@ -46,16 +44,19 @@ function inArray(obj, array){
 }
 
 function hexToRGB(hex, alpha){
-	hex = hex.replace("#", "");
-	var r, g, b;
 	if (alpha == undefined){
 		alpha = 1.0;
 	}
+	return getColorPrefix(hex) + alpha.toString() + ')';
+}
+
+function getColorPrefix(hex){
+	hex = hex.replace("#", "");
+	var r, g, b;
 	r = parseInt(hex.substring(0,2), 16);
 	g = parseInt(hex.substring(2,4), 16);
 	b = parseInt(hex.substring(4,6), 16);
-	return 'rgba(' + r.toString() + ', ' + g.toString() + ', ' + b.toString() + ', ' + alpha.toString() + ')';
-	
+	return 'rgba(' + r.toString() + ', ' + g.toString() + ', ' + b.toString() + ', ';
 }
 
 function capitalizeFirstLetter(string){
