@@ -8,7 +8,9 @@ function initBoardEmptyPlain(){
 	//addPlayerInfantry(400, 200, -135, "Brigade");
 	addPlayerInfantry(200, 400, 0, "Brigade");
 
+	//addEnemyInfantry(600, 260, -135, "Brigade");
 	var enemyUnit = addEnemyInfantry(400, 200, -135, "Brigade");
+
 	enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
 	//addEnemyInfantry(600, 100, -135, "Brigade");
 }

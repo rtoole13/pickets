@@ -41,7 +41,7 @@ class CollisionEngine{
 			if ((unitA.command == null) || (unitA.unitType == unitTypes.courier)){
 				continue;
 			}
-
+			//Note: Because of the way the collision is checked, cant populate AI's nearby friendlies
 			this.checkFriendlyCollision(unitA, idA, friendlyList);
 		}
 
@@ -122,10 +122,11 @@ class CollisionEngine{
 	}
 
 	static collisionDynamicFriendly(unitA, idA, unitB, idB){
-		var radiusA = unitA.combatRadius;
-		var radiusB = unitB.combatRadius;
+		var radiusA, radiusB, distanceSq;
 		
-		var distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
+		radiusA = unitA.combatRadius;
+		radiusB = unitB.combatRadius;
+		distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
 			distanceSq = getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitB.x, unitB.y);
 			if (unitA.targetSigma > unitA.combatRadius){
@@ -448,10 +449,46 @@ function getCenterOfMass(ids, unitDict){
 
     return {x: centerX, y: centerY}
 }
+function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList){
+	//Given a list of unit ids, idlist, find the one closest to the
+	//path drawn from (xA, yA) to (xB, yB). If none between, return
+	//null
+
+	var vecA, vecB, magB, dirB, aDotB, closestDist, closestID, projA, perpA;
+	vecB = {x: xB - xA, y: yB - yA};
+	magB = getVectorMag(vecB.x, vecB.y);
+	dirB = {x: vecB.x / magB, y: vecB.y / magB};
+
+	closestID = null;
+	closestDist = Infinity;
+	for (var id in idList){
+		var unit = unitList[id];
+		vecA = {x: unit.x - xA, y: unit.y - yA};
+		aDotB = dotProduct(vecA.x, vecA.y, vecB.x, vecB.y);
+		if (aDotB < 0){
+			//negative, meaning it's not in the direction of vecB
+			continue;
+		}
+		projA = aDotB / magB;
+		if (projA > magB){
+			//projection is greater than the length of vecB, meaning
+			//it is past (xB,yB)
+			continue;
+		}
+		perpA = {x: vecA.x - (projA * dirB.x), y: vecA.y - (projA * dirB.y)};
+		var perpDist = getVectorMag(perpA.x, perpA.y);
+		if (perpDist > closestDist){
+			closestDist = perpDist;
+			closestID = id;
+		}
+	}
+	return closestID;
+}
 class Timer{
 	constructor(duration, repeating){
 		this.duration = duration;
 		this.repeating = repeating;
+		this.startTime = 0;
 	}
 	start(){
 		this.startTime = Date.now();

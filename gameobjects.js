@@ -43,6 +43,8 @@ class GameBoard{
 		}
 
 		//Enemy updates second
+		//enemy general MUST update after player units, as they flag the enemy
+		//as having been flanked, for instance.
 		enemyGeneral.update(dt);
 		for (var id in enemyCourierList){
 			enemyCourierList[id].update(dt);
@@ -57,7 +59,6 @@ class GameBoard{
 			enemyCavalryList[id].update(dt);
 		}
 	}
-
 }
 
 class Unit{
@@ -327,6 +328,8 @@ class CombatUnit extends Unit{
 		this.inBattle = false;
 		this.combatTargetProximityTol = 40;
 		this.command = null;
+		this.recentlyFlanked = false;
+		this.recentlyFlankedTimer = new Timer(2000, false);
 		this.flankAngle = 90; //Angle range to left and right of unit's direction vector, defining unit's flanks
 		this.cosFlankAngle = Math.cos(this.flankAngle * Math.PI/180);
 		this.friendlyCollisionList = [];
@@ -351,6 +354,7 @@ class CombatUnit extends Unit{
 
 	update(dt){
 		this.checkMorale();
+		this.checkCombatLists();
 		this.attack();
 		super.update(dt);
 		//clean up lists
@@ -361,7 +365,13 @@ class CombatUnit extends Unit{
 	attack(){
 		throw 'CombatUnit\s attack() function currently must be overriden by subclass!';
 	}
-
+	checkCombatLists(){
+		for (var i = 0; i < this.skirmishCollisionList.length; i++){
+			if (this.combatCollisionList.includes(this.skirmishCollisionList[i])){
+				this.skirmishCollisionList.splice(i,1);
+			}
+		}
+	}
 	executeMoveOrder(location, angle, target){
 		this.targetAngleFinal = angle;
 		this.target = target;
@@ -397,6 +407,11 @@ class CombatUnit extends Unit{
 		this.getNextWaypoint();
 	}
 
+	wasRecentlyFlanked(){
+		this.recentlyFlankedTimer.start();
+		this.recentlyFlanked = true;
+	}
+
 	checkCombatState(){
 		//this.combatCollisionList = []; //Enemies in combat range this frame
 		//this.skirmishCollisionList = []; //Enemies in skirmish range this frame
@@ -407,6 +422,9 @@ class CombatUnit extends Unit{
 		else{
 			//skirmish
 			this.inBattle = false;
+		}
+		if (this.recentlyFlankedTimer.checkTime()){
+			this.recentlyFlanked = false;
 		}
 	}
 
@@ -619,6 +637,7 @@ class InfantryUnit extends CombatUnit{
 		if (this.getFlankModifier(inBattle, xLoc, yLoc)){
 			damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
 			addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
+			this.wasRecentlyFlanked();
 		}
 		else{
 			damage = Math.floor(damage * this.getFortificationModifier());
@@ -651,19 +670,11 @@ class InfantryUnit extends CombatUnit{
 	}
 
 	checkCombatState(){
-		//this.combatCollisionList = []; //Enemies in combat range this frame
-		//this.skirmishCollisionList = []; //Enemies in skirmish range this frame
-		if (this.combatCollisionList.length > 0){
-			//combat, no skirmish
-			this.inBattle = true;
-		}
-		else{
-			//skirmish
-			this.inBattle = false;
-		}
+		super.checkCombatState();
         if (this.attackCooldown.checkTime()){
             this.reloaded = true;
         }
+
 	}
 
 	adjustAngle(angle){

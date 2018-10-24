@@ -5,12 +5,15 @@ class EnemyGeneral extends General{
         super(x, y, angle, courierCount, army);
         this.flightRadius = 75;
         this.AIcontrolled = true;
+        this.riskAssessment = {};
         this.nearbyEnemies = [];
         this.nearbyFriendlies = [];
         this.routingFriendlies = [];
         this.freeFriendlies = [];
         this.skirmishingFriendlies = [];
         this.battlingFriendlies = [];
+        this.flankedRiskMultiplier = 3;
+        this.battleRiskMultiplier = 2;
         this.stateChangeTimer = new Timer(500, true);
         this.stateChangeTimer.start();
         this.AIstates = enemyGenStates; //global enum surviving, rallying, commanding
@@ -18,6 +21,7 @@ class EnemyGeneral extends General{
 
     }
     update(dt){
+        this.evaluateBoard();
         this.executeStateLogic();
         super.update(dt);
         this.nearbyEnemies = [];
@@ -25,6 +29,39 @@ class EnemyGeneral extends General{
         this.freeFriendlies = [];
         this.skirmishingFriendlies = [];
         this.battlingFriendlies = [];
+    }
+    evaluateBoard(){
+        //due to awkward structure, cant pre-populate these lists in the broadCollisionCheck in the main game loop
+        for(var id in enemyInfantryList){
+            var unit = enemyInfantryList[id];
+
+            //track risk value of all friendlies
+            this.riskAssessment[id] = this.calculateUnitRisk(unit);
+
+            var distanceSq = getDistanceSq(this.x, this.y, unit.x, unit.y);
+            if (distanceSq <= (this.commandRadius * this.commandRadius)){
+                this.nearbyFriendlies.push(id);
+            }
+            if (unit.retreating){
+                this.routingFriendlies.push(id);
+                break;
+            }
+            if (unit.isSkirmishing){
+                this.skirmishingFriendlies.push(id);
+            }
+            else if (unit.inBattle){
+                this.battlingFriendlies.push(id);
+            }
+            else{
+                this.freeFriendlies.push(id);
+            }
+        }
+    }
+    calculateUnitRisk(unit){
+        var risk = unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
+                   (unit.recentlyFlanked * this.flankedRiskMultiplier);
+        return risk
+
     }
     executeStateLogic(){
         //Only change state if timer is up.
