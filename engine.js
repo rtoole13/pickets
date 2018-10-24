@@ -449,20 +449,40 @@ function getCenterOfMass(ids, unitDict){
 
     return {x: centerX, y: centerY}
 }
+function getClosestUnitToPosition(x, y, idList){
+	//Given a list of unit ids, idlist, find the one closest to the
+	//point (x,y). If none between, return null
+	var id, unit, distSq, closestID, closestDistSq;
+	
+	closestID = null;
+	closestDistSq = Infinity;
+	for (var i = 0; i < idList.length; i++){
+		id = idList[i];
+		unit = unitList[id];
+		distSq = getDistanceSq(x, y, unit.x, unit.y);
+		if (distSq < closestDistSq){
+			closestDistSq = distSq;
+			closestID = id;
+		}
+	}
+	return closestID;
+}
+
 function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList){
 	//Given a list of unit ids, idlist, find the one closest to the
 	//path drawn from (xA, yA) to (xB, yB). If none between, return
 	//null
 
-	var vecA, vecB, magB, dirB, aDotB, closestDist, closestID, projA, perpA;
+	var vecA, vecB, magB, dirB, aDotB, closestDist, closestID, projA, perpA, id, unit;
 	vecB = {x: xB - xA, y: yB - yA};
 	magB = getVectorMag(vecB.x, vecB.y);
 	dirB = {x: vecB.x / magB, y: vecB.y / magB};
 
 	closestID = null;
 	closestDist = Infinity;
-	for (var id in idList){
-		var unit = unitList[id];
+	for (var i = 0; i < idList.length; i++){
+		id = idList[i];
+		unit = unitList[id];
 		vecA = {x: unit.x - xA, y: unit.y - yA};
 		aDotB = dotProduct(vecA.x, vecA.y, vecB.x, vecB.y);
 		if (aDotB < 0){
@@ -477,7 +497,7 @@ function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList){
 		}
 		perpA = {x: vecA.x - (projA * dirB.x), y: vecA.y - (projA * dirB.y)};
 		var perpDist = getVectorMag(perpA.x, perpA.y);
-		if (perpDist > closestDist){
+		if (perpDist < closestDist){
 			closestDist = perpDist;
 			closestID = id;
 		}
