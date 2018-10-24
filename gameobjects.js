@@ -744,18 +744,44 @@ class General extends AuxiliaryUnit{
 	}
 	moveToLocation(xLoc, yLoc, queuingOrders){
 		this.command = commandTypes.move;
+		var order = {type: commandTypes.move, target: null, x: xLoc, y: yLoc, angle: null, date: Date.now(), queue: queuingOrders};
+		this.updateCommand(order, false);
+		/*
 		this.path = Pathfinder.findPath(this.x, this.y, xLoc, yLoc, this, []);
 		this.updateRouteTimer.start();
 		this.getNextWaypoint();
+		*/
 	}
+	
+	updateCommand(order, clearQueue){
+		// Called on being given a command, and also on command completion
+		if (order == null){
+			if (clearQueue){
+				this.commandQueue = [];
+			}
 
-	updateCommand(){
-		this.command = null;
-		this.targetPosition = null;
-		this.targetAngle = null;
-		this.target = null;
-		this.path = [];
-		return;
+			if (this.commandQueue.length > 0){
+				order = this.commandQueue.shift();
+			}
+			else{
+				this.command = null;
+				this.targetPosition = null;
+				this.targetAngle = null;
+				this.target = null;
+				this.path = [];
+				return;
+			}
+		}
+		else if (this.command != null && order.queue){
+			//queued command first hits unit here. Add it to command queue
+			this.commandQueue.push(order);
+			return;
+		}
+		else{
+			this.commandQueue = [];
+		}
+		this.path = Pathfinder.findPath(this.x, this.y, order.x, order.y, this);
+		this.getNextWaypoint();
 	}
 	update(dt){
 		this.refreshCouriers();
