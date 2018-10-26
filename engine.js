@@ -449,6 +449,34 @@ function getCenterOfMass(ids, unitDict){
 
     return {x: centerX, y: centerY}
 }
+
+function vectorProjection(xA, yA, xB, yB, segment){
+	//Project vector (xA, yA) onto vector (xB, yB)
+	//if segment == true, return null if the projection is negative
+	//or greater than the magnitude of (xB, yB)
+	var projMagAB, aDotB, magB;
+	aDotB = dotProduct(xA, yA, xB, yB);
+	magB = getVectorMag(xB, yB);
+	projMagAB = aDotB / magB;
+	if (segment){
+		if ((aDotB < 0) || (projMagAB > magB)){
+			return null;
+		}	
+	} 
+	return {x: projMagAB * xB / magB, y: projMagAB * yB / magB}
+}
+
+function vectorRejection(xA, yA, xB, yB, segment){
+	//Project vector (xA, yA) onto vector (xB, yB), get rejection
+	//if segment == true, return null if the rejection is not on
+	//segment defined by (xB, yB)
+	var projAB = vectorProjection(xA, yA, xB, yB, segment);
+	if (projAB == null){
+		return null;
+	}
+	return {x: xA - projAB.x, y: yA - projAB.y};
+}
+
 function getClosestUnitToPosition(x, y, idList){
 	//Given a list of unit ids, idlist, find the one closest to the
 	//point (x,y). If none between, return null
@@ -468,12 +496,43 @@ function getClosestUnitToPosition(x, y, idList){
 	return closestID;
 }
 
+function getMidpoint(xA, yA, xB, yB){
+	return {x: xA + (xB - xA) / 2, y: yA + (yB - yA) / 2}
+}
+
+function rayCastSegment(xA, yA, xB, yB, pathWidth, idList){
+	//Give a ray origin (xA, yA) and terminating location (xB, yB),
+	//return the first id along that path (to within pathWidth), else null.
+	var id, unit, closestID, closestDist, vecA, vecB, perpA;
+	vecB = {x: xB - xA, y: yB - yA};
+
+	closestID = null;
+	closestDist = Infinity;
+	for (var i = 0; i < idList.length; i++){
+		id = idList[i];
+		unit = unitList[id];
+		vecA = {x: unit.x - xA, y: unit.y - yA};
+
+		perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);
+		if (perpA == null){
+			continue;
+		}
+		var perpDist = getVectorMag(perpA.x, perpA.y);
+		if (perpDist < (unit.combatRadius + (pathWidth / 2))){
+			if (perpDist < closestDist){
+				closestDist = perpDist;
+				closestID = id;
+			}
+		}
+	}
+	return closestID
+}
+
 function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList){
 	//Given a list of unit ids, idlist, find the one closest to the
 	//path drawn from (xA, yA) to (xB, yB). If none between, return
 	//null
-
-	var vecA, vecB, magB, dirB, aDotB, closestDist, closestID, projA, perpA, id, unit;
+	var vecA, vecB, magB, dirB, closestDist, closestID, perpA, id, unit;
 	vecB = {x: xB - xA, y: yB - yA};
 	magB = getVectorMag(vecB.x, vecB.y);
 	dirB = {x: vecB.x / magB, y: vecB.y / magB};
@@ -484,18 +543,11 @@ function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList){
 		id = idList[i];
 		unit = unitList[id];
 		vecA = {x: unit.x - xA, y: unit.y - yA};
-		aDotB = dotProduct(vecA.x, vecA.y, vecB.x, vecB.y);
-		if (aDotB < 0){
-			//negative, meaning it's not in the direction of vecB
+		
+		perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);
+		if (perpA == null){
 			continue;
 		}
-		projA = aDotB / magB;
-		if (projA > magB){
-			//projection is greater than the length of vecB, meaning
-			//it is past (xB,yB)
-			continue;
-		}
-		perpA = {x: vecA.x - (projA * dirB.x), y: vecA.y - (projA * dirB.y)};
 		var perpDist = getVectorMag(perpA.x, perpA.y);
 		if (perpDist < closestDist){
 			closestDist = perpDist;

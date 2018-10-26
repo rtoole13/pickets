@@ -86,17 +86,22 @@ class EnemyGeneral extends General{
     }
     stateSurvive(){
         if (this.nearbyEnemies.length > 0){
-            //enemies are near!
+            //enemies are near! Run!
             var centroid = getCenterOfMass(this.nearbyEnemies, playerUnitList);
-            //this.moveDirectlyAwayFrom(centroid.x, centroid.y);
-            
-            if (this.nearbyFriendlies.length > 0){
+            if (rayCastSegment(this.x, this.y, centroid.x, centroid.y, 22, this.nearbyFriendlies) != null){
+                //A friendly is blocking the path
+                this.currentState = this.AIstates.rallying;
+                return;    
+            }
+
+            if (this.nearbyNotBattlingFriendlies.length > 0){
                 //friends are near to help
                 var nearID = getClosestUnitToPosition(this.x, this.y, this.nearbyNotBattlingFriendlies);
                 if (nearID != null){
-                    this.issueCommandWrapper(enemyUnitList[nearID], commandTypes.attackmove, null, this.x, this.y);
+                    //route friendly to intercept enemy.  
+                    var midpoint = getMidpoint(this.x, this.y, centroid.x, centroid.y);   
+                    this.issueCommandWrapper(enemyUnitList[nearID], commandTypes.attackmove, null, midpoint.x, midpoint.y, true);
                 }
-                //2) route friendly to intercept enemy. 
                 //3) move to opposite side of friend.
             }
             else{
@@ -148,8 +153,13 @@ class EnemyGeneral extends General{
         this.moveToLocation(newX, newY);
     }
 
-    issueCommandWrapper(targetFriendly, commandType, targetEnemy, targetOriginX, targetOriginY){
-        this.issueCommand(targetFriendly, {type: commandType, target: targetEnemy, x: targetOriginX, y: targetOriginY, angle: null, date: Date.now(), queue: false});
+    issueCommandWrapper(targetFriendly, commandType, targetEnemy, targetOriginX, targetOriginY, intercepting){
+        var dir, targetAngle = null;
+        if (intercepting){
+            dir = normalizeVector(targetOriginX - this.x, targetOriginY - this.y);
+            targetAngle = getAngleFromDir(dir.x, dir.y);
+        }
+        this.issueCommand(targetFriendly, {type: commandType, target: targetEnemy, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now(), queue: false});
     }
 
     sendCourier(target, command){
