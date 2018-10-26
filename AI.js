@@ -3,13 +3,15 @@
 class EnemyGeneral extends General{
     constructor(x, y, angle, courierCount, army){
         super(x, y, angle, courierCount, army);
-        this.flightRadius = 75;
+        this.flightRadius = 150;
+        this.closeFriendlyRadius = 150;
         this.AIcontrolled = true;
         this.riskAssessment = {};
         this.nearbyEnemies = [];
         this.nearbyFriendlies = [];
         this.routingFriendlies = [];
         this.freeFriendlies = [];
+        this.nearbyNotBattlingFriendlies = [];
         this.skirmishingFriendlies = [];
         this.battlingFriendlies = [];
         this.flankedRiskMultiplier = 3;
@@ -29,6 +31,7 @@ class EnemyGeneral extends General{
         this.freeFriendlies = [];
         this.skirmishingFriendlies = [];
         this.battlingFriendlies = [];
+        this.nearbyNotBattlingFriendlies = [];
     }
     evaluateBoard(){
         //due to awkward structure, cant pre-populate these lists in the broadCollisionCheck in the main game loop
@@ -39,8 +42,11 @@ class EnemyGeneral extends General{
             this.riskAssessment[id] = this.calculateUnitRisk(unit);
 
             var distanceSq = getDistanceSq(this.x, this.y, unit.x, unit.y);
-            if (distanceSq <= (this.commandRadius * this.commandRadius)){
+            if (distanceSq <= (this.closeFriendlyRadius * this.closeFriendlyRadius)){
                 this.nearbyFriendlies.push(id);
+                if (!unit.inBattle){
+                    this.nearbyNotBattlingFriendlies.push(id);
+                }
             }
             if (unit.retreating){
                 this.routingFriendlies.push(id);
@@ -60,7 +66,7 @@ class EnemyGeneral extends General{
     calculateUnitRisk(unit){
         var risk = unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
                    (unit.recentlyFlanked * this.flankedRiskMultiplier);
-        return risk
+        return risk;
 
     }
     executeStateLogic(){
@@ -82,11 +88,14 @@ class EnemyGeneral extends General{
         if (this.nearbyEnemies.length > 0){
             //enemies are near!
             var centroid = getCenterOfMass(this.nearbyEnemies, playerUnitList);
-            this.moveDirectlyAwayFrom(centroid.x, centroid.y);
+            //this.moveDirectlyAwayFrom(centroid.x, centroid.y);
             
             if (this.nearbyFriendlies.length > 0){
                 //friends are near to help
-                //1) find nearest friend that is not in combat
+                var nearID = getClosestUnitToPosition(this.x, this.y, this.nearbyNotBattlingFriendlies);
+                if (nearID != null){
+                    this.issueCommandWrapper(enemyUnitList[nearID], commandTypes.attackmove, null, this.x, this.y);
+                }
                 //2) route friendly to intercept enemy. 
                 //3) move to opposite side of friend.
             }
@@ -137,5 +146,25 @@ class EnemyGeneral extends General{
         newX = 2 * this.x - x;
         newY = 2 * this.y - y;
         this.moveToLocation(newX, newY);
+    }
+
+    issueCommandWrapper(targetFriendly, commandType, targetEnemy, targetOriginX, targetOriginY){
+        this.issueCommand(targetFriendly, {type: commandType, target: targetEnemy, x: targetOriginX, y: targetOriginY, angle: null, date: Date.now(), queue: false});
+    }
+
+    sendCourier(target, command){
+        if (this.courierCount > 0){
+            if (this.courierCooldown.checkTime()){
+                addEnemyCourier(this.x, this.y, this.angle, this, target, command);
+                this.courierCount -= 1;
+                this.issuedCourierCount += 1;
+            }
+            else{
+                console.log('Courier sending on cooldown!');
+            }   
+        }
+        else{
+            console.log('No couriers available!');
+        }
     }
 }

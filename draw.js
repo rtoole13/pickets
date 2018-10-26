@@ -1269,6 +1269,7 @@ function drawPlayerUnits(){
 	drawInfantry(playerInfantryList);
 }
 function drawEnemyUnits(){
+	drawCouriers(enemyCourierList);
 	drawGeneral(enemyGeneral, displayingCommandRadii);
 	drawInfantry(enemyInfantryList);
 }

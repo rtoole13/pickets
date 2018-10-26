@@ -4,11 +4,11 @@ function initBoardEmptyPlain(){
 	addPlayerGeneral(150, 450, 45, 10);
 	addEnemyGeneral(600, 200, -135, 10);
 
-	addPlayerInfantry(600, 300, -135, "Brigade");
+	addPlayerInfantry(600, 400, -135, "Brigade");
 	//addPlayerInfantry(400, 200, -135, "Brigade");
 	addPlayerInfantry(200, 400, 0, "Brigade");
 
-	//addEnemyInfantry(600, 260, -135, "Brigade");
+	addEnemyInfantry(500, 260, -135, "Brigade");
 	var enemyUnit = addEnemyInfantry(400, 200, -135, "Brigade");
 
 	enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
@@ -59,6 +59,15 @@ function addEnemyInfantry(x, y, angle, element){
 	enemyUnitList[id] = unit;
 	unitList[id] = unit;
 	return unit;
+}
+
+function addEnemyCourier(x, y, angle, general, target, order){
+	var id = getUniqueID(5, unitList);
+	var unit = new Courier(x, y, angle, general, target, order, armies.red);
+	unit.id = id;
+	enemyCourierList[id] = unit;
+	enemyUnitList[id] = unit;
+	unitList[id] = unit;
 }
 
 function createSkirmishAnimation(unit, skirmishTargets, animationTime){

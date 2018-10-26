@@ -82,6 +82,7 @@ class Unit{
 		this.targetSigma = 30;
 		this.targetSigmaFinal = 5;
 		this.targetAngleSigma = 3; //deg 
+		this.redundantCommandSigma = 25;
 		this.turnAngleTol = 90;
 		this.command = null;
 		this.commandQueue = [];
@@ -232,6 +233,13 @@ class Unit{
 		}
 		else if (this.command != null && order.queue){
 			//queued command first hits unit here. Add it to command queue
+			if (this.commandQueue.length > 0){
+				var previousOrder = this.commandQueue[this.commandQueue.length - 1];
+				var dist = getDistance(order.x, order.y, previousOrder.x, previousOrder.y)
+				if (getDistance(order.x, order.y, previousOrder.x, previousOrder.y) < this.redundantCommandSigma){
+					return;
+				}
+			}
 			this.commandQueue.push(order);
 			return;
 		}
@@ -882,9 +890,16 @@ class Courier extends AuxiliaryUnit{
 	reportToGeneral(success){
 		//if success, add back to courier count total
 		//need to make general for enemy
-		delete playerCourierList[this.id];
-		delete playerUnitList[this.id];
-		delete unitList[this.id];
+		if (this.army == armies.blue){
+			delete playerCourierList[this.id];
+			delete playerUnitList[this.id];
+			delete unitList[this.id];
+		}
+		else{
+			delete enemyCourierList[this.id];
+			delete enemyUnitList[this.id];
+			delete unitList[this.id];
+		}
 
 		if (success){
 			this.general.addCourier();
