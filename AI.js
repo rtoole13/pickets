@@ -5,6 +5,7 @@ class EnemyGeneral extends General{
         super(x, y, angle, courierCount, army);
         this.flightRadius = 150;
         this.closeFriendlyRadius = 150;
+        this.panicRadius = 75;
         this.AIcontrolled = true;
         this.riskAssessment = {};
         this.nearbyEnemies = [];
@@ -87,22 +88,31 @@ class EnemyGeneral extends General{
     stateSurvive(){
         if (this.nearbyEnemies.length > 0){
             //enemies are near! Run!
-            var centroid = getCenterOfMass(this.nearbyEnemies, playerUnitList);
-            if (rayCastSegment(this.x, this.y, centroid.x, centroid.y, 22, this.nearbyFriendlies) != null){
+            var centroid = getCentroidAndClosest(this.x, this.y, this.nearbyEnemies, playerUnitList);
+            if (centroid.closestDist <= this.panicRadius){
+                //Run! 
+                this.moveDirectlyAwayFrom(centroid.closestUnit.x, centroid.closestUnit.y);
+            }
+            if (rayCastSegment(this.x, this.y, centroid.centerX, centroid.centerX, 15, this.nearbyFriendlies) != null){
                 //A friendly is blocking the path
                 this.currentState = this.AIstates.rallying;
                 return;    
             }
-
             if (this.nearbyNotBattlingFriendlies.length > 0){
                 //friends are near to help
                 var nearID = getClosestUnitToPosition(this.x, this.y, this.nearbyNotBattlingFriendlies);
                 if (nearID != null){
-                    //route friendly to intercept enemy.  
-                    var midpoint = getMidpoint(this.x, this.y, centroid.x, centroid.y);   
-                    this.issueCommandWrapper(enemyUnitList[nearID], commandTypes.attackmove, null, midpoint.x, midpoint.y, true);
+                    var nearUnit, midpoint;
+                    nearUnit = enemyUnitList[nearID];
+                    if (centroid.centroidDist <= this.panicRadius){
+                        this.moveBehindUnit(nearUnit, centroid.centerX, centroid.centerY, this.panicRadius * 2);
+                    }
+                    //route friendly to intercept enemy.
+                    var midpoint = getMidpoint(this.x, this.y, centroid.centerX, centroid.centerY);   
+                    this.issueCommandWrapper(nearUnit, commandTypes.attackmove, null, midpoint.x, midpoint.y, true);
                 }
                 //3) move to opposite side of friend.
+                
             }
             else{
                 //no friends immediately near.
@@ -151,6 +161,25 @@ class EnemyGeneral extends General{
         newX = 2 * this.x - x;
         newY = 2 * this.y - y;
         this.moveToLocation(newX, newY);
+    }
+
+    moveBehindLocation(x, y, distance){
+        //move to location past x, y by distance;
+        var dir, locDist;
+        dir = normalizeVector(x - this.x, y - this.y);
+        this.moveToLocation(x + (distance * dir.x), y + (distance * dir.y));
+    }
+    moveBehindUnit(unit, x, y, distance){
+        //move to a location on the other side of unit from (x, y) by distance;
+        var dir, locDist;
+        dir = normalizeVector(unit.x - x, unit.y - y);
+        this.moveToLocation(unit.x + (distance * dir.x), unit.y + (distance * dir.y));
+    }
+
+    possiblyFleeFromNearbyEnemies(){
+        for (var i = 0; i < this.nearbyEnemies.length; i++){
+
+        }
     }
 
     issueCommandWrapper(targetFriendly, commandType, targetEnemy, targetOriginX, targetOriginY, intercepting){

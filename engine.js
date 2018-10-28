@@ -435,7 +435,7 @@ function normalizeVector(x, y){
 	return {x: x / magnitude, y: y / magnitude};
 }
 
-function getCenterOfMass(ids, unitDict){
+function getCentroid(ids, unitDict){
 	//given a list of ids and a dictionary, find center of mass
 	var centerX = 0;
     var centerY = 0;
@@ -448,6 +448,31 @@ function getCenterOfMass(ids, unitDict){
     centerY /= ids.length;
 
     return {x: centerX, y: centerY}
+}
+
+function getCentroidAndClosest(x, y, ids, unitDict){
+	//given a list of ids and a dictionary, find center of mass and the 
+	//unit nearest to (x,y) and it's distance to (x,y);
+	var closestDistSq = Infinity;
+	var closestUnit;
+	var centerX = 0;
+    var centerY = 0;
+    for (var i = 0; i < ids.length; i++){
+        var unit = unitDict[ids[i]];
+        var distSq = getDistanceSq(x, y, unit.x, unit.y);
+        if (distSq < closestDistSq){
+        	closestDistSq = distSq;
+        	closestUnit = unit;
+        }
+        centerX += unit.x;
+        centerY += unit.y;
+
+    }
+    centerX /= ids.length;
+    centerY /= ids.length;
+
+    return {centerX: centerX, centerY: centerY, centroidDist: getDistance(x, y, centerX, centerY), 
+    	    closestUnit: closestUnit, closestDist: Math.sqrt(closestDistSq)}
 }
 
 function vectorProjection(xA, yA, xB, yB, segment){
@@ -497,7 +522,7 @@ function getClosestUnitToPosition(x, y, idList){
 }
 
 function getMidpoint(xA, yA, xB, yB){
-	return {x: xA + (xB - xA) / 2, y: yA + (yB - yA) / 2}
+	return {x: xA + ((xB - xA) / 2), y: yA + ((yB - yA) / 2)}
 }
 
 function rayCastSegment(xA, yA, xB, yB, pathWidth, idList){

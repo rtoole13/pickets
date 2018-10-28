@@ -471,7 +471,12 @@ class UnitToolTip {
 	}
 	drawCombatUnitTooltip(friendly){
 		var xLoc, yLoc, name, state, strength, rows, unit;
-		
+		unit = unitList[hoverUnit.id];
+		if (unit == undefined){
+			//unit deleted before drawing, null pointer
+			return;
+		}
+
 		rows = 3;
 		this.height = rows * this.rowHeight + this.textPaddingBotY;
 		this.y = canvas.height - (this.height + this.canvasPadding); //TOP LEFT CORNER Y
@@ -482,7 +487,7 @@ class UnitToolTip {
 		canvasContext.translate(this.x, this.y);
 		canvasContext.fillRect(0, 0, this.width, this.height);
 		canvasContext.restore();
-		unit = unitList[hoverUnit.id];
+
 		if (friendly){
 			 //should probably fix this indexing..
 			name = 'Friendly ' + capitalizeFirstLetter(unitTypeNames[unit.unitType - 1]);
@@ -511,7 +516,11 @@ class UnitToolTip {
 
 	drawAuxiliaryUnitTooltip(friendly){
 		var xLoc, yLoc, name, rows, unit;
-		
+		unit = unitList[hoverUnit.id];
+		if (unit == undefined){
+			//unit deleted before drawing, null pointer
+			return;
+		}	
 		rows = 1;
 		this.height = rows * this.rowHeight + this.textPaddingBotY;
 		this.y = canvas.height - (this.height + this.canvasPadding); //TOP LEFT CORNER Y
@@ -522,7 +531,6 @@ class UnitToolTip {
 		canvasContext.fillRect(0, 0, this.width, this.height);
 		canvasContext.restore();
 
-		unit = unitList[hoverUnit.id];
 		if (friendly){
 			 //should probably fix this indexing..
 			name = 'Friendly ' + capitalizeFirstLetter(unitTypeNames[unit.unitType - 1]);
@@ -702,6 +710,7 @@ function drawDebug(){
 	drawTextDebug();
 	//drawGridDebug();
 }
+
 function drawTextDebug(){
 	var fps = 1/dt;
 	fps = fps.toFixed(1);
