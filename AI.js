@@ -87,16 +87,20 @@ class EnemyGeneral extends General{
     }
     stateSurvive(){
         if (this.nearbyEnemies.length > 0){
-            //enemies are near! Run!
+            //enemies are near! Run (maybe)!
             var centroid = getCentroidAndClosest(this.x, this.y, this.nearbyEnemies, playerUnitList);
-            if (centroid.closestDist <= this.panicRadius){
-                //Run! 
-                this.moveDirectlyAwayFrom(centroid.closestUnit.x, centroid.closestUnit.y);
-            }
-            if (rayCastSegment(this.x, this.y, centroid.centerX, centroid.centerX, 15, this.nearbyFriendlies) != null){
+            
+            if (rayCastSegment(this.x, this.y, centroid.centerX, centroid.centerY, 10, this.nearbyFriendlies) != null){
                 //A friendly is blocking the path
+                console.log('enemyGeneral: a friendly seems to be blocking path to enemy');
                 this.currentState = this.AIstates.rallying;
                 return;    
+            }
+            if (centroid.closestDist <= this.panicRadius){
+                //Run! Staying in survival state
+                console.log('enemyGeneral: Enemy centroid too close, running');
+                this.moveDirectlyAwayFrom(centroid.closestUnit.x, centroid.closestUnit.y);
+                return;
             }
             if (this.nearbyNotBattlingFriendlies.length > 0){
                 //friends are near to help
@@ -105,18 +109,20 @@ class EnemyGeneral extends General{
                     var nearUnit, midpoint;
                     nearUnit = enemyUnitList[nearID];
                     if (centroid.centroidDist <= this.panicRadius){
+                        //Enemy centroid is too close. Move behind this nearUnit.
+                        console.log('enemyGeneral: Enemy centroid close, running to near, not fighting friend');
                         this.moveBehindUnit(nearUnit, centroid.centerX, centroid.centerY, this.panicRadius * 2);
                     }
                     //route friendly to intercept enemy.
+                    console.log('enemyGeneral: Routing friend to intercept enemy');
                     var midpoint = getMidpoint(this.x, this.y, centroid.centerX, centroid.centerY);   
                     this.issueCommandWrapper(nearUnit, commandTypes.attackmove, null, midpoint.x, midpoint.y, true);
                 }
-                //3) move to opposite side of friend.
                 
             }
             else{
-                //no friends immediately near.
-                //1) move towards nearest friendly along enemy's path
+                console.log('enemyGeneral: No friends near, running to likely help');
+                this.runToLikelyHelp();
             }
 
             //final action
@@ -169,17 +175,33 @@ class EnemyGeneral extends General{
         dir = normalizeVector(x - this.x, y - this.y);
         this.moveToLocation(x + (distance * dir.x), y + (distance * dir.y));
     }
+
     moveBehindUnit(unit, x, y, distance){
         //move to a location on the other side of unit from (x, y) by distance;
-        var dir, locDist;
-        dir = normalizeVector(unit.x - x, unit.y - y);
+        var dir = normalizeVector(unit.x - x, unit.y - y);
         this.moveToLocation(unit.x + (distance * dir.x), unit.y + (distance * dir.y));
     }
 
-    possiblyFleeFromNearbyEnemies(){
-        for (var i = 0; i < this.nearbyEnemies.length; i++){
+    moveTowardsUnit(unit, distance){
+        //Move to within distance from unit
+        var dir = normalizeVector(unit.x - this.x, unit.y - this.y);
+        this.moveToLocation(unit.x - (distance * dir.x), unit.y - (distance * dir.y));
+    }
 
+    runToLikelyHelp(){
+        //looks for the nearest free friendly unit. if not found, looks for the nearest skirmishing
+        //unit. If not found, looks for the nearest unit in battle and move to within command range
+        //of it.
+        var nearID, nearUnit;
+        nearID = getClosestUnitToPosition(this.x, this.y, this.freeFriendlies);
+        if (nearID == null){
+            nearID = getClosestUnitToPosition(this.x, this.y, this.skirmishingFriendlies);
         }
+        if (nearID == null){
+            nearID = getClosestUnitToPosition(this.x, this.y, this.BattlingFriendlies);
+        }
+        nearUnit = enemyUnitList[nearID];
+        this.moveTowardsUnit(nearUnit, this.commandRadius);
     }
 
     issueCommandWrapper(targetFriendly, commandType, targetEnemy, targetOriginX, targetOriginY, intercepting){

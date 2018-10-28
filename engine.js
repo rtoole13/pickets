@@ -284,7 +284,7 @@ class CollisionEngine{
 			radiusA = unitAux.flightRadius;
 			radiusB = unitOther.combatRadius;
 
-			if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+			if (distanceSq <= Math.pow(radiusA + radiusB, 2) && !unitOther.inBattle){
 				unitAux.nearbyEnemies.push(idOther);
 			}
 		}
@@ -452,7 +452,7 @@ function getCentroid(ids, unitDict){
 
 function getCentroidAndClosest(x, y, ids, unitDict){
 	//given a list of ids and a dictionary, find center of mass and the 
-	//unit nearest to (x,y) and it's distance to (x,y);
+	//unit nearest to (x,y) and it's distance to (x,y)
 	var closestDistSq = Infinity;
 	var closestUnit;
 	var centerX = 0;

@@ -358,10 +358,8 @@ function setHoverUnitAndToolTip(unit, combat){
 }
 
 function handleLeftClick(){
-	console.log(mouseX)
 	if (CollisionEngine.pointInCircle(mouseX, mouseY, playerGeneral.x, playerGeneral.y, 13)){
 		activeUnit = playerGeneral;
-		console.log("Selected general at " + "(" + playerGeneral.x + ", " + playerGeneral.y + ")");
 		return;
 	}
 
@@ -369,7 +367,6 @@ function handleLeftClick(){
 		var unit = playerCavalryList[id];
 		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
 			activeUnit = unit;
-			console.log("Selected cavalry unit at " + "(" + unit.x + ", " + unit.y + ")");
 			return;
 		}
 	}
@@ -378,7 +375,6 @@ function handleLeftClick(){
 		var unit = playerInfantryList[id];
 		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
 			activeUnit = unit;
-			console.log("Selected infantry unit at " + "(" + unit.x + ", " + unit.y + ")");
 			return;
 		}
 	}
@@ -387,12 +383,10 @@ function handleLeftClick(){
 		var unit = playerArtilleryList[id];
 		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, 23)){
 			activeUnit = unit;
-			console.log("Selected artillery unit at " + "(" + unit.x + ", " + unit.y + ")");
 			return;
 		}
 	}
 	activeUnit = undefined;
-	console.log("No unit selected");
 	return;
 }
 function selectEnemyUnit(x, y){
@@ -427,7 +421,6 @@ function handleRightClickDown(){
 	if (activeUnit != undefined || null){
 		if (activeUnit == playerGeneral){
 			playerGeneral.moveToLocation(mouseX, mouseY, queuingOrders);
-			console.log("Moving general to " + "(" + playerGeneral.targetPosition.x + ", " + playerGeneral.targetPosition.y + ")");
 		}
 		else{
 			targetOriginX = mouseX;
