@@ -1297,6 +1297,3 @@ function drawInfantry(units){
 		drawInfantryUnit(units[id], displayingCommandRadii);
 	}
 }
-
-
-

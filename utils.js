@@ -81,3 +81,28 @@ function initializeElement(elementType){
 	}
 	return strength;
 }
+
+function sortDictByValue(thisDict){
+	//Given a dict, thisDict, of numbers, sort and return
+	//a list with the smallest number first
+	var sortedList, valA, valB, unsorted = true;
+	var sortedList = Object.keys(thisDict);
+
+	if (sortedList.length < 2){
+		return sortedList;
+	}
+	while (unsorted){
+		unsorted = false;
+		for (var i = 0; i < sortedList.length - 1; i++){
+			valA = thisDict[sortedList[i]];
+			valB = thisDict[sortedList[i + 1]];
+			if (valB < valA){
+				var temp = sortedList[i+1];
+				sortedList[i+1] = sortedList[i];
+				sortedList[i] = temp;
+				unsorted = true;
+			}
+		}
+	}	
+	return sortedList;
+}

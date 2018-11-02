@@ -754,11 +754,6 @@ class General extends AuxiliaryUnit{
 		this.command = commandTypes.move;
 		var order = {type: commandTypes.move, target: null, x: xLoc, y: yLoc, angle: null, date: Date.now(), queue: queuingOrders};
 		this.updateCommand(order, false);
-		/*
-		this.path = Pathfinder.findPath(this.x, this.y, xLoc, yLoc, this, []);
-		this.updateRouteTimer.start();
-		this.getNextWaypoint();
-		*/
 	}
 	
 	updateCommand(order, clearQueue){

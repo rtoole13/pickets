@@ -8,6 +8,7 @@ class EnemyGeneral extends General{
         this.panicRadius = 75;
         this.AIcontrolled = true;
         this.riskAssessment = {};
+        this.riskThreshold = 8;
         this.nearbyEnemies = [];
         this.nearbyFriendlies = [];
         this.routingFriendlies = [];
@@ -24,7 +25,6 @@ class EnemyGeneral extends General{
 
     }
     update(dt){
-        this.evaluateBoard();
         this.executeStateLogic();
         super.update(dt);
         this.nearbyEnemies = [];
@@ -47,20 +47,25 @@ class EnemyGeneral extends General{
                 this.nearbyFriendlies.push(id);
                 if (!unit.inBattle){
                     this.nearbyNotBattlingFriendlies.push(id);
+                    this.nearbyNotBattlingFriendlies = sortListByDistToPoint(this.x, this.y, this.nearbyNotBattlingFriendlies, enemyInfantryList);
                 }
             }
             if (unit.retreating){
                 this.routingFriendlies.push(id);
+                this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyInfantryList);
                 break;
             }
             if (unit.isSkirmishing){
                 this.skirmishingFriendlies.push(id);
+                this.skirmishingFriendlies = sortListByDistToPoint(this.x, this.y, this.skirmishingFriendlies, enemyInfantryList);
             }
             else if (unit.inBattle){
                 this.battlingFriendlies.push(id);
+                this.battlingFriendlies = sortListByDistToPoint(this.x, this.y, this.battlingFriendlies, enemyInfantryList);   
             }
             else{
                 this.freeFriendlies.push(id);
+                this.freeFriendlies = sortListByDistToPoint(this.x, this.y, this.freeFriendlies, enemyInfantryList);
             }
         }
     }
@@ -75,6 +80,9 @@ class EnemyGeneral extends General{
         if (!this.stateChangeTimer.checkTime()){
             return;
         }
+        //evaluate the gameboard
+        this.evaluateBoard();
+
         if (this.currentState == this.AIstates.surviving){
             this.stateSurvive();
         }
@@ -89,8 +97,7 @@ class EnemyGeneral extends General{
         if (this.nearbyEnemies.length > 0){
             //enemies are near! Run (maybe)!
             var centroid = getCentroidAndClosest(this.x, this.y, this.nearbyEnemies, playerUnitList);
-            
-            if (rayCastSegment(this.x, this.y, centroid.centerX, centroid.centerY, 10, this.nearbyFriendlies) != null){
+            if (rayCastSegment(this.x, this.y, centroid.centerX, centroid.centerY, 10, this.nearbyFriendlies, enemyInfantryList, false) != null){
                 //A friendly is blocking the path
                 console.log('enemyGeneral: a friendly seems to be blocking path to enemy');
                 this.currentState = this.AIstates.rallying;
@@ -104,7 +111,10 @@ class EnemyGeneral extends General{
             }
             if (this.nearbyNotBattlingFriendlies.length > 0){
                 //friends are near to help
-                var nearID = getClosestUnitToPosition(this.x, this.y, this.nearbyNotBattlingFriendlies);
+                var nearID, potentialAid;
+                potentialAid = sortListByDistToPoint(centroid.centerX, centroid.centerY, this.nearbyFriendlies, enemyInfantryList);
+                console.log(potentialAid);
+                nearID = potentialAid[0];
                 if (nearID != null){
                     var nearUnit, midpoint;
                     nearUnit = enemyUnitList[nearID];
@@ -139,9 +149,16 @@ class EnemyGeneral extends General{
             //1) find a routing unit to which path is clear
             //2) route near to that unit if path is available,
             //   else, do nothing and jump to commanding state.
-            
-            //final action
-            this.currentState = this.AIstates.commanding;
+            this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyUnitList);
+            for (var i = 0; i < this.routingFriendlies.length; i++){
+                var unit = enemyUnitList[this.routingFriendlies[i]];
+                if (rayCastSegment(this.x, this.y, unit.x, unit.y, 15, this.nearbyEnemies, enemyInfantryList, false) == null){
+                    //Path is relatively free to the routing enemy
+                    console.log('enemyGeneral: Path is clear to a routing unit, Moving towards.')
+                    this.moveTowardsUnit(unit, this.commandRadius / 2);
+                    return;
+                }
+            }
         }
         else{
             this.stateCommand();
@@ -149,9 +166,23 @@ class EnemyGeneral extends General{
         }
     }
     stateCommand(){
+        var unitsInNeed = this.defenseNecessary();
+        if (!defendingAI){
+            if (unitsInNeed.length > 0){
+                this.sendAssistance(unitsInNeed);
+            }
+            else{
+                this.aggressiveCommand();
+            }
+        }
+        else{
+            this.defensiveCommand(unitsInNeed);
+        }
+        
         //1) evaluate unit risk
         if (this.freeFriendlies.length > 0){
             //free friendlies
+            //this.hailMary(this.freeFriendlies, enemyUnitList);
         }
         else if (this.skirmishingFriendlies.length > 0){
             //no free, but some skirmishing.
@@ -160,6 +191,46 @@ class EnemyGeneral extends General{
             //no free, no skirmishing, some battling.
         }
         this.currentState = this.AIstates.surviving;
+    }
+
+    defenseNecessary(){
+        //return an array of ids that need defending.
+        var defenseNecessary = []
+        for(var id in this.riskAssessment){
+            if (this.riskAssessment[id] > this.riskThreshold){
+                defenseNecessary.push(id);
+            }
+        }
+        return defenseNecessary;
+    }
+
+    defensiveCommand(unitsInNeed){
+        if (unitsInNeed.length > 0){
+            this.sendAssistance(unitsInNeed);
+        }
+
+    }
+
+    sendAssistance(unitsInNeed){
+        if (this.freeFriendlies.length > 0){
+
+        }
+        else if(this.skirmishingFriendlies.length > 0){
+
+        }
+    }
+
+    aggressiveCommand(){
+
+    }
+
+    hailMary(idList, unitDict){
+        console.log('enemyGeneral: All in assault on the enemy general!');
+        var unit;
+        for (var i = 0; i < idList.length; i++){
+            unit = unitDict[idList[i]];
+            this.issueCommandWrapper(unit, commandTypes.attackmove, playerGeneral, playerGeneral.x, playerGeneral.y, true);
+        }
     }
 
     moveDirectlyAwayFrom(x, y){

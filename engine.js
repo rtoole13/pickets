@@ -525,35 +525,57 @@ function getMidpoint(xA, yA, xB, yB){
 	return {x: xA + ((xB - xA) / 2), y: yA + ((yB - yA) / 2)}
 }
 
-function rayCastSegment(xA, yA, xB, yB, pathWidth, idList){
+function rayCastSegment(xA, yA, xB, yB, pathWidth, idList, unitDict, returnAll){
 	//Give a ray origin (xA, yA) and terminating location (xB, yB),
 	//return the first id along that path (to within pathWidth), else null.
-	var id, unit, closestID, closestDist, vecA, vecB, perpA;
+	var id, unit, vecA, vecB, perpA, closestDist;
 	vecB = {x: xB - xA, y: yB - yA};
+	if (returnAll){
+		var allColliders = [];
+		for (var i = 0; i < idList.length; i++){
+			id = idList[i];
+			unit = unitDict[id];
+			vecA = {x: unit.x - xA, y: unit.y - yA};
 
-	closestID = null;
-	closestDist = Infinity;
-	for (var i = 0; i < idList.length; i++){
-		id = idList[i];
-		unit = unitList[id];
-		vecA = {x: unit.x - xA, y: unit.y - yA};
-
-		perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);
-		if (perpA == null){
-			continue;
-		}
-		var perpDist = getVectorMag(perpA.x, perpA.y);
-		if (perpDist < (unit.combatRadius + (pathWidth / 2))){
-			if (perpDist < closestDist){
-				closestDist = perpDist;
-				closestID = id;
+			perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);
+			if (perpA == null){
+				continue;
+			}
+			var perpDist = getVectorMag(perpA.x, perpA.y);
+			if (perpDist < (unit.combatRadius + (pathWidth / 2))){
+				allColliders.push[id];
 			}
 		}
+		allColliders = sortListByDist(xA, yA, allColliders, unitDict);
+		console.log(allColliders);
+		return allColliders;
 	}
-	return closestID
+	else{
+		var closestID;
+		closestID = null;
+		closestDist = Infinity;
+		for (var i = 0; i < idList.length; i++){
+			id = idList[i];
+			unit = unitList[id];
+			vecA = {x: unit.x - xA, y: unit.y - yA};
+
+			perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);
+			if (perpA == null){
+				continue;
+			}
+			var perpDist = getVectorMag(perpA.x, perpA.y);
+			if (perpDist < (unit.combatRadius + (pathWidth / 2))){
+				if (perpDist < closestDist){
+					closestDist = perpDist;
+					closestID = id;
+				}
+			}
+		}
+		return closestID;
+	}
 }
 
-function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList){
+function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList, unitDict){
 	//Given a list of unit ids, idlist, find the one closest to the
 	//path drawn from (xA, yA) to (xB, yB). If none between, return
 	//null
@@ -566,7 +588,7 @@ function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList){
 	closestDist = Infinity;
 	for (var i = 0; i < idList.length; i++){
 		id = idList[i];
-		unit = unitList[id];
+		unit = unitDict[id];
 		vecA = {x: unit.x - xA, y: unit.y - yA};
 		
 		perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);
@@ -581,6 +603,53 @@ function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList){
 	}
 	return closestID;
 }
+
+function sortListByDistFromLine(xA, yA, xB, yB, idList, unitDict){
+	//Given a list of unit ids, idlist, sort the list based off of which
+	//is closest to the path drawn from (xA, yA) to (xB, yB).
+	var vecA, vecB, magB, dirB, perpA, id, unit, distDict;
+	vecB = {x: xB - xA, y: yB - yA};
+	magB = getVectorMag(vecB.x, vecB.y);
+	dirB = {x: vecB.x / magB, y: vecB.y / magB};
+
+	distDict = {};
+	for (var i = 0; i < idList.length; i++){
+		id = idList[i];
+		unit = unitDict[id];
+		vecA = {x: unit.x - xA, y: unit.y - yA};
+		perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, false);
+
+		distDict[id] = getVectorMag(perpA.x, perpA.y);
+	}
+	return sortDictByValue(distDict);
+}
+
+function sortListByDistToPoint(x, y, idList, unitDict){
+	//Assuming list of IDs given. Sort by proximity to (x,y)
+	//Draw actual units form unitDict
+	var unitA, unitB, distSqA, distSqB, sortedList, unsorted = true;
+	sortedList = idList;
+	if (sortedList.length < 2){
+		return sortedList;
+	}
+	while (unsorted){
+		unsorted = false;
+		for (var i = 0; i < sortedList.length - 1; i++){
+			unitA = unitDict[sortedList[i]];
+			unitB = unitDict[sortedList[i + 1]];
+			distSqA = getDistanceSq(x, y, unitA.x, unitA.y);
+			distSqB = getDistanceSq(x, y, unitB.x, unitB.y);
+			if (distSqB < distSqA){
+				var temp = sortedList[i+1];
+				sortedList[i+1] = sortedList[i];
+				sortedList[i] = temp;
+				unsorted = true;
+			}
+		}
+	}	
+	return sortedList
+}
+
 class Timer{
 	constructor(duration, repeating){
 		this.duration = duration;

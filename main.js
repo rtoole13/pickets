@@ -83,6 +83,7 @@ var gameBoard,
     displayingCommandRadii = false,
 	givingOrder = false,
 	queuingOrders = false,
+	defendingAI = true,
 	selector = 0;
 
 
