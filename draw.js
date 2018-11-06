@@ -551,23 +551,22 @@ class Trail{
 	constructor(initialPosition, length, lineWidth, color, alphaStart){
 		this.vertices = [];
 		this.length = length;
-		for (var i = 0; i < this.length; i++){
-			this.vertices.push(initialPosition);
-		}
+		this.vertices.push(initialPosition);
 		this.lineWidth = lineWidth;
 		this.alphaStart = alphaStart;
 		this.colorPrefix = getColorPrefix(color);
 		this.initialColor = this.colorPrefix + this.alphaStart.toString() + ')';
-		this.updateTimer = new Timer(5000, true);
+		this.updateTimer = new Timer(500, true);
 		this.updateTimer.start();
 	}
 	update(currentPosition){
 		if (this.updateTimer.checkTime()){
-			for (var i = this.length - 1; i > 0; i--){
-				this.vertices[i] = this.vertices[i-1];
+			this.vertices.unshift(currentPosition);
+			if (this.vertices.length > this.length){
+				this.vertices.pop();
 			}
+			
 		}
-		this.vertices[0] = currentPosition;
 	}
 	draw(){
 		canvasContext.save();
@@ -575,11 +574,12 @@ class Trail{
 		canvasContext.lineWidth = this.lineWidth;
 		canvasContext.moveTo(this.vertices[0].x, this.vertices[0].y);
 		var previousColor = this.initialColor;
-		for (var i = 1; i < this.length; i++){
+		var currentLength = this.vertices.length;
+		for (var i = 1; i < currentLength; i++){
 			var lastPoint = this.vertices[i-1];
 			var point = this.vertices[i];
 			var gradient = canvasContext.createLinearGradient(lastPoint.x, lastPoint.y, point.x, point.y);
-			var alpha = Math.round(this.alphaStart * 100 * (this.length - 1 - i) / (this.length - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
+			var alpha = Math.round(this.alphaStart * 100 * (currentLength - 1 - i) / (currentLength - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
 			var nextColor = this.colorPrefix + alpha.toString() + ')';
 			gradient.addColorStop(0, previousColor); //start color
 			gradient.addColorStop(1, nextColor); //end color

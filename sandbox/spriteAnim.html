@@ -4,7 +4,7 @@
 "use strict";
 var unit = new Image(1600,200);
 var map_bg = new Image(800, 600);
-map_bg.src = '../main_map.png';
+map_bg.src = '../assets/main_map.png';
 unit.src = '../assets/unit_sketch_test.svg';
 
 var width = window.innerWidth,
@@ -16,7 +16,8 @@ var canvasContext,
 	mouseObj,
 	mouseX = 0,
 	mouseY = 0,
-	objectList = [];
+	objectList = [],
+	unitTrails = [];
 
 window.onload = function(){
 	canvasContext = canvas.getContext("2d");
@@ -83,6 +84,9 @@ function drawObjects(){
 	}
 	*/
 	mouseObj.draw();
+	unitTrails.forEach(function(element){
+		element.draw()
+	});
 }
 
 class GameObject {
@@ -91,6 +95,7 @@ class GameObject {
 		this.y = y;
 		this.radius = radius;
 		this.color = color;
+		
 	}
 	update(){
 
@@ -121,6 +126,8 @@ class SpriteSheet {
 		this.ticks = 0;
 		this.frameIndex = 0;
 		this.loopAnimation = true;
+
+
 	}
 	update(dt, x, y){
 		this.x = x;
@@ -146,17 +153,98 @@ class MouseObject extends GameObject {
 	constructor(x, y, radius, color){
 		super(x, y, radius, color);
 		this.attached = true;
-		this.spriteSheet = new SpriteSheet(unit, this.x, this.y, 200, 50, 10, 1);
+		this.spriteSheet = new SpriteSheet(unit, this.x, this.y, 200, 50, 10, 5);
+		this.trail = new Trail({x: this.x, y: this.y}, 10, 10, "#30618C", 0.5);
+		unitTrails.push(this.trail);
 	}
 	update(dt){
 		this.x = mouseX;
 		this.y = mouseY;
 		this.spriteSheet.update(dt, this.x, this.y);
+		this.trail.update({x:this.x, y:this.y});
 	}
 	draw(){
 		this.spriteSheet.draw();
 	}
 
+}
+
+class Trail{
+	constructor(initialPosition, length, lineWidth, color, alphaStart){
+		this.vertices = [];
+		this.length = length;
+		this.vertices.push(initialPosition);	
+		this.lineWidth = lineWidth;
+		this.alphaStart = alphaStart;
+		this.colorPrefix = getColorPrefix(color);
+		this.initialColor = this.colorPrefix + this.alphaStart.toString() + ')';
+		this.updateTimer = new Timer(1000, true);
+		this.updateTimer.start();
+	}
+	update(currentPosition){
+		if (this.updateTimer.checkTime()){
+			this.vertices.unshift(currentPosition);
+			if (this.vertices.length > this.length){
+				this.vertices.pop();
+			}
+			
+		}
+	}
+	draw(){
+		canvasContext.save();
+		canvasContext.beginPath();
+		canvasContext.lineWidth = this.lineWidth;
+		canvasContext.moveTo(this.vertices[0].x, this.vertices[0].y);
+		var previousColor = this.initialColor;
+		for (var i = 1; i < this.vertices.length; i++){
+			var lastPoint = this.vertices[i-1];
+			var point = this.vertices[i];
+			var gradient = canvasContext.createLinearGradient(lastPoint.x, lastPoint.y, point.x, point.y);
+			var alpha = Math.round(this.alphaStart * 100 * (this.vertices.length - 1 - i) / (this.vertices.length - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
+			var nextColor = this.colorPrefix + alpha.toString() + ')';
+			gradient.addColorStop(0, previousColor); //start color
+			gradient.addColorStop(1, nextColor); //end color
+			previousColor = nextColor;
+			canvasContext.strokeStyle = gradient;
+			canvasContext.lineTo(point.x, point.y);
+			canvasContext.stroke();
+		}
+		canvasContext.restore();
+	}
+
+	
+}
+
+function getColorPrefix(hex){
+	hex = hex.replace("#", "");
+	var r, g, b;
+	r = parseInt(hex.substring(0,2), 16);
+	g = parseInt(hex.substring(2,4), 16);
+	b = parseInt(hex.substring(4,6), 16);
+	return 'rgba(' + r.toString() + ', ' + g.toString() + ', ' + b.toString() + ', ';
+}
+
+class Timer{
+	constructor(duration, repeating){
+		this.duration = duration;
+		this.repeating = repeating;
+		this.startTime = 0;
+	}
+	start(){
+		this.startTime = Date.now();
+	}
+	checkTime(){
+		if ( Date.now() - this.startTime > this.duration){
+			if (this.repeating){
+				this.start();
+			}
+			return true;
+		}
+		return false;
+	}
+	getElapsedTime(){
+		return (Date.now() - this.startTime);
+	}
 }
 
 </script>
