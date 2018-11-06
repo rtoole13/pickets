@@ -558,21 +558,22 @@ class Trail{
 		this.initialColor = this.colorPrefix + this.alphaStart.toString() + ')';
 		this.updateTimer = new Timer(500, true);
 		this.updateTimer.start();
+		this.currentHead = initialPosition;
 	}
 	update(currentPosition){
+		this.currentHead = currentPosition;
 		if (this.updateTimer.checkTime()){
 			this.vertices.unshift(currentPosition);
 			if (this.vertices.length > this.length){
 				this.vertices.pop();
 			}
-			
 		}
 	}
 	draw(){
 		canvasContext.save();
 		canvasContext.beginPath();
 		canvasContext.lineWidth = this.lineWidth;
-		canvasContext.moveTo(this.vertices[0].x, this.vertices[0].y);
+		canvasContext.moveTo(this.currentHead.x, this.currentHead.y);
 		var previousColor = this.initialColor;
 		var currentLength = this.vertices.length;
 		for (var i = 1; i < currentLength; i++){
