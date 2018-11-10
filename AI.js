@@ -113,7 +113,6 @@ class EnemyGeneral extends General{
                 //friends are near to help
                 var nearID, potentialAid;
                 potentialAid = sortListByDistToPoint(centroid.centerX, centroid.centerY, this.nearbyFriendlies, enemyInfantryList);
-                console.log(potentialAid);
                 nearID = potentialAid[0];
                 if (nearID != null){
                     var nearUnit, midpoint;

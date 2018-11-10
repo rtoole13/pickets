@@ -432,7 +432,13 @@ function handleRightClickDown(){
 			var target;
 			target = selectEnemyUnit(mouseX, mouseY);
 			if (target != null){
-				playerGeneral.issueCommand(activeUnit, {type: commandType, target: target, x: targetOriginX, y: targetOriginY, angle: null, date: Date.now(), queue: queuingOrders});
+				var command = {type: commandType, target: target, x: targetOriginX, y: targetOriginY, angle: null, date: Date.now(), queue: queuingOrders};
+				if (queuingOrders){
+					orderStack.push(command)
+				}
+				else{
+					playerGeneral.issueCommand(activeUnit, command);
+				}
 			}
 			else{
 			givingOrder = true;

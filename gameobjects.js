@@ -232,7 +232,7 @@ class Unit{
 			}
 			this.initiateCommand(order);
 		}
-		else if(order.length > 1){
+		else if(order.length > 0){
 			//given a list of commands
 			var firstOrder = order[0];
 			if (this.command != null && firstOrder.queue){
