@@ -230,6 +230,17 @@ class Unit{
 				this.path = [];
 				return;
 			}
+			this.initiateCommand(order);
+		}
+		else if(order.length > 1){
+			//given a list of commands
+			var firstOrder = order[0];
+			if (this.command != null && firstOrder.queue){
+				this.commandQueue = this.commandQueue.concat(order);
+				return;
+			}
+			this.initiateCommand(order.shift());
+			this.commandQueue = order;
 		}
 		else if (this.command != null && order.queue){
 			//queued command first hits unit here. Add it to command queue
@@ -245,8 +256,35 @@ class Unit{
 		}
 		else{
 			this.commandQueue = [];
+			this.initiateCommand(order);
 		}
+		/*
+		this.command = order.type;
+		switch(this.command){
+			default:
+				this.command = null;
+				break;
+			
+			case commandTypes.move:
+				this.executeMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
+				break;
+			
+			case commandTypes.attackmove:
+				this.executeAttackMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
+				break;
+			
+			case commandTypes.fallback:
+				this.executeMoveOrder({x: order.x, y: order.y});
+				break;
+			
+			case commandTypes.retreat:
+				this.executeRetreatOrder(order.target);	
+				break;
+		}
+		*/
+	}
 
+	initiateCommand(order){
 		this.command = order.type;
 		switch(this.command){
 			default:
@@ -750,6 +788,7 @@ class General extends AuxiliaryUnit{
 			this.sendCourier(target, command);
 		}
 	}
+
 	moveToLocation(xLoc, yLoc, queuingOrders){
 		this.command = commandTypes.move;
 		var order = {type: commandTypes.move, target: null, x: xLoc, y: yLoc, angle: null, date: Date.now(), queue: queuingOrders};
@@ -786,6 +825,7 @@ class General extends AuxiliaryUnit{
 		this.path = Pathfinder.findPath(this.x, this.y, order.x, order.y, this);
 		this.getNextWaypoint();
 	}
+
 	update(dt){
 		this.refreshCouriers();
 		super.update(dt);

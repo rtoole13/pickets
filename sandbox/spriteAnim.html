@@ -83,10 +83,10 @@ function drawObjects(){
 		objectList[i].draw();
 	}
 	*/
-	mouseObj.draw();
 	unitTrails.forEach(function(element){
 		element.draw()
 	});
+	mouseObj.draw();
 }
 
 class GameObject {
@@ -154,7 +154,7 @@ class MouseObject extends GameObject {
 		super(x, y, radius, color);
 		this.attached = true;
 		this.spriteSheet = new SpriteSheet(unit, this.x, this.y, 200, 50, 10, 5);
-		this.trail = new Trail({x: this.x, y: this.y}, 10, 10, "#30618C", 0.5);
+		this.trail = new Trail({x: this.x, y: this.y}, 24, 4, "#30618C", 0.5, 'bezier');
 		unitTrails.push(this.trail);
 	}
 	update(dt){
@@ -170,37 +170,96 @@ class MouseObject extends GameObject {
 }
 
 class Trail{
-	constructor(initialPosition, length, lineWidth, color, alphaStart){
+	constructor(initialPosition, length, lineWidth, color, alphaStart, mode){
 		this.vertices = [];
+		this.tempSet = [];
 		this.length = length;
-		this.vertices.push(initialPosition);	
+		this.vertices.push(initialPosition);
+		this.tempSet.push(initialPosition);
 		this.lineWidth = lineWidth;
 		this.alphaStart = alphaStart;
 		this.colorPrefix = getColorPrefix(color);
 		this.initialColor = this.colorPrefix + this.alphaStart.toString() + ')';
-		this.updateTimer = new Timer(1000, true);
+		this.updateTimer = new Timer(10, true);
 		this.updateTimer.start();
+		this.currentHead = initialPosition;
+		this.minDist = 100;
+		this.minDistSq = this.minDist * this.minDist;
+		this.mode = mode;
 	}
+
 	update(currentPosition){
+		if (this.mode == 'bezier'){
+			this.updateBezier(currentPosition);
+		}
+		else{
+			//default
+			this.updateDefault(currentPosition);
+		}
+		
+	}
+
+	updateDefault(currentPosition){
+		this.currentHead = currentPosition;
 		if (this.updateTimer.checkTime()){
-			this.vertices.unshift(currentPosition);
-			if (this.vertices.length > this.length){
-				this.vertices.pop();
+			if (getDistanceSq(this.vertices[0].x, this.vertices[0].y, this.currentHead.x, this.currentHead.y) > this.minDistSq){
+				this.vertices.unshift(currentPosition);
+				if (this.vertices.length > this.length){
+					this.vertices.pop();
+				}
 			}
-			
 		}
 	}
+
+	updateBezier(currentPosition){
+		this.currentHead = currentPosition;
+		if (this.updateTimer.checkTime()){
+			var baseX, baseY;
+			if (this.tempSet.length > 0){
+				baseX = this.tempSet.x;
+				baseY = this.tempSet.y;
+			}
+			else{
+				baseX = this.vertices[this.vertices.length - 1].x;
+				baseY = this.vertices[this.vertices.length - 1].y;
+			}
+			if (getDistanceSq(baseX, baseY, this.currentHead.x, this.currentHead.y) > this.minDistSq){
+				this.tempSet.push(currentPosition);
+
+				if (this.tempSet.length > 1){
+					this.vertices = this.vertices.concat(this.tempSet);
+					if (this.vertices.length > this.length){
+						this.vertices.splice(0, 2);
+					}
+					this.tempSet = [];
+				}
+			}
+		}
+	}
+
 	draw(){
+		if (this.mode == 'bezier'){
+			this.drawBezier();
+		}
+		else{
+			//default
+			this.drawDefault();
+		}
+
+	}
+	
+	drawDefault(){
 		canvasContext.save();
 		canvasContext.beginPath();
 		canvasContext.lineWidth = this.lineWidth;
-		canvasContext.moveTo(this.vertices[0].x, this.vertices[0].y);
+		canvasContext.moveTo(this.currentHead.x, this.currentHead.y);
 		var previousColor = this.initialColor;
-		for (var i = 1; i < this.vertices.length; i++){
+		var currentLength = this.vertices.length;
+		for (var i = 1; i < currentLength; i++){
 			var lastPoint = this.vertices[i-1];
 			var point = this.vertices[i];
 			var gradient = canvasContext.createLinearGradient(lastPoint.x, lastPoint.y, point.x, point.y);
-			var alpha = Math.round(this.alphaStart * 100 * (this.vertices.length - 1 - i) / (this.vertices.length - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
+			var alpha = Math.round(this.alphaStart * 100 * (currentLength - 1 - i) / (currentLength - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
 			var nextColor = this.colorPrefix + alpha.toString() + ')';
 			gradient.addColorStop(0, previousColor); //start color
 			gradient.addColorStop(1, nextColor); //end color
@@ -212,7 +271,39 @@ class Trail{
 		canvasContext.restore();
 	}
 
-	
+	drawBezier(){
+		canvasContext.save();
+		canvasContext.beginPath();
+		canvasContext.lineWidth = this.lineWidth;
+		canvasContext.moveTo(this.currentHead.x, this.currentHead.y);
+		var previousColor = this.initialColor;
+		var currentLength = this.vertices.length;
+		for (var i = 2; i < currentLength; i+=2){
+			var firstPoint = this.vertices[i-1];
+			var midPoint = this.vertices[i-1];
+			var lastPoint = this.vertices[i];
+			var gradient = canvasContext.createLinearGradient(firstPoint.x, firstPoint.y, lastPoint.x, lastPoint.y);
+			var alpha = Math.round(this.alphaStart * 100 * (currentLength - 1 - i) / (currentLength - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
+			var nextColor = this.colorPrefix + alpha.toString() + ')';
+			gradient.addColorStop(0, previousColor); //start color
+			gradient.addColorStop(1, nextColor); //end color
+			previousColor = nextColor;
+			canvasContext.strokeStyle = gradient;
+			canvasContext.bezierCurveTo(midPoint.x, midPoint.y, midPoint.x, midPoint.y, lastPoint.x, lastPoint.y);
+			canvasContext.stroke();
+		}
+		canvasContext.restore();
+	}
+}
+
+function getDistanceSq(xi, yi, xf, yf){
+	//Get the distance squared between points (xi,yi) and (xf, yf)
+	return getVectorMagSq(xf-xi, yf-yi);
+}
+
+function getVectorMagSq(x, y){
+	//Get the magnitude squared of the vector (x,y)
+	return Math.pow(x,2) + Math.pow(y,2);
 }
 
 function getColorPrefix(hex){

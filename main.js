@@ -83,6 +83,7 @@ var gameBoard,
     displayingCommandRadii = false,
 	givingOrder = false,
 	queuingOrders = false,
+	orderStack = [],
 	defendingAI = true,
 	selector = 0;
 
@@ -359,6 +360,7 @@ function setHoverUnitAndToolTip(unit, combat){
 }
 
 function handleLeftClick(){
+	clearOrderStack();
 	if (CollisionEngine.pointInCircle(mouseX, mouseY, playerGeneral.x, playerGeneral.y, 13)){
 		activeUnit = playerGeneral;
 		return;
@@ -446,7 +448,7 @@ function handleRightClickUp(e){
 	if ((activeUnit != undefined || null) && (activeUnit != playerGeneral) && givingOrder){
 		givingOrder = false;
 
-		var dist, dirX, dirY, targetAngle;
+		var dist, dirX, dirY, targetAngle, command;
 		dist = getDistance(targetOriginX, targetOriginY, mouseX, mouseY);
 		if (dist >= minDragDrawDistance){
 			dirX = (mouseX - targetOriginX) / dist;
@@ -456,8 +458,27 @@ function handleRightClickUp(e){
 		else{
 			targetAngle = null;
 		}
-		playerGeneral.issueCommand(activeUnit, {type: commandType, target: null, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now(), queue: queuingOrders});
+
+		command = {type: commandType, target: null, x: targetOriginX, y: targetOriginY, 
+				   angle: targetAngle, date: Date.now(), queue: queuingOrders};
+
+		if (queuingOrders){
+			orderStack.push(command)
+		}
+		else{
+			playerGeneral.issueCommand(activeUnit, command);
+		}
 	}
+}
+
+function clearOrderStack(){
+	if (orderStack.length == 0){
+		return;
+	}
+	if (activeUnit != undefined || null){
+		playerGeneral.issueCommand(activeUnit, orderStack);
+	}
+	orderStack = [];
 }
 
 function handleKeyPress(e){
@@ -519,6 +540,7 @@ function handleKeyRelease(e){
 	switch(keyCode){
 		case 16: 
 			queuingOrders = false;
+			clearOrderStack();
 			break;
 
         case 32:
@@ -530,6 +552,7 @@ function handleKeyRelease(e){
 			return;
 	}
 }
+
 
 function getMousePosition(e){
 	var rect = canvas.getBoundingClientRect(),

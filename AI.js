@@ -213,7 +213,7 @@ class EnemyGeneral extends General{
 
     sendAssistance(unitsInNeed){
         if (this.freeFriendlies.length > 0){
-
+            
         }
         else if(this.skirmishingFriendlies.length > 0){
 
