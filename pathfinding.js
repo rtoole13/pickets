@@ -33,7 +33,7 @@ class Pathfinder{
 				if (!neighbor.walkable || inArray(neighbor, closedSet)){
 					continue;
 				}
-				var newMovementCostToNeighbor = currentNode.gcost + this.getDistance(currentNode, neighbor);
+				var newMovementCostToNeighbor = currentNode.gcost + this.getDistance(currentNode, neighbor) + neighbor.movementPenalty;
 				if (newMovementCostToNeighbor < neighbor.gcost || !inArray(neighbor, openSet)){
 					neighbor.gcost = newMovementCostToNeighbor;
 					neighbor.hcost = this.getDistance(neighbor, targetNode);
@@ -91,16 +91,7 @@ class Pathfinder{
 		var xDist, yDist, diagonalCost, straightCost;
 		xDist = Math.abs(nodeB.indX - nodeA.indX);
 		yDist = Math.abs(nodeB.indY - nodeA.indY);
-		/*
-		if (nodeB.tileType == tileTypes.road){
-			diagonalCost = 6;
-			straightCost = 5;
-		}
-		else{
-			diagonalCost = 14;
-			straightCost = 10;
-		}
-		*/
+		
 		diagonalCost = 14;
 		straightCost = 10;
 		if (xDist > yDist){
@@ -254,13 +245,25 @@ class GridNode{
 		this.width = width;
 		this.height = height;
 		this.walkable = walkable;
-		
-		if (this.tileType == tileTypes.mountain){
-        	this.impassable = true; //Reserved for permanantly unwalkable terrain
+
+		switch(this.tileType){
+			default:
+				this.impassable = false;
+				this.movementPenalty = 3;
+			case tileTypes.mountain:
+				this.impassable = true;
+				this.movementPenalty = 10;
+				break;
+			case tileTypes.plain:
+				this.impassable = false;
+				this.movementPenalty = 3;
+				break;
+			case tileTypes.road:
+				this.impassable = false;
+				this.movementPenalty = 0;
+				break;
 		}
-		else{
-			this.impassable = false;
-		}
+
 		this.parent = null;
 		this.gcost = 0;
 		this.hcost = 0;
