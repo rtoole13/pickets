@@ -548,7 +548,8 @@ class InfantryUnit extends CombatUnit{
 		this.bracedTimer.start();
 		this.unitType = unitTypes.infantry;
 		this.spriteSheet = initializeSpriteSheet(this);
-		this.trail = new Trail({x: this.x, y: this.y}, 15, 5, (this.army==armies.blue)?playerColor:enemyColor, 0.5);
+		//constructor(initialPosition, length, lineWidth, color, alphaStart, dashRatio, segmentLifeTime){
+		this.trail = new Trail({x: this.x, y: this.y}, 4, 5, (this.army==armies.blue)?playerColor:enemyColor, 0.5, 0.75, 8000);
 		unitTrails.push(this.trail);
 	}
 	update(dt){

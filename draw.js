@@ -548,10 +548,12 @@ class UnitToolTip {
 }
 
 class Trail{
-	constructor(initialPosition, length, lineWidth, color, alphaStart){
-		this.vertices = [];
+	constructor(initialPosition, length, lineWidth, color, alphaStart, dashRatio, segmentLifeTime){
+		this.curves = [];
+		this.tempSet = [];
 		this.length = length;
-		this.vertices.push(initialPosition);
+		
+		this.tempSet.push(initialPosition);
 		this.lineWidth = lineWidth;
 		this.alphaStart = alphaStart;
 		this.colorPrefix = getColorPrefix(color);
@@ -559,37 +561,149 @@ class Trail{
 		this.updateTimer = new Timer(500, true);
 		this.updateTimer.start();
 		this.currentHead = initialPosition;
+		this.lastCurveEnd = initialPosition;
+		this.minDist = 10; //segment will be minDist * 2 in length
+		this.minDistSq = this.minDist * this.minDist;
+		this.dashRatio = dashRatio; //1 is a solid line.
+		this.dashSpacing = (1 - this.dashRatio) * 2 * this.minDist / this.dashRatio; //space b/w dashes
+		this.dashSpacingSq = this.dashSpacing * this.dashSpacing;
+		this.segmentLifeTime = segmentLifeTime;
 	}
+
 	update(currentPosition){
+		this.addCurveSegment(currentPosition);
+	}
+
+	addCurveSegment(currentPosition){
 		this.currentHead = currentPosition;
+		
 		if (this.updateTimer.checkTime()){
-			this.vertices.unshift(currentPosition);
-			if (this.vertices.length > this.length){
-				this.vertices.pop();
+			if (this.tempSet.length == 0){
+				this.beginNewSet();	
+			}
+			else{
+				this.addToSet();
+				
 			}
 		}
 	}
+
+	beginNewSet(){
+		if (getDistanceSq(this.lastCurveEnd.x, this.lastCurveEnd.y, this.currentHead.x, this.currentHead.y) < this.dashSpacingSq){
+			return;
+		}
+		this.tempSet.unshift(this.currentHead);
+	}
+
+	addToSet(){
+		if (getDistanceSq(this.tempSet[0].x, this.tempSet[0].y, this.currentHead.x, this.currentHead.y) < this.minDistSq){
+			return;
+		}
+		this.tempSet.unshift(this.currentHead);
+		if (this.tempSet.length > 2){
+			var curve = new CurveSegment(this.tempSet[0], this.tempSet[1], this.tempSet[1], this.tempSet[2],
+				   						 this.segmentLifeTime, this.lineWidth, this.colorPrefix, this.alphaStart);
+			this.curves.unshift(curve);
+			if (this.curves.length > this.length){
+				this.curves.pop();
+			}
+			this.tempSet = [];
+			this.lastCurveEnd = this.currentHead;
+			if (this.dashRatio == 1){
+				this.tempSet.unshift(this.currentHead);
+			}
+		}
+	}
+
 	draw(){
+		for (var i = 0; i < this.curves.length; i++){
+			var destroy = this.curves[i].draw();
+			if (destroy){
+				this.curves.splice(i,1);
+				i -= 1;
+			}
+		}
+
+	}
+	/*
+	drawBezier(){
 		canvasContext.save();
 		canvasContext.beginPath();
 		canvasContext.lineWidth = this.lineWidth;
 		canvasContext.moveTo(this.currentHead.x, this.currentHead.y);
+		if ((this.tempSet.length > 0) && (this.vertices.length > 0)){
+			canvasContext.bezierCurveTo(this.tempSet[0].x, this.tempSet[0].y, this.tempSet[0].x, this.tempSet[0].y,
+										this.vertices[0].x, this.vertices[0].y);
+		}
+
 		var previousColor = this.initialColor;
 		var currentLength = this.vertices.length;
-		for (var i = 1; i < currentLength; i++){
-			var lastPoint = this.vertices[i-1];
-			var point = this.vertices[i];
-			var gradient = canvasContext.createLinearGradient(lastPoint.x, lastPoint.y, point.x, point.y);
+		for (var i = 0; i < (currentLength - 2); i+=2){
+			var firstPoint = this.vertices[i];
+			var midPoint = this.vertices[i + 1];
+			var lastPoint = this.vertices[i + 2];
+			
+			var gradient = canvasContext.createLinearGradient(firstPoint.x, firstPoint.y, lastPoint.x, lastPoint.y);
 			var alpha = Math.round(this.alphaStart * 100 * (currentLength - 1 - i) / (currentLength - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
 			var nextColor = this.colorPrefix + alpha.toString() + ')';
 			gradient.addColorStop(0, previousColor); //start color
 			gradient.addColorStop(1, nextColor); //end color
 			previousColor = nextColor;
 			canvasContext.strokeStyle = gradient;
-			canvasContext.lineTo(point.x, point.y);
+			canvasContext.bezierCurveTo(midPoint.x, midPoint.y, midPoint.x, midPoint.y, lastPoint.x, lastPoint.y);
 			canvasContext.stroke();
 		}
 		canvasContext.restore();
+	}
+	*/
+}
+
+class CurveSegment{
+	constructor(startPoint, firstControlPoint, secondControlPoint, endPoint, lifeTime, lineWidth, colorPrefix, alphaStart){
+		this.startPoint = startPoint;
+		this.firstControlPoint = firstControlPoint;
+		this.secondControlPoint = secondControlPoint;
+		this.endPoint = endPoint;
+		this.lineWidth = lineWidth;
+		this.colorPrefix = colorPrefix;
+		this.alphaStart = alphaStart;
+		this.alpha = this.alphaStart;
+
+		this.initialColor = this.colorPrefix + this.alphaStart.toString() + ')';
+		this.previousColor = this.initialColor;
+		this.currentColor = this.initialColor;
+		this.lifeTime = lifeTime;
+		this.lifeTimer = new Timer(this.lifeTime, false);
+		this.lifeTimer.start();
+
+	}
+	draw(){
+		var elapsedTime = this.lifeTimer.getElapsedTime();
+		if (elapsedTime > this.lifeTime){
+			return true;
+		}
+		this.alpha = this.alphaStart * (this.lifeTime - elapsedTime) / this.lifeTime;
+		this.currentColor = this.colorPrefix + this.alpha.toString() + ')';
+
+		canvasContext.save();
+		canvasContext.beginPath();
+		canvasContext.lineWidth = this.lineWidth;
+		canvasContext.moveTo(this.startPoint.x, this.startPoint.y);
+
+		var gradient = canvasContext.createLinearGradient(this.startPoint.x, this.startPoint.y, this.endPoint.x, this.endPoint.y);
+		gradient.addColorStop(0, this.previousColor); //start color
+		gradient.addColorStop(1, this.currentColor); //end color
+
+		canvasContext.strokeStyle = gradient;
+		canvasContext.bezierCurveTo(this.firstControlPoint.x, this.firstControlPoint.y, this.secondControlPoint.x, this.secondControlPoint.y,
+									this.endPoint.x, this.endPoint.y);
+		canvasContext.stroke();
+
+		canvasContext.restore();
+		
+		this.previousColor = this.currentColor;
+		//false if alive, true if dead
+		return false;
 	}
 }
 
