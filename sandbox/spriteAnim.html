@@ -154,7 +154,7 @@ class MouseObject extends GameObject {
 		super(x, y, radius, color);
 		this.attached = true;
 		this.spriteSheet = new SpriteSheet(unit, this.x, this.y, 200, 50, 10, 5);
-		this.trail = new Trail({x: this.x, y: this.y}, 23, 4, "#30618C", 0.5, 'bezier');
+		this.trail = new Trail({x: this.x, y: this.y}, 23, 4, "#30618C", 0.5, 0.6);
 		unitTrails.push(this.trail);
 	}
 	update(dt){
@@ -170,11 +170,11 @@ class MouseObject extends GameObject {
 }
 
 class Trail{
-	constructor(initialPosition, length, lineWidth, color, alphaStart, mode){
-		this.vertices = [];
+	constructor(initialPosition, length, lineWidth, color, alphaStart, dashRatio){
+		this.curves = [];
 		this.tempSet = [];
 		this.length = length;
-		//this.vertices.push(initialPosition);
+		
 		this.tempSet.push(initialPosition);
 		this.lineWidth = lineWidth;
 		this.alphaStart = alphaStart;
@@ -183,96 +183,70 @@ class Trail{
 		this.updateTimer = new Timer(10, true);
 		this.updateTimer.start();
 		this.currentHead = initialPosition;
-		this.minDist = 10;
+		this.lastCurveEnd = initialPosition;
+		this.minDist = 10; //segment will be minDist * 2 in length
 		this.minDistSq = this.minDist * this.minDist;
-		this.mode = mode;
+		this.dashRatio = dashRatio; //1 is a solid line.
+		this.dashSpacing = (1 - this.dashRatio) * 2 * this.minDist / this.dashRatio; //space b/w dashes
+		this.dashSpacingSq = this.dashSpacing * this.dashSpacing;
 	}
 
 	update(currentPosition){
-		if (this.mode == 'bezier'){
-			this.updateBezier(currentPosition);
-		}
-		else{
-			//default
-			this.updateDefault(currentPosition);
-		}
-		
+		this.addCurveSegment(currentPosition);
 	}
 
-	updateDefault(currentPosition){
-		this.currentHead = currentPosition;
-		if (this.updateTimer.checkTime()){
-			if (getDistanceSq(this.vertices[0].x, this.vertices[0].y, this.currentHead.x, this.currentHead.y) > this.minDistSq){
-				this.vertices.unshift(currentPosition);
-				if (this.vertices.length > this.length){
-					this.vertices.pop();
-				}
-			}
-		}
-	}
-
-	updateBezier(currentPosition){
+	addCurveSegment(currentPosition){
 		this.currentHead = currentPosition;
 		
 		if (this.updateTimer.checkTime()){
-			var baseX, baseY;
-			if (this.tempSet.length > 0){
-				baseX = this.tempSet[0].x;
-				baseY = this.tempSet[0].y;
+			if (this.tempSet.length == 0){
+				this.beginNewSet();	
 			}
 			else{
-				baseX = this.vertices[0].x;
-				baseY = this.vertices[0].y;
+				this.addToSet();
+				
 			}
-			if (getDistanceSq(baseX, baseY, this.currentHead.x, this.currentHead.y) > this.minDistSq){
-				this.tempSet.unshift(currentPosition);
+		}
+	}
 
-				if (this.tempSet.length > 1){
-					this.vertices = this.tempSet.concat(this.vertices);
-					if (this.vertices.length > this.length){
-						this.vertices.pop();
-						this.vertices.pop();
-					}
-					this.tempSet = [];
-				}
+	beginNewSet(){
+		if (getDistanceSq(this.lastCurveEnd.x, this.lastCurveEnd.y, this.currentHead.x, this.currentHead.y) < this.dashSpacingSq){
+			return;
+		}
+		this.tempSet.unshift(this.currentHead);
+	}
+
+	addToSet(){
+		if (getDistanceSq(this.tempSet[0].x, this.tempSet[0].y, this.currentHead.x, this.currentHead.y) < this.minDistSq){
+			return;
+		}
+		this.tempSet.unshift(this.currentHead);
+		if (this.tempSet.length > 2){
+			var curve = new CurveSegment(this.tempSet[0], this.tempSet[1], this.tempSet[1], this.tempSet[2],
+				   						 5000, this.lineWidth, this.colorPrefix, this.alphaStart);
+			this.curves.unshift(curve);
+			if (this.curves.length > this.length){
+				this.curves.pop();
+			}
+			this.tempSet = [];
+			this.lastCurveEnd = this.currentHead;
+			if (this.dashRatio == 1){
+				this.tempSet.unshift(this.currentHead);
 			}
 		}
 	}
 
 	draw(){
-		if (this.mode == 'bezier'){
-			this.drawBezier();
-		}
-		else{
-			//default
-			this.drawDefault();
+		for (var i = 0; i < this.curves.length; i++){
+			var destroy = this.curves[i].draw();
+			if (destroy){
+				this.curves.splice(i,1);
+				i -= 1;
+			}
 		}
 
 	}
-	
-	drawDefault(){
-		canvasContext.save();
-		canvasContext.beginPath();
-		canvasContext.lineWidth = this.lineWidth;
-		canvasContext.moveTo(this.currentHead.x, this.currentHead.y);
-		var previousColor = this.initialColor;
-		var currentLength = this.vertices.length;
-		for (var i = 1; i < currentLength; i++){
-			var lastPoint = this.vertices[i-1];
-			var point = this.vertices[i];
-			var gradient = canvasContext.createLinearGradient(lastPoint.x, lastPoint.y, point.x, point.y);
-			var alpha = Math.round(this.alphaStart * 100 * (currentLength - 1 - i) / (currentLength - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
-			var nextColor = this.colorPrefix + alpha.toString() + ')';
-			gradient.addColorStop(0, previousColor); //start color
-			gradient.addColorStop(1, nextColor); //end color
-			previousColor = nextColor;
-			canvasContext.strokeStyle = gradient;
-			canvasContext.lineTo(point.x, point.y);
-			canvasContext.stroke();
-		}
-		canvasContext.restore();
-	}
-
+	/*
 	drawBezier(){
 		canvasContext.save();
 		canvasContext.beginPath();
@@ -302,8 +276,57 @@ class Trail{
 		}
 		canvasContext.restore();
 	}
+	*/
 }
 
+class CurveSegment{
+	constructor(startPoint, firstControlPoint, secondControlPoint, endPoint, lifeTime, lineWidth, colorPrefix, alphaStart){
+		this.startPoint = startPoint;
+		this.firstControlPoint = firstControlPoint;
+		this.secondControlPoint = secondControlPoint;
+		this.endPoint = endPoint;
+		this.lineWidth = lineWidth;
+		this.colorPrefix = colorPrefix;
+		this.alphaStart = alphaStart;
+		this.alpha = this.alphaStart;
+
+		this.initialColor = this.colorPrefix + this.alphaStart.toString() + ')';
+		this.previousColor = this.initialColor;
+		this.currentColor = this.initialColor;
+		this.lifeTime = lifeTime;
+		this.lifeTimer = new Timer(this.lifeTime, false);
+		this.lifeTimer.start();
+
+	}
+	draw(){
+		var elapsedTime = this.lifeTimer.getElapsedTime();
+		if (elapsedTime > this.lifeTime){
+			return true;
+		}
+		this.alpha = this.alphaStart * (this.lifeTime - elapsedTime) / this.lifeTime;
+		this.currentColor = this.colorPrefix + this.alpha.toString() + ')';
+
+		canvasContext.save();
+		canvasContext.beginPath();
+		canvasContext.lineWidth = this.lineWidth;
+		canvasContext.moveTo(this.startPoint.x, this.startPoint.y);
+
+		var gradient = canvasContext.createLinearGradient(this.startPoint.x, this.startPoint.y, this.endPoint.x, this.endPoint.y);
+		gradient.addColorStop(0, this.previousColor); //start color
+		gradient.addColorStop(1, this.currentColor); //end color
+
+		canvasContext.strokeStyle = gradient;
+		canvasContext.bezierCurveTo(this.firstControlPoint.x, this.firstControlPoint.y, this.secondControlPoint.x, this.secondControlPoint.y,
+									this.endPoint.x, this.endPoint.y);
+		canvasContext.stroke();
+
+		canvasContext.restore();
+		
+		this.previousColor = this.currentColor;
+		//false if alive, true if dead
+		return false;
+	}
+}
 function getDistanceSq(xi, yi, xf, yf){
 	//Get the distance squared between points (xi,yi) and (xf, yf)
 	return getVectorMagSq(xf-xi, yf-yi);
