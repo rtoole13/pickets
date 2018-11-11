@@ -377,7 +377,7 @@ class CollisionEngine{
 	}
 }
 
-function getAngleFromDir(dirX, dirY){
+function getAngleFromDir(dirX, dirY){ 
 	if (dirY >= 0){
 		return - Math.acos(dirX) * 180 / Math.PI;	
 	}
