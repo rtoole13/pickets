@@ -8,7 +8,8 @@ class EnemyGeneral extends General{
         this.panicRadius = 75;
         this.AIcontrolled = true;
         this.riskAssessment = {};
-        this.riskThreshold = 8;
+        //this.riskThreshold = 8;
+        this.riskThreshold = 4;
         this.nearbyEnemies = [];
         this.nearbyFriendlies = [];
         this.routingFriendlies = [];
@@ -18,10 +19,12 @@ class EnemyGeneral extends General{
         this.battlingFriendlies = [];
         this.flankedRiskMultiplier = 3;
         this.battleRiskMultiplier = 2;
+        this.recentAssistFactor = 3;
         this.stateChangeTimer = new Timer(500, true);
         this.stateChangeTimer.start();
         this.AIstates = enemyGenStates; //global enum surviving, rallying, commanding
         this.currentState = this.AIstates.commanding;
+        this.recentlyAssistedUnitID = '';
 
     }
     update(dt){
@@ -40,7 +43,7 @@ class EnemyGeneral extends General{
             var unit = enemyInfantryList[id];
 
             //track risk value of all friendlies
-            this.riskAssessment[id] = this.calculateUnitRisk(unit);
+            this.riskAssessment[id] = this.calculateUnitRisk(unit, id);
 
             var distanceSq = getDistanceSq(this.x, this.y, unit.x, unit.y);
             if (distanceSq <= (this.closeFriendlyRadius * this.closeFriendlyRadius)){
@@ -69,9 +72,13 @@ class EnemyGeneral extends General{
             }
         }
     }
-    calculateUnitRisk(unit){
+    calculateUnitRisk(unit, id){
         var risk = unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
                    (unit.recentlyFlanked * this.flankedRiskMultiplier);
+        if (id == this.recentlyAssistedUnitID){
+            //Unit was helped last command, reduce apparent risk.
+            risk -= this.recentAssistFactor;
+        }
         return risk;
 
     }
@@ -125,7 +132,7 @@ class EnemyGeneral extends General{
                     //route friendly to intercept enemy.
                     console.log('enemyGeneral: Routing friend to intercept enemy');
                     var midpoint = getMidpoint(this.x, this.y, centroid.centerX, centroid.centerY);   
-                    this.issueCommandWrapper(nearUnit, commandTypes.attackmove, null, midpoint.x, midpoint.y, true);
+                    this.issueCommandWrapper(nearUnit, commandTypes.move, null, midpoint.x, midpoint.y, true);
                 }
                 
             }
@@ -165,17 +172,17 @@ class EnemyGeneral extends General{
         }
     }
     stateCommand(){
-        var unitsInNeed = this.defenseNecessary();
+        var unitInNeed = this.getUnitMostAtRisk();
         if (!defendingAI){
-            if (unitsInNeed.length > 0){
-                this.sendAssistance(unitsInNeed);
+            if (unitInNeed != null){
+                this.sendAssistance(unitInNeed);
             }
             else{
                 this.aggressiveCommand();
             }
         }
         else{
-            this.defensiveCommand(unitsInNeed);
+            this.defensiveCommand(unitInNeed);
         }
         
         //1) evaluate unit risk
@@ -203,16 +210,41 @@ class EnemyGeneral extends General{
         return defenseNecessary;
     }
 
-    defensiveCommand(unitsInNeed){
-        if (unitsInNeed.length > 0){
-            this.sendAssistance(unitsInNeed);
+    getUnitMostAtRisk(){
+        var highestRiskValue = 0;
+        var mostAtRiskID = null;
+        for(var id in this.riskAssessment){
+            if (this.riskAssessment[id] > this.riskThreshold && this.riskAssessment[id] > highestRiskValue){
+                highestRiskValue = this.riskAssessment[id];
+                mostAtRiskID = id;
+            }
+        }
+        return mostAtRiskID;
+    }
+    defensiveCommand(unitInNeed){
+        if (unitInNeed != null){
+            this.sendAssistance(unitInNeed);
         }
 
     }
 
-    sendAssistance(unitsInNeed){
+    sendAssistance(unitInNeed){
         if (this.freeFriendlies.length > 0){
-            
+            //getClosestUnitToPosition(x, y, idList){
+            var unit = enemyInfantryList[unitInNeed];
+            var closestFreeUnit = getClosestUnitToPosition(unit.x, unit.y, this.freeFriendlies);
+            if (closestFreeUnit != null){
+                var target, targetID = null;
+                if (unit.combatCollisionList.length > 0){
+                    targetID = unit.combatCollisionList[0];
+                }
+                else if (unit.skirmishCollisionList.length > 0){
+                    targetID = unit.skirmishCollisionList[0];
+                }
+                target = playerInfantryList[targetID];
+                this.issueCommandWrapper(enemyInfantryList[closestFreeUnit], commandTypes.attackmove, target, target.x, target.y, false);
+                this.recentlyAssistedUnitID = unitInNeed;
+            }
         }
         else if(this.skirmishingFriendlies.length > 0){
 
