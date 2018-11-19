@@ -582,7 +582,7 @@ function rayCastSegment(xA, yA, xB, yB, pathWidth, idList, unitDict, returnAll){
 	}
 }
 
-function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList, unitDict){
+function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList, unitDict, ignoreList){
 	//Given a list of unit ids, idlist, find the one closest to the
 	//path drawn from (xA, yA) to (xB, yB). If none between, return
 	//null
@@ -595,6 +595,9 @@ function getClosestUnitBetweenPoints(xA, yA, xB, yB, idList, unitDict){
 	closestDist = Infinity;
 	for (var i = 0; i < idList.length; i++){
 		id = idList[i];
+		if (ignoreList.includes(id)){
+			continue;
+		}
 		unit = unitDict[id];
 		vecA = {x: unit.x - xA, y: unit.y - yA};
 		
