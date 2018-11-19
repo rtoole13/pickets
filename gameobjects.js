@@ -609,6 +609,7 @@ class InfantryUnit extends CombatUnit{
 
 			if (this.combatCollisionList.length > 0){
 				createBattleAnimation(this, this.combatCollisionList, this.attackCooldownTime);
+				this.spriteSheet.startRumble();
                 this.reload();
 			} 
 

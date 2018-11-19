@@ -4,14 +4,14 @@ function initBoardEmptyPlain(){
 	addPlayerGeneral(550, 450, 45, 10);
 	addEnemyGeneral(450, 200, -135, 10);
 
-	addPlayerInfantry(600, 400, -135, "Brigade");
+	addPlayerInfantry(600, 300, -135, "Brigade");
 	//addPlayerInfantry(400, 200, -135, "Brigade");
 	addPlayerInfantry(200, 400, 0, "Brigade");
 	addPlayerInfantry(400, 400, 0, "Brigade");
 
 	addEnemyInfantry(500, 260, -135, "Brigade");
-	addEnemyInfantry(200, 260, -135, "Brigade");	
-	var enemyUnit = addEnemyInfantry(400, 200, -135, "Brigade");
+	//addEnemyInfantry(200, 260, -135, "Brigade");	
+	var enemyUnit = addEnemyInfantry(200, 200, -135, "Brigade");
 	//enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
 	//addEnemyInfantry(600, 100, -135, "Brigade");
 }

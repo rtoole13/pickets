@@ -80,6 +80,64 @@ class SpriteSheet {
 	}
 }
 
+class CombatSpriteSheet extends SpriteSheet {
+	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, rumbleDuration){
+		super(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation);
+		this.rumbleDuration = rumbleDuration;
+		this.rumblingTimer = new Timer(this.rumbleDuration, false);
+		this.isRumbling = false;
+		this.rumbleRate = 14;
+		this.rumbleTicksPerFrame = 1 / this.rumbleRate;
+		this.rumbleTicks = 0;
+		this.maxRumbleRadius = 10;
+		this.currentRumbleRadius = this.maxRumbleRadius;
+		this.dx = 0;
+		this.dy = 0;
+	}
+
+	update(dt){
+		super.update(dt);
+		this.updateRumblePosition(dt);
+	}
+
+	move(x, y){
+		this.x = x + this.dx;
+		this.y = y + this.dy;
+	}
+
+	startRumble(){
+		this.isRumbling = true;
+		this.rumblingTimer.start();
+	}
+
+	updateRumblePosition(dt){
+		if (!this.isRumbling){
+			return;
+		}
+		var remainingTime = (this.rumbleDuration - this.rumblingTimer.getElapsedTime()) / 1000;
+		if (remainingTime <= 0){
+			this.isRumbling = false;
+			//reset dx, dy, and the currentRadius
+			this.dx = 0;
+			this.dy = 0;
+			this.currentRumbleRadius = this.maxRumbleRadius;
+			return;
+		}
+		this.rumbleTicks += dt;
+		if (this.rumbleTicks > this.rumbleTicksPerFrame){
+			this.rumbleTicks = 0;
+			var dist, dir;
+			this.currentRumbleRadius = this.maxRumbleRadius * remainingTime * remainingTime; //quadratic decline
+			dist = getRandomFloat(0, this.currentRumbleRadius);
+			dir = getDirFromAngle(getRandomInt(0,359));
+			
+			this.dx = dist * dir.x;
+			this.dy = dist * dir.y;
+		}
+			
+	}
+}
+
 class FloatingText {
 	constructor(font, velX, velY, duration, color){
 		this.font = '20px sans-serif';
@@ -745,10 +803,10 @@ function initializeSpriteSheet(unit){
 	switch(unit.unitType){
 		default:
 			if(unit.army == armies.blue){
-				return new SpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true);
+				return new CombatSpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 2);
 			}
 			else{
-				return new SpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true);
+				return new CombatSpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 2);
 			}
 			break;
 		case unitTypes.courier:
@@ -769,10 +827,10 @@ function initializeSpriteSheet(unit){
 			break;
 		case unitTypes.infantry:
 			if(unit.army == armies.blue){
-				return new SpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true);
+				return new CombatSpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 3);
 			}
 			else{
-				return new SpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true);
+				return new CombatSpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 3);
 			}
 			break;
 	}

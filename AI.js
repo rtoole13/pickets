@@ -8,8 +8,7 @@ class EnemyGeneral extends General{
         this.panicRadius = 75;
         this.AIcontrolled = true;
         this.riskAssessment = {};
-        //this.riskThreshold = 8;
-        this.riskThreshold = 4;
+        this.riskThreshold = 8;
         this.nearbyEnemies = [];
         this.nearbyFriendlies = [];
         this.routingFriendlies = [];
@@ -48,29 +47,33 @@ class EnemyGeneral extends General{
             var distanceSq = getDistanceSq(this.x, this.y, unit.x, unit.y);
             if (distanceSq <= (this.closeFriendlyRadius * this.closeFriendlyRadius)){
                 this.nearbyFriendlies.push(id);
-                if (!unit.inBattle){
+                if (unit.combatCollisionList.length == 0){
                     this.nearbyNotBattlingFriendlies.push(id);
-                    this.nearbyNotBattlingFriendlies = sortListByDistToPoint(this.x, this.y, this.nearbyNotBattlingFriendlies, enemyInfantryList);
                 }
             }
             if (unit.retreating){
                 this.routingFriendlies.push(id);
-                this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyInfantryList);
                 break;
             }
-            if (unit.isSkirmishing){
-                this.skirmishingFriendlies.push(id);
-                this.skirmishingFriendlies = sortListByDistToPoint(this.x, this.y, this.skirmishingFriendlies, enemyInfantryList);
-            }
-            else if (unit.inBattle){
-                this.battlingFriendlies.push(id);
-                this.battlingFriendlies = sortListByDistToPoint(this.x, this.y, this.battlingFriendlies, enemyInfantryList);   
+            if (unit.skirmishCollisionList.length > 0){
+                // this awkward nesting here is due to the fact that the collision engine doesn't remove units from the skirmish
+                // collision list if they exist in the combat collision list
+                if (unit.combatCollisionList.length > 0){
+                    this.battlingFriendlies.push(id);
+                }
+                else{
+                    this.skirmishingFriendlies.push(id);
+                }
             }
             else{
                 this.freeFriendlies.push(id);
-                this.freeFriendlies = sortListByDistToPoint(this.x, this.y, this.freeFriendlies, enemyInfantryList);
             }
         }
+        this.nearbyNotBattlingFriendlies = sortListByDistToPoint(this.x, this.y, this.nearbyNotBattlingFriendlies, enemyInfantryList);
+        this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyInfantryList);
+        this.battlingFriendlies = sortListByDistToPoint(this.x, this.y, this.battlingFriendlies, enemyInfantryList);   
+        this.skirmishingFriendlies = sortListByDistToPoint(this.x, this.y, this.skirmishingFriendlies, enemyInfantryList);
+        this.freeFriendlies = sortListByDistToPoint(this.x, this.y, this.freeFriendlies, enemyInfantryList);
     }
     calculateUnitRisk(unit, id){
         var risk = unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
@@ -111,7 +114,7 @@ class EnemyGeneral extends General{
                 return;    
             }
             if (centroid.closestDist <= this.panicRadius){
-                //Run! Staying in survival state
+                //Run! Staying in survival state 
                 console.log('enemyGeneral: Enemy centroid too close, running');
                 this.moveDirectlyAwayFrom(centroid.closestUnit.x, centroid.closestUnit.y);
                 return;
@@ -230,24 +233,30 @@ class EnemyGeneral extends General{
 
     sendAssistance(unitInNeed){
         if (this.freeFriendlies.length > 0){
-            //getClosestUnitToPosition(x, y, idList){
-            var unit = enemyInfantryList[unitInNeed];
-            var closestFreeUnit = getClosestUnitToPosition(unit.x, unit.y, this.freeFriendlies);
-            if (closestFreeUnit != null){
-                var target, targetID = null;
-                if (unit.combatCollisionList.length > 0){
-                    targetID = unit.combatCollisionList[0];
-                }
-                else if (unit.skirmishCollisionList.length > 0){
-                    targetID = unit.skirmishCollisionList[0];
-                }
-                target = playerInfantryList[targetID];
-                this.issueCommandWrapper(enemyInfantryList[closestFreeUnit], commandTypes.attackmove, target, target.x, target.y, false);
-                this.recentlyAssistedUnitID = unitInNeed;
-            }
+            this.sendAssistanceFromList(unitInNeed, this.freeFriendlies);
         }
         else if(this.skirmishingFriendlies.length > 0){
+            this.sendAssistanceFromList(unitInNeed, this.skirmishingFriendlies);
+        }
+    }
 
+    sendAssistanceFromList(unitInNeed, unitList){
+        var unit = enemyInfantryList[unitInNeed];
+        var ignoreList = [];
+        ignoreList.push(unitInNeed);
+        var closestFreeUnit = getClosestUnitToPosition(unit.x, unit.y, unitList, ignoreList);
+        if (closestFreeUnit != null){
+            var target, targetID = null;
+            if (unit.combatCollisionList.length > 0){
+                targetID = unit.combatCollisionList[0];
+            }
+            else if (unit.skirmishCollisionList.length > 0){
+                targetID = unit.skirmishCollisionList[0];
+            }
+            target = playerInfantryList[targetID];
+            console.log('enemyGeneral: Sending a unit to assist another at risk.');
+            this.issueCommandWrapper(enemyInfantryList[closestFreeUnit], commandTypes.attackmove, target, target.x, target.y, false);
+            this.recentlyAssistedUnitID = unitInNeed;
         }
     }
 
@@ -295,12 +304,12 @@ class EnemyGeneral extends General{
         //unit. If not found, looks for the nearest unit in battle and move to within command range
         //of it.
         var nearID, nearUnit;
-        nearID = getClosestUnitToPosition(this.x, this.y, this.freeFriendlies);
+        nearID = getClosestUnitToPosition(this.x, this.y, this.freeFriendlies, []);
         if (nearID == null){
-            nearID = getClosestUnitToPosition(this.x, this.y, this.skirmishingFriendlies);
+            nearID = getClosestUnitToPosition(this.x, this.y, this.skirmishingFriendlies, []);
         }
         if (nearID == null){
-            nearID = getClosestUnitToPosition(this.x, this.y, this.BattlingFriendlies);
+            nearID = getClosestUnitToPosition(this.x, this.y, this.battlingFriendlies, []);
         }
         nearUnit = enemyUnitList[nearID];
         this.moveTowardsUnit(nearUnit, this.commandRadius);

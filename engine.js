@@ -386,6 +386,9 @@ function getAngleFromDir(dirX, dirY){
 	}
 }
 
+function getDirFromAngle(angle){
+	return {x: Math.cos((angle) * Math.PI/180), y: - Math.sin((angle) * Math.PI/180)};
+}
 function rotateVector(xi, yi, theta, degrees){
 	//Rotate a vector by theta (-theta == CW, +theta == CCW)
 	//returns a vector (vector.x, vector.y)
@@ -502,15 +505,19 @@ function vectorRejection(xA, yA, xB, yB, segment){
 	return {x: xA - projAB.x, y: yA - projAB.y};
 }
 
-function getClosestUnitToPosition(x, y, idList){
+function getClosestUnitToPosition(x, y, idList, ignoreList){
 	//Given a list of unit ids, idlist, find the one closest to the
 	//point (x,y). If none between, return null
+	//ignore any ids in the ignore list
 	var id, unit, distSq, closestID, closestDistSq;
 	
 	closestID = null;
 	closestDistSq = Infinity;
 	for (var i = 0; i < idList.length; i++){
 		id = idList[i];
+		if (ignoreList.includes(id)){
+			continue;
+		}
 		unit = unitList[id];
 		distSq = getDistanceSq(x, y, unit.x, unit.y);
 		if (distSq < closestDistSq){
