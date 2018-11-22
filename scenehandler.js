@@ -51,7 +51,14 @@ class SceneHandler {
     }
 
     beginTitleScene(){
-
+        howToHitBox = {xMin: canvas.width/2 - 55, xMax: canvas.width/2 + 55, yMin: canvas.height/2 - 30, yMax: canvas.height/2 + 10};
+        playHitBox = {xMin: canvas.width/2 - 35, xMax: canvas.width/2 + 35, yMin: canvas.height/2 + 20, yMax: canvas.height/2 + 60};
+        playClicked = howToClicked = false;
+        
+        canvas.addEventListener("mousemove", getMousePositionTitle, false);
+        canvas.addEventListener("mousedown", handleTitleMouseDown, false);
+        //Enter title screen game loop
+        mainTitle();
     }
 
     beginGameScene(){
@@ -116,15 +123,6 @@ class SceneHandler {
         unitTypeNames    = Object.keys(unitTypes);
         unitStateNames   = Object.keys(unitStates);
 
-        //Initialize some colors
-        orderColor = hexToRGB(playerColor, 0.25);
-        enemyOrderColor = hexToRGB(enemyColor, 0.25);
-        crimsonAlpha = hexToRGB(crimson, 0.85);
-        greenAlpha = hexToRGB(green, 0.85);
-        grayAlpha = hexToRGB(gray, 0.5);
-        flankAlpha = hexToRGB(crimson, 0.25);
-        frontAlpha = hexToRGB(forestGreen, 0.25);
-        skirmishAlpha = hexToRGB(forestGreen, 0.45);
 
         //Initialize stuff
         commandType = commandTypes.move;
@@ -142,7 +140,7 @@ class SceneHandler {
 
 
         //Enter main game loop
-        main();
+        mainGame();
     }
 
     beginHowToScene(){
@@ -157,7 +155,13 @@ class SceneHandler {
     }
 
     endTitleScene(){
+        canvas.removeEventListener("mousemove", getMousePositionTitle, false);
+        canvas.removeEventListener("mousedown", handleTitleMouseDown, false);
 
+        howToHitBox = null;
+        playHitBox = null;
+        howToClicked = null;
+        playClicked = null;
     }
 
     endGameScene(){

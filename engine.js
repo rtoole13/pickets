@@ -375,6 +375,15 @@ class CollisionEngine{
 		}
 		return false;
 	}
+
+	static pointInAABB(x, y, xMin, xMax, yMin, yMax){
+		if ((x >= xMin) && (x <= xMax)){
+			if ((y >= yMin) && (y <= yMax)){
+				return true;
+			}	
+		}
+		return false;
+	}
 }
 
 function getAngleFromDir(dirX, dirY){ 

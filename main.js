@@ -13,6 +13,12 @@ var canvas = document.getElementById('gameCanvas'),
     scenes,
     sceneHandler;
 
+//Title Objects//
+var howToHitBox,
+	playHitBox,
+	howToClicked,
+	playClicked;
+
 //Game Objects//
 var gameBoard,
     unitList = {},
@@ -56,6 +62,7 @@ var gameBoard,
 	unitTypeNames,
 	unitStateNames,
 
+	//Initialize some colors
 	playerColor = "#30618C",
 	enemyColor  = "#8B0000",
 	damageColor = "#ff0000",
@@ -64,11 +71,11 @@ var gameBoard,
 	green       = "#90EE90",
     forestGreen = "#336600",
 
-	orderColor,
-	enemyOrderColor,
-	crimsonAlpha,
-	grayAlpha,
-	greenAlpha,
+    orderColor,
+    enemyOrderColor,
+    crimsonAlpha,
+    greenAlpha,
+    grayAlpha,
     flankAlpha,
     frontAlpha,
     skirmishAlpha,
@@ -98,68 +105,22 @@ window.onload = function(){
 
 function init(){
 	scenes = Object.freeze({titleScene:1, howToScene:2, gameScene:3, endScene:4});
+
+	orderColor = hexToRGB(playerColor, 0.25);
+    enemyOrderColor = hexToRGB(enemyColor, 0.25);
+    crimsonAlpha = hexToRGB(crimson, 0.85);
+    greenAlpha = hexToRGB(green, 0.85);
+    grayAlpha = hexToRGB(gray, 0.2);
+    flankAlpha = hexToRGB(crimson, 0.25);
+    frontAlpha = hexToRGB(forestGreen, 0.25);
+    skirmishAlpha = hexToRGB(forestGreen, 0.45);
+
 	sceneHandler = new SceneHandler();
-	sceneHandler.beginGameScene();
+
+	//Begin game
+	sceneHandler.beginTitleScene();
 }
 
-function main(){
-	//Main loop
-	//Time calculations
-	currentFrame = new Date();
-	dt = (currentFrame - lastFrame)/1000.0;
-	lastFrame = currentFrame;
-	count = 0;
-	//Game over?
-	if(checkWinCondition()){
-        gameOver = true;
-        return;
-    }
-
-	//Updates
-	gameBoard.update(dt);
-	draw(dt);
-
-	requestAnimationFrame(main);
-}
-
-function checkWinCondition(){
-	//Check win conditions
-    var ending = false;
-    var playerVictory = false;
-    var condition;
-    if (playerGeneral.captured){
-        ending = true;
-        condition = winConditions.generalCaptured;
-    }
-    else if (enemyGeneral.captured){
-        ending = true;
-        condition = winConditions.generalCaptured;
-        playerVictory = true;
-    }
-    else if (Object.keys(playerInfantryList) < 1 && Object.keys(playerCavalryList) < 1 && Object.keys(playerArtilleryList) < 1){
-        ending = true;
-        condition = winConditions.unitsCaptured;
-    }
-    else if (Object.keys(enemyInfantryList) < 1 && Object.keys(enemyCavalryList) < 1 && Object.keys(enemyArtilleryList) < 1){
-        ending = true;
-        condition = winConditions.unitsCaptured;
-        playerVictory = true;
-    }
-    else if (fullRetreatPlayer){
-    	ending = true;
-        condition = winConditions.unitsRouting;
-    }
-    else if (fullRetreatEnemy){
-    	ending = true;
-        condition = winConditions.unitsRouting;
-        playerVictory = true;
-    }
-
-    if (ending){
-        sceneHandler.changeScene(scenes.endScene, {playerVictory: playerVictory, condition: condition});
-    }
-    return ending;
-}
 
 //Event Handlers
 function handleMouseDown(e){
@@ -429,6 +390,20 @@ function handleKeyPress(e){
 	}
 }
 
+function handleTitleMouseDown(e){
+	if (CollisionEngine.pointInAABB(mouseX, mouseY, howToHitBox.xMin, howToHitBox.xMax, howToHitBox.yMin, howToHitBox.yMax)){
+	    howToClicked = true;
+	    return;
+	}
+	else if (CollisionEngine.pointInAABB(mouseX, mouseY, playHitBox.xMin, playHitBox.xMax, playHitBox.yMin, playHitBox.yMax)){
+	    playClicked = true;
+	    return;
+	}
+	else{
+		playClicked = howToClicked = false;
+	}
+}
+
 function handleEndGameKeyPress(e){
 	var keyCode = e.keyCode;
 	switch (keyCode){
@@ -466,4 +441,14 @@ function getMousePosition(e){
 	mouseY = e.pageY - rect.top - root.scrollTop;
 
 	checkMouseOver();
+}
+
+function getMousePositionTitle(e){
+	var rect = canvas.getBoundingClientRect(),
+        root = document.documentElement;
+
+	mouseX = e.pageX - rect.left - root.scrollLeft;
+	mouseY = e.pageY - rect.top - root.scrollTop;
+
+
 }
