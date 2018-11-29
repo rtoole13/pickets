@@ -2,7 +2,30 @@
 
 var audio_bugle = new Audio('assets/audio/Bugle_Tune.mp3');
 
+var audio_bugle2 = new Audio('assets/audio/Bugle_Tune.mp3');
+var audio_farm  = new Audio('assets/audio/Morning_Farm.mp3');
+/*
+work audio controller and audioGroup to preload a fixed number of 
+new Audio objects. Therefore only allowing a set amount of sounds
+to be playing simultaneously.
+
+Set up available pools for each sound effect. When a group requests
+that one be played, try pulling a free one from the pool. If none are 
+available, don't play. If this becomes a problem, either increase
+pool size or allow one to override pool count limit.
+
+Add a callback to each audioClip.onEnded() to add the finished sound
+back to the appropriate available pool.
+*/
+
 //audio_bugle.ended to check if still playing.
+class AudioController {
+    constructor(){
+        this.currentlyPlaying = [];
+    }
+
+
+}
 class AudioGroup {
     constructor(pitchVariance){
         this.pitchVariance = pitchVariance;
@@ -73,3 +96,57 @@ class AudioGroup {
         }
     }
 }
+
+class AudioPool {
+    constructor(clipURL, count){
+        this.clipURL = clipURL;
+        this.available = new Queue();
+        this.unavailable = [];
+
+        for (var i = 0; i < count; i++){
+            var audio = new Audio(clipURL);
+            var arg = this.clipURL;
+            this.unavailable.push(audio);
+        }
+    }
+    update(){
+
+    }
+    onAudioLoad(e){
+        console.log(e);
+        console.log(this);
+    }
+}
+
+class AudioClip {
+    constructor(clipURL){
+        this.clipURL = clipURL;
+        this.audio = new Audio(this.clipURL);
+    }
+
+
+}
+class Queue {
+    constructor(){
+        this.data = [];
+    }
+    add(entry){
+        this.data.unshift(entry);
+    }
+    remove(){
+        return this.data.pop();
+    }
+    cut(i){
+        return this.data.splice(i,1);
+    }
+    getFront(){
+        return this.data[this.data.length - 1];
+    }
+    getBack(){
+        return this.data[0];
+    }
+    getLength(){
+        return this.data.length;
+    }
+}
+
