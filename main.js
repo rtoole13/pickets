@@ -11,7 +11,8 @@ var canvas = document.getElementById('gameCanvas'),
     debugState = false,
     count = 0,
     scenes,
-    sceneHandler;
+    sceneHandler,
+    audioHandler;
 
 //Title Objects//
 var howToHitBox,
@@ -116,11 +117,11 @@ function init(){
     skirmishAlpha = hexToRGB(forestGreen, 0.45);
 
 	sceneHandler = new SceneHandler();
+	audioHandler = new AudioHandler();
 
 	//Begin game
 	sceneHandler.beginTitleScene();
 }
-
 
 //Event Handlers
 function handleMouseDown(e){

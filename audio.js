@@ -19,26 +19,47 @@ back to the appropriate available pool.
 */
 
 //audio_bugle.ended to check if still playing.
-class AudioController {
+class AudioHandler {
     constructor(){
-        this.currentlyPlaying = [];
+        //create AudioPools
+        this.audioPools = {};
+        
+        var id = 'bugle';
+        this.audioPools[id] = new AudioPool('assets/audio/Bugle_Tune.mp3', 2, 0.2, id);
+        
+        //create AudioGroups
+        this.audioGroups = {};
+        id = 'attack';
+        var audioGroup = new AudioGroup(0.5);
+        audioGroup.addClip('bugle', 1);
+        this.audioGroups[id] = audioGroup;
     }
-
-
+    playAudioGroup(id, varyPitch){
+        var audioGroup, poolID;
+        audioGroup = this.audioGroups[id];
+        poolID = this.audioGroups[id].getRandomClip();
+        this.audioPools[poolID].playAvailableClip(varyPitch, audioGroup.volume);
+    }
+    updatePools(){
+        for (var id in this.audioPools){
+            this.audioPools[id].checkUnavailable();
+        }
+    }
 }
+
 class AudioGroup {
-    constructor(pitchVariance){
-        this.pitchVariance = pitchVariance;
+    constructor(volume){
         this.clips = [];
         this.weights = [];
         this.rollingWeights = [];
+        this.volume = volume;
         this.totalWeight = 0;
 
-        this.debugTally = [];
+        //this.debugTally = [];
     }
 
-    addClip(clip, weight){
-        this.clips.push(clip);
+    addClip(clipPoolID, weight){
+        this.clips.push(clipPoolID);
         this.weights.push(weight);
 
         if (this.rollingWeights.length > 0){
@@ -53,30 +74,22 @@ class AudioGroup {
 
         this.totalWeight += weight;
 
-        this.debugTally.push(0);
+        //this.debugTally.push(0);
     }
 
-    playClip(i, varyPitch){
+    getClipAtIndex(i){
         //play clip at index i
-        var clip = this.clips[i];
-        if (varyPitch){
-            clip.playbackRate = 1 + getRandomFloat(-this.pitchVariance, this.pitchVariance);
-        }
-        else{
-            clip.playbackRate = 1;   
-        }
-        clip.play();
+        return this.clips[i];
     }
 
-    playRandomClip(varyPitch){
+    getRandomClip(){
         var ind = getRandomInt(1, this.totalWeight);
         for (var i = this.rollingWeights.length - 1; i > -1; i--){
             if (ind < this.rollingWeights[i]){
                 continue;
             }
-            //this.playClip(i, varyPitch);
-            this.debugAddTally(i);
-            break;
+            return this.getClipAtIndex(i);
+            //this.debugAddTally(i);
         }
     }
 
@@ -98,34 +111,60 @@ class AudioGroup {
 }
 
 class AudioPool {
-    constructor(clipURL, count){
+    constructor(clipURL, count, pitchVariance, poolID){
         this.clipURL = clipURL;
+        this.pitchVariance = pitchVariance;
+        this.poolID = poolID;
         this.available = new Queue();
         this.unavailable = [];
 
         for (var i = 0; i < count; i++){
             var audio = new Audio(clipURL);
-            var arg = this.clipURL;
-            this.unavailable.push(audio);
+            this.available.add(audio);
         }
     }
-    update(){
-
+    checkUnavailable(){
+        for (var i = 0; i < this.unavailable.length; i++){
+            if (this.unavailable[i].ended){
+                var clip = this.unavailable.splice(i,1)[0];
+                i -= 1;
+                this.available.add(clip);
+            }
+        }
     }
-    onAudioLoad(e){
-        console.log(e);
-        console.log(this);
+
+    playAvailableClip(varyPitch, volume){
+        var clip = this.available.remove();
+        if (clip == undefined){
+            return null;
+        }
+        this.unavailable.push(clip);
+        console.log(clip);
+        if (varyPitch){
+            clip.playbackRate = 1 + getRandomFloat(-this.pitchVariance, this.pitchVariance);
+        }
+        else{
+            clip.playbackRate = 1;   
+        }
+
+        clip.volume = volume;
+        clip.play();
     }
 }
 
 class AudioClip {
-    constructor(clipURL){
+    constructor(clipURL, poolID){
         this.clipURL = clipURL;
+        this.poolID = poolID;
         this.audio = new Audio(this.clipURL);
+        this.audio.play();
+        this.ended = false;
+        this.audio.onended = function(){}
     }
 
 
 }
+
 class Queue {
     constructor(){
         this.data = [];
