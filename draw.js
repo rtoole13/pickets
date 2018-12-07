@@ -273,7 +273,8 @@ class BattleAnimation extends Animation {
 					var circleDist = this.baseRadius + getRandomFloat(-this.distVariance, this.distVariance); 
 					var circleDir = rotateVector(dir.x, dir.y, getRandomFloat(-this.angleVariance, this.angleVariance), true);
 					var spawnDelay = j * this.delayIter;
-					var circle = new SkirmishAnimationCircle(target.x + circleDist * circleDir.x, target.y + circleDist * circleDir.y, this.circleRadius, this.color, this.circleLifeTime, spawnDelay);
+					var circle = new SkirmishAnimationCircle(target.x + circleDist * circleDir.x, target.y + circleDist * circleDir.y, 
+															 this.circleRadius, this.color, this.circleLifeTime, spawnDelay, 'battle');
 					this.circles.push(circle);
 				}
 
@@ -334,7 +335,8 @@ class SkirmishAnimation extends Animation {
 					var circleDist = getRandomFloat(this.minCircleDist, (maxDist>this.minCircleDist)?maxDist:this.minCircleDist); //returns this.minCircleDist if maxDist <min
 					var circleDir = rotateVector(dir.x, dir.y, getRandomFloat(-this.angleVariance, this.angleVariance), true);
 					var spawnDelay = j * this.delayIter;
-					var circle = new SkirmishAnimationCircle(unit.x + circleDist * circleDir.x, unit.y + circleDist * circleDir.y, this.circleRadius, this.color, this.circleLifeTime, spawnDelay);
+					var circle = new SkirmishAnimationCircle(unit.x + circleDist * circleDir.x, unit.y + circleDist * circleDir.y,
+															 this.circleRadius, this.color, this.circleLifeTime, spawnDelay, 'skirmish');
 					this.circles.push(circle);
 				}
 
@@ -370,6 +372,7 @@ class SkirmishAnimationCircle {
 				this.begun = true;
 				this.lifeTimer.start();
 				drawCircle(this.x, this.y, this.radius, this.baseColor);
+				audioHandler.playAudioGroup('skirmish', true);
 				return false;
 			}
 			return false;
@@ -683,37 +686,6 @@ class Trail{
 		}
 
 	}
-	/*
-	drawBezier(){
-		canvasContext.save();
-		canvasContext.beginPath();
-		canvasContext.lineWidth = this.lineWidth;
-		canvasContext.moveTo(this.currentHead.x, this.currentHead.y);
-		if ((this.tempSet.length > 0) && (this.vertices.length > 0)){
-			canvasContext.bezierCurveTo(this.tempSet[0].x, this.tempSet[0].y, this.tempSet[0].x, this.tempSet[0].y,
-										this.vertices[0].x, this.vertices[0].y);
-		}
-
-		var previousColor = this.initialColor;
-		var currentLength = this.vertices.length;
-		for (var i = 0; i < (currentLength - 2); i+=2){
-			var firstPoint = this.vertices[i];
-			var midPoint = this.vertices[i + 1];
-			var lastPoint = this.vertices[i + 2];
-			
-			var gradient = canvasContext.createLinearGradient(firstPoint.x, firstPoint.y, lastPoint.x, lastPoint.y);
-			var alpha = Math.round(this.alphaStart * 100 * (currentLength - 1 - i) / (currentLength - 1)) / 100; //note that there are this.length - 1 line segments. note, won't round up on .005
-			var nextColor = this.colorPrefix + alpha.toString() + ')';
-			gradient.addColorStop(0, previousColor); //start color
-			gradient.addColorStop(1, nextColor); //end color
-			previousColor = nextColor;
-			canvasContext.strokeStyle = gradient;
-			canvasContext.bezierCurveTo(midPoint.x, midPoint.y, midPoint.x, midPoint.y, lastPoint.x, lastPoint.y);
-			canvasContext.stroke();
-		}
-		canvasContext.restore();
-	}
-	*/
 }
 
 class CurveSegment{
