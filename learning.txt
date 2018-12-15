@@ -1,0 +1,67 @@
+On learning game dev
+
+	It's incredibly easy to get excited about the prospects of developing a game. Particularly so
+prior to having developed a game. The thought of having a story to tell, or simply a juicy 
+mechanic you just know players would enjoy, come purely from mental space and ultimately manifest
+itself in a personal, interactive experience is indelibly captivating. To think, and all too often 
+ignorantly speak aloud, "Such a game will surely change the world! How the hell haven't developers
+made this obviously incredible breakthrough in interactive media/games/tech/art??" often marks the 
+beginning of a developers journey. Though it's more like the conception of a potential journey. For 
+some, it rarely leaves that stage. Rather, some are inclined to sit comfortably from afar, oftering
+little but censure and 'advice'.
+	Understandably.. as developing a game is incredibly challenging. Completely fucking exhausting 
+and demoralizing. If anyone tells you otherwise, they're gaining something by saying so. They've 
+likey sank a lifetime or two into the learning process before realizing that the process can never
+truly end, as there will always seem to be 2k better devs out there, and to compete you must learn, 
+and to continue the grind you must do whatever it takes to maintain your sanity. "It wasn't so 
+tough for me!", "It's pretty easy to implement THAT mechanic," "It only took me a couple of hours!"
+they'll say, self-validating, convincing themselves they aren't dumb or overwhelmed or never were 
+when others seemed painfully not to be.. I mean, how else can I feel about myself, that guy did a 
+thing that took me a week in two hours. I have to get better but I might be too stupid to do so.. 
+	And yet, people do it, and certainly to varying degrees of pain. And for good reason. Developing 
+a game is inncredibly rewarding. Creating something from nothing, as we aspired to in the first
+paragraph can be like, to quote Mad Men's Midge on taking shooting up, "Like.. drinking a hundred 
+bottles of whiskey while someone licks your tits." Okay, so maybe that's a bit dramatic (I also don't
+mean to minimalize the struggles of drug addiction, just to be clear..), but it's a truly gratifying
+thing that's been as meaningful to me as publishing scientific papers. A sense of belonging, 
+contendedness can wash over your. You contributed. It's awesome.
+	But enough rambling on why game development is and is not awful. To sum it up and risk sounding 
+overly cliche, anything that's worth anything will take some serious dedication and hardship. How do 
+you make it to and over the stretch of hurdles fading into the horizon? I don't know, there is no 
+one piece of advice anyone could give to keep one moving in the proper direction. However, I have had 
+a number of experiences in the past while trying to develop games and gone through a number of 
+dramatic changes in outlook and the way I approach projects.
+
+DeLeon approach - engineless development, minimal barrier to entry
+Not comparing yourself to others (people boast, people suck)
+Emphasis on discipline.
+Importance of a project you are dedicated to over broader goals
+	Dont be concerned with purchasing every possible Udemy course because those are clearly the 
+	skills that will set you apart and carry you to success
+Competence comes with serious experience. Lessons are great, but quick tutorials or stack overflow
+	queries that help you push through your immediate passion project to 'completion' will do far
+	more for you.
+Take a step back and recognize progress. You have progressed. A lot. For fucking sure.
+
+Progression:
+1) DeLeon Pong. Nothing to complete game
+2) Tinkering with complete game
+	- Modify the physics
+	- Add more players
+	- Make the paddles change color/size/force-applied every time they make contact
+3) Try to a make a canvas game from there. Just JS, just html5 canvas.
+4) Fail. Overscope incredibly. How could you have possibly thought you could develop such apparently
+	complicated mechanics on your own from scratch in a short period of time and maintain interest?
+5) FORGIVE. Overscoping is an absolute guarantee. You WILL do it. 
+6) Revisit the monster project and cut nearly everything. Focus on making it a 'game', with a win 
+	condition as soon as humanly possible.
+7) Recognize how long that awful excuse for a game ended up taking you..
+8) Appreciate the difficulty. The fault is not on you. It's inevitable.
+9) Learn to hone scope
+10) Learn the power of collaboration
+11) Learn the power of third party engines
+
+At each step along the way, stay disciplined. Read War of Art. Do stuff. Everyday. without fail. If
+you don't, don't crush yourself, just get back in the groove the next day. Get involved with 
+communities. I hardly am and suffer from it. This community is ridiculously supportive.
+

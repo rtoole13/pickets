@@ -8,7 +8,7 @@ class GameBoard{
 	}
 
 	initializeBoard	(){
-		initBoardEmptyPlain();
+		initMainBoard();
 	}
 
 	update(dt){

@@ -1,6 +1,6 @@
 "use strict";
 
-function initBoardEmptyPlain(){
+function initMainBoard(){
 	addPlayerGeneral(550, 450, 45, 10);
 	addEnemyGeneral(450, 200, -135, 10);
 
@@ -14,6 +14,22 @@ function initBoardEmptyPlain(){
 	var enemyUnit = addEnemyInfantry(200, 200, -135, "Brigade");
 	//enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
 	//addEnemyInfantry(600, 100, -135, "Brigade");
+}
+
+function initTutorialBoardOne(){
+	//move and attack tutorial
+	//move a unit into skirmish range of an enemy unit
+}
+
+function initTutorialBoardTwo(){
+	//courier capture tutorial
+	//your units nearly surround an enemy unit
+	//have a unit reroute to intercept a courier being sent by enemy general
+}
+
+function initTutorialBoardThree(){
+	//fallback and artillery tutorial
+	//have a unit fallback to friendly lines, then attack enemy with artillery
 }
 
 //Player Unit Init

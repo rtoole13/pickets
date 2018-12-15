@@ -46,14 +46,26 @@ function mainGame(){
     requestAnimationFrame(mainGame);
 }
 
-//Loop conditions
+function tutorialScene(){
+    //Tutorial loop
+    //Time calculations
+    currentFrame = new Date();
+    dt = (currentFrame - lastFrame)/1000.0;
+    lastFrame = currentFrame;
+    count = 0;
 
+    drawTutorialScene(dt);
+    requestAnimationFrame(tutorialScene);
+}
+
+//Loop conditions
 function checkSceneChange(){
     if (playClicked){
         sceneHandler.changeScene(scenes.gameScene);
         return true;
     }
     else if (howToClicked){
+        sceneHandler.changeScene(scenes.howToScene);
         return true;    
     }
     return false;

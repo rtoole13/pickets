@@ -51,6 +51,8 @@ class SceneHandler {
     }
 
     beginTitleScene(){
+        map_bg = new Image(800, 600);
+        map_bg.src = 'assets/main_map.png';
         howToHitBox = {xMin: canvas.width/2 - 55, xMax: canvas.width/2 + 55, yMin: canvas.height/2 - 30, yMax: canvas.height/2 + 10};
         playHitBox = {xMin: canvas.width/2 - 35, xMax: canvas.width/2 + 35, yMin: canvas.height/2 + 20, yMax: canvas.height/2 + 60};
         playClicked = howToClicked = false;
@@ -62,6 +64,8 @@ class SceneHandler {
     }
 
     beginGameScene(){
+        map_bg = new Image(800, 600);
+        map_bg.src = 'assets/main_map.png';
         //Zero out dicts
         unitList = {},
         playerCourierList = {},
@@ -144,7 +148,15 @@ class SceneHandler {
     }
 
     beginHowToScene(){
-        
+        map_bg = new Image(800, 600);
+        map_bg.src = 'assets/tutorial_map.png';
+        //Set tutorial gameboard
+        /*
+        gameBoard = new GameBoard(30,40);
+        gameBoard.initializeBoard();
+        */
+        //Enter tutorial loop
+        tutorialScene();
     }
 
     beginEndScene(variableArgs){

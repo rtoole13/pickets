@@ -11,6 +11,7 @@ var canvas = document.getElementById('gameCanvas'),
     debugState = false,
     count = 0,
     scenes,
+    map_bg,
     sceneHandler,
     audioHandler;
 

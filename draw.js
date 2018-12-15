@@ -1,7 +1,4 @@
 "use strict";
-var map_bg = new Image(800, 600);
-map_bg.src = 'assets/main_map.png';
-
 var blue_infantry,
 	red_infantry,
 	blue_general,
