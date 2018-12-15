@@ -19,6 +19,9 @@ function initMainBoard(){
 function initTutorialOneBoard(){
 	//move and attack tutorial
 	//move a unit into skirmish range of an enemy unit
+
+	addPlayerGeneral(550, 450, 45, 10);
+	addEnemyGeneral(450, 200, -135, 10);
 }
 
 function initTutorialTwoBoard(){

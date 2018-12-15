@@ -52,18 +52,6 @@ function drawArrows(){
 }
 
 function drawTutorialScene(dt){
-    drawBackground();
+    draw(dt);
     drawArrows();
-    /*
-    drawDebug();
-    //drawFortifications();
-    drawInfantryTrails();
-    drawPlayerUnits();
-    drawEnemyUnits();
-    drawAnimations(dt);
-    drawSelection();
-    drawOrder();
-    combatTextList.draw(dt);
-    drawHUD();
-    */
 }

@@ -742,7 +742,7 @@ function draw(dt){
 	drawPlayerUnits();
 	drawEnemyUnits();
 	drawAnimations(dt);
-	drawSelection();
+	drawSelection(dt);
 	drawOrder();
 	combatTextList.draw(dt);
 	drawHUD();
@@ -1013,46 +1013,58 @@ function drawOrder(){
 	drawRay(unit.x, unit.y, dirX, dirY, 25, color);
 }
 
-function drawSelection(){
+class Selector {
+	constructor(radius, lineWidth, rotationRate, relArcLength){
+		this.radius = radius;
+		this.lineWidth = lineWidth;
+		this.norm = 0;
+		this.rotationRate = rotationRate;
+		this.arcLength = relArcLength * 2 * Math.PI;
+	}
+	draw(dt){
+		this.norm += this.rotationRate * dt; 
+		this.norm = this.norm % 1;
+
+		var color;
+		if (activeUnit == playerGeneral){
+			color = commandColors.move;
+		}
+		else{
+			switch(commandType){
+				default:
+					color = commandColors.move;
+					break;
+				
+				case commandTypes.move:
+					color = commandColors.move;
+					break;
+				
+				case commandTypes.attackmove:
+					color = commandColors.attackmove;
+					break;
+				
+				case commandTypes.fallback:
+					color = commandColors.fallback;
+					break;
+				
+			}
+		}
+		canvasContext.save();
+		canvasContext.strokeStyle = color;
+		canvasContext.lineWidth = this.lineWidth;
+		canvasContext.beginPath();
+		canvasContext.arc(activeUnit.x, activeUnit.y, this.radius, this.norm * 2 * Math.PI, this.norm * 2 * Math.PI + Math.PI / 3);
+		canvasContext.stroke();
+		canvasContext.restore();
+	}
+
+}
+
+function drawSelection(dt){
 	if (activeUnit == undefined || null){
 		return;
 	}
-	selector += .035;
-	selector = selector % 1;
-	var radius = 25;
-
-	var color;
-	if (activeUnit == playerGeneral){
-		color = commandColors.move;
-	}
-	else{
-		switch(commandType){
-			default:
-				color = commandColors.move;
-				break;
-			
-			case commandTypes.move:
-				color = commandColors.move;
-				break;
-			
-			case commandTypes.attackmove:
-				color = commandColors.attackmove;
-				break;
-			
-			case commandTypes.fallback:
-				color = commandColors.fallback;
-				break;
-			
-		}
-	}
-	canvasContext.save();
-	canvasContext.strokeStyle = color;
-	canvasContext.lineWidth = 2;
-	canvasContext.beginPath();
-	canvasContext.arc(activeUnit.x, activeUnit.y, radius, selector * 2 * Math.PI, selector * 2 * Math.PI + Math.PI / 3);
-	canvasContext.stroke();
-	canvasContext.restore();
-
+	selector.draw(dt);
 	drawActiveUnitPath();
 }
 function drawActiveUnitPath(){

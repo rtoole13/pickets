@@ -104,7 +104,7 @@ var gameBoard,
 	queuingOrders = false,
 	orderStack = [],
 	defendingAI = true,
-	selector = 0;
+	selector;
 
 
 window.onload = function(){
@@ -419,15 +419,19 @@ function handleHowToMouseDown(e){
 	var left, right;
 	left = tutorialArrowLeft;
 	right = tutorialArrowRight;
-	if (CollisionEngine.pointInAABB(mouseX, mouseY, curr.xMin, curr.xMax, curr.yMin, curr.yMax)){
+	if (CollisionEngine.pointInAABB(mouseX, mouseY, left.xMin, left.xMax, left.yMin, left.yMax)){
 		left.clicked = true;
+		return;
 	}
-	else if (CollisionEngine.pointInAABB(mouseX, mouseY, curr.xMin, curr.xMax, curr.yMin, curr.yMax)){
+	else if (CollisionEngine.pointInAABB(mouseX, mouseY, right.xMin, right.xMax, right.yMin, right.yMax)){
 		right.clicked = true;
+		return;
 	}
 	else{
 		left.clicked = right.clicked = false;
 	}
+	//Call default handleMouseDown
+	handleMouseDown(e);
 }
 
 function handleEndGameKeyPress(e){

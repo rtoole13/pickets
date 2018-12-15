@@ -42,8 +42,8 @@ function mainGame(){
     //Updates
     gameBoard.update(dt);
     draw(dt);
-    audioHandler.updatePools();
     
+    audioHandler.updatePools();
     requestAnimationFrame(mainGame);
 }
 
@@ -61,8 +61,11 @@ function tutorialScene(){
 
     tutorialArrowLeft.update(dt);
     tutorialArrowRight.update(dt);
-
+    gameBoard.update(dt);
+    
     drawTutorialScene(dt);
+    
+    audioHandler.updatePools();
     requestAnimationFrame(tutorialScene);
 }
 
@@ -78,7 +81,7 @@ function checkTutorialSceneChange(){
         sceneHandler.changeScene(scenes.titleScene);
         return true;
     }
-    
+
     return false;
 }
 
