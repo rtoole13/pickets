@@ -11,6 +11,7 @@ var canvas = document.getElementById('gameCanvas'),
     debugState = false,
     count = 0,
     scenes,
+    boards,
     map_bg,
     sceneHandler,
     audioHandler;
@@ -20,6 +21,13 @@ var howToHitBox,
 	playHitBox,
 	howToClicked,
 	playClicked;
+
+//HowTo Objects//
+var tutorialArrowLeft,
+	tutorialArrowRight,
+	homeButton,
+	tutorialSceneCount,
+	currentTutorial;
 
 //Game Objects//
 var gameBoard,
@@ -107,6 +115,7 @@ window.onload = function(){
 
 function init(){
 	scenes = Object.freeze({titleScene:1, howToScene:2, gameScene:3, endScene:4});
+	boards = Object.freeze({main:0, tutorialOne:1, tutorialTwo:2, tutorialThree:3});
 
 	orderColor = hexToRGB(playerColor, 0.25);
     enemyOrderColor = hexToRGB(enemyColor, 0.25);
@@ -406,6 +415,21 @@ function handleTitleMouseDown(e){
 	}
 }
 
+function handleHowToMouseDown(e){
+	var left, right;
+	left = tutorialArrowLeft;
+	right = tutorialArrowRight;
+	if (CollisionEngine.pointInAABB(mouseX, mouseY, curr.xMin, curr.xMax, curr.yMin, curr.yMax)){
+		left.clicked = true;
+	}
+	else if (CollisionEngine.pointInAABB(mouseX, mouseY, curr.xMin, curr.xMax, curr.yMin, curr.yMax)){
+		right.clicked = true;
+	}
+	else{
+		left.clicked = right.clicked = false;
+	}
+}
+
 function handleEndGameKeyPress(e){
 	var keyCode = e.keyCode;
 	switch (keyCode){
@@ -451,6 +475,4 @@ function getMousePositionTitle(e){
 
 	mouseX = e.pageX - rect.left - root.scrollLeft;
 	mouseY = e.pageY - rect.top - root.scrollTop;
-
-
 }

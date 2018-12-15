@@ -16,18 +16,18 @@ function initMainBoard(){
 	//addEnemyInfantry(600, 100, -135, "Brigade");
 }
 
-function initTutorialBoardOne(){
+function initTutorialOneBoard(){
 	//move and attack tutorial
 	//move a unit into skirmish range of an enemy unit
 }
 
-function initTutorialBoardTwo(){
+function initTutorialTwoBoard(){
 	//courier capture tutorial
 	//your units nearly surround an enemy unit
 	//have a unit reroute to intercept a courier being sent by enemy general
 }
 
-function initTutorialBoardThree(){
+function initTutorialThreeBoard(){
 	//fallback and artillery tutorial
 	//have a unit fallback to friendly lines, then attack enemy with artillery
 }

@@ -7,8 +7,24 @@ class GameBoard{
 		this.collisionTimer = Date.now();
 	}
 
-	initializeBoard	(){
-		initMainBoard();
+	initializeBoard(board){
+		switch(board){
+			default:
+				initMainBoard();
+				break;
+			case boards.main:
+				initMainBoard();
+				break;
+			case boards.tutorialOne:
+				initTutorialOneBoard();
+				break;
+			case boards.tutorialTwo:
+				initTutorialTwoBoard();
+				break;
+			case boards.tutorialThree:
+				initTutorialThreeBoard();
+				break;
+		}
 	}
 
 	update(dt){

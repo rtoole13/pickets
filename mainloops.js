@@ -55,11 +55,33 @@ function tutorialScene(){
     lastFrame = currentFrame;
     count = 0;
 
+    if (checkTutorialSceneChange()){
+        return;
+    }
+
+    tutorialArrowLeft.update(dt);
+    tutorialArrowRight.update(dt);
+
     drawTutorialScene(dt);
     requestAnimationFrame(tutorialScene);
 }
 
 //Loop conditions
+function checkTutorialSceneChange(){
+    if (tutorialArrowLeft.clicked){
+        currentTutorial -= 1;
+    }
+    else if (tutorialArrowRight.clicked){
+        currentTutorial += 1;
+    }
+    if (currentTutorial < 0 || currentTutorial > tutorialSceneCount - 1){
+        sceneHandler.changeScene(scenes.titleScene);
+        return true;
+    }
+    
+    return false;
+}
+
 function checkSceneChange(){
     if (playClicked){
         sceneHandler.changeScene(scenes.gameScene);

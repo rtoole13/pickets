@@ -139,7 +139,7 @@ class SceneHandler {
         initializeSpriteSheets();
 
         gameBoard = new GameBoard(30,40);
-        gameBoard.initializeBoard();
+        gameBoard.initializeBoard(boards.main);
         hoverUnit = {};
 
 
@@ -150,11 +150,20 @@ class SceneHandler {
     beginHowToScene(){
         map_bg = new Image(800, 600);
         map_bg.src = 'assets/tutorial_map.png';
+
+        tutorialSceneCount = 3;
+        currentTutorial = 0;
+        //tutorial arrows
+        tutorialArrowLeft = new TutorialArrow(100, 500, 80, 80, true);
+        tutorialArrowRight = new TutorialArrow(700, 500, 80, 80, false);
+        
+        //set tutorial event listeners
+        canvas.addEventListener("mousemove", getMousePositionTitle, false);
+        canvas.addEventListener("mousedown", handleHowToMouseDown, false);
+
         //Set tutorial gameboard
-        /*
         gameBoard = new GameBoard(30,40);
-        gameBoard.initializeBoard();
-        */
+        gameBoard.initializeBoard(boards.tutorialOne);
         //Enter tutorial loop
         tutorialScene();
     }
@@ -187,7 +196,14 @@ class SceneHandler {
     }
 
     endHowToScene(){
-        
+        canvas.removeEventListener("mousemove", getMousePositionTitle, false);
+        canvas.removeEventListener("mousedown", handleHowToMouseDown, false);
+
+        tutorialArrowLeft = null;
+        tutorialArrowRight = null;
+        homeButton = null;
+        tutorialScenes = null;
+        currentTutorial = null;
     }
 
     endEndScene(){
