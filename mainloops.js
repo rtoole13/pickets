@@ -42,7 +42,8 @@ function mainGame(){
     //Updates
     gameBoard.update(dt);
     draw(dt);
-
+    audioHandler.updatePools();
+    
     requestAnimationFrame(mainGame);
 }
 
