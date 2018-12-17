@@ -1,38 +1,106 @@
 "use strict";
 
-function initMainBoard(){
-	addPlayerGeneral(550, 450, 45, 10);
-	addEnemyGeneral(450, 200, -135, 10);
+class BoardPreset {
+	constructor(){
 
-	addPlayerInfantry(500, 360, -135, "Brigade");
-	//addPlayerInfantry(400, 200, -135, "Brigade");
-	addPlayerInfantry(600, 400, 0, "Brigade");
-	addPlayerInfantry(400, 400, 0, "Brigade");
+	}
+	load(){
+		this.addUnits();
+	}
+	addUnits(){
 
-	addEnemyInfantry(500, 260, -135, "Brigade");
-	//addEnemyInfantry(200, 260, -135, "Brigade");	
-	var enemyUnit = addEnemyInfantry(200, 200, -135, "Brigade");
-	//enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
-	//addEnemyInfantry(600, 100, -135, "Brigade");
+	}
 }
 
-function initTutorialOneBoard(){
-	//move and attack tutorial
-	//move a unit into skirmish range of an enemy unit
+class MainBoard extends BoardPreset{
+	constructor(){
+		super();
+	}
+	addUnits(){
+		addPlayerGeneral(550, 450, 45, 10);
+		addEnemyGeneral(450, 200, -135, 10);
 
-	addPlayerGeneral(550, 450, 45, 10);
-	addEnemyGeneral(450, 200, -135, 10);
+		addPlayerInfantry(500, 360, -135, "Brigade");
+		//addPlayerInfantry(400, 200, -135, "Brigade");
+		addPlayerInfantry(600, 400, 0, "Brigade");
+		addPlayerInfantry(400, 400, 0, "Brigade");
+
+		addEnemyInfantry(500, 260, -135, "Brigade");
+		//addEnemyInfantry(200, 260, -135, "Brigade");	
+		var enemyUnit = addEnemyInfantry(200, 200, -135, "Brigade");
+		//enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
+		//addEnemyInfantry(600, 100, -135, "Brigade");
+	}
 }
 
-function initTutorialTwoBoard(){
-	//courier capture tutorial
-	//your units nearly surround an enemy unit
-	//have a unit reroute to intercept a courier being sent by enemy general
+class TutorialBoard extends BoardPreset{
+	constructor(){
+		super();
+		this.goals = new Queue();
+		this.initializeGoals();
+		this.currentGoal = null;
+	}
+	initializeGoals(){
+		throw 'Inheriting classes must override \'initializeGoals\'!';
+	}
+	checkGoals(){
+		throw 'Inheriting classes must override \'checkGoals\'!';
+	}
 }
 
-function initTutorialThreeBoard(){
-	//fallback and artillery tutorial
-	//have a unit fallback to friendly lines, then attack enemy with artillery
+class TutorialOneBoard extends TutorialBoard {
+	constructor(){
+		super();
+	}
+	addUnits(){
+		//move and attack tutorial
+		//move a unit into skirmish range of an enemy unit
+		addPlayerGeneral(550, 450, 45, 10);
+		addEnemyGeneral(450, 200, -135, 10);
+	}
+	initializeGoals(){
+
+	}
+	checkGoals(){
+
+	}
+}
+
+class TutorialTwoBoard extends TutorialBoard {
+	constructor(){
+		super();
+	}
+	addUnits(){
+		//courier capture tutorial
+		//your units nearly surround an enemy unit
+		//have a unit reroute to intercept a courier being sent by enemy general
+		addPlayerGeneral(550, 450, 45, 10);
+		addEnemyGeneral(450, 200, -135, 10);
+	}
+	initializeGoals(){
+
+	}
+	checkGoals(){
+
+	}
+}
+
+class TutorialThreeBoard extends TutorialBoard {
+	constructor(){
+		super();
+	}
+	addUnits(){
+		//fallback and artillery tutorial
+		//have a unit fallback to friendly lines, then attack enemy with artillery
+		addPlayerGeneral(550, 450, 45, 10);
+		addEnemyGeneral(450, 200, -135, 10);
+	}
+	initializeGoals(){
+
+	}
+	checkGoals(){
+
+	}
 }
 
 //Player Unit Init

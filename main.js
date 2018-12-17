@@ -12,6 +12,7 @@ var canvas = document.getElementById('gameCanvas'),
     count = 0,
     scenes,
     boards,
+    tutorialBoardNames,
     map_bg,
     sceneHandler,
     audioHandler;
@@ -115,8 +116,10 @@ window.onload = function(){
 
 function init(){
 	scenes = Object.freeze({titleScene:1, howToScene:2, gameScene:3, endScene:4});
-	boards = Object.freeze({main:0, tutorialOne:1, tutorialTwo:2, tutorialThree:3});
-
+	boards = Object.freeze({main: new MainBoard(), tutorialOne: new TutorialOneBoard(), 
+							tutorialTwo: new TutorialTwoBoard(), tutorialThree: new TutorialThreeBoard()});
+	tutorialBoardNames = Object.keys(boards).filter(elem => elem.includes('tutorial'));
+	
 	orderColor = hexToRGB(playerColor, 0.25);
     enemyOrderColor = hexToRGB(enemyColor, 0.25);
     crimsonAlpha = hexToRGB(crimson, 0.85);
@@ -125,6 +128,9 @@ function init(){
     flankAlpha = hexToRGB(crimson, 0.25);
     frontAlpha = hexToRGB(forestGreen, 0.25);
     skirmishAlpha = hexToRGB(forestGreen, 0.45);
+
+    //reference external .svgs
+    initializeSpriteSheets();
 
 	sceneHandler = new SceneHandler();
 	audioHandler = new AudioHandler();

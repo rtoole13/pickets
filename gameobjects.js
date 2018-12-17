@@ -1,30 +1,15 @@
 "use strict";
 
 class GameBoard{
-	constructor(rows, columns){
+	constructor(rows, columns, board){
 		this.grid = new Grid(rows, columns, canvas.width, canvas.height);
 		this.collisionCheckTime = 200;
 		this.collisionTimer = Date.now();
+		this.board = board;
 	}
 
-	initializeBoard(board){
-		switch(board){
-			default:
-				initMainBoard();
-				break;
-			case boards.main:
-				initMainBoard();
-				break;
-			case boards.tutorialOne:
-				initTutorialOneBoard();
-				break;
-			case boards.tutorialTwo:
-				initTutorialTwoBoard();
-				break;
-			case boards.tutorialThree:
-				initTutorialThreeBoard();
-				break;
-		}
+	initializeBoard(){
+		this.board.load();
 	}
 
 	update(dt){
@@ -425,7 +410,7 @@ class CombatUnit extends Unit{
 	}
 
 	attack(){
-		throw 'CombatUnit\s attack() function currently must be overriden by subclass!';
+		throw 'CombatUnit\'s attack() function currently must be overriden by subclass!';
 	}
 	checkCombatLists(){
 		for (var i = 0; i < this.skirmishCollisionList.length; i++){

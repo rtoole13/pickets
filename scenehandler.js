@@ -65,7 +65,6 @@ class SceneHandler {
 
     beginGameScene(){
         initializePlayableState(boards.main, true);
-
         //Enter main game loop
         mainGame();
     }
@@ -74,7 +73,7 @@ class SceneHandler {
         map_bg = new Image(800, 600);
         map_bg.src = 'assets/tutorial_map.png';
 
-        tutorialSceneCount = 3;
+        tutorialSceneCount = tutorialBoardNames.length;
         currentTutorial = 0;
         //tutorial arrows
         tutorialArrowLeft = new TutorialArrow(100, 500, 80, 80, true);
@@ -85,7 +84,7 @@ class SceneHandler {
         canvas.addEventListener("mousedown", handleHowToMouseDown, false);
 
         //Set tutorial params and gameboard
-        initializePlayableState(boards.tutorialOne, false);
+        initializePlayableState(boards[tutorialBoardNames[currentTutorial]], false);
 
         //Enter tutorial loop
         tutorialScene();
@@ -162,9 +161,8 @@ function initializePlayableState(board, mainGame){
     hoverHealth = {},
     activeHealth = {},
 
-    //Clear active and hover units
+    //Clear active unit
     activeUnit = undefined,
-    hoverUnit = undefined,
 
     //Reset win conditions
     fullRetreatPlayer = false,
@@ -215,11 +213,44 @@ function initializePlayableState(board, mainGame){
     hoverHealth = new HoverHealth(40, 5, 2, crimsonAlpha, grayAlpha);
     activeHealth = new ActiveHealth(40, 5, 2, greenAlpha, grayAlpha);
 
-    //reference external .svgs
-    initializeSpriteSheets();
-
-    gameBoard = new GameBoard(30,40);
-    gameBoard.initializeBoard(board);
+    gameBoard = new GameBoard(30,40, board);
+    gameBoard.initializeBoard();
 
     hoverUnit = {};
+}
+
+function resetObjects(){
+    //Zero out dicts
+    unitList = {},
+    playerCourierList = {},
+    playerCavalryList = {},
+    playerInfantryList = {},
+    playerArtilleryList = {},
+    playerUnitList = {},
+
+    enemyCourierList = {},
+    enemyCavalryList = {},
+    enemyInfantryList = {},
+    enemyArtilleryList = {},
+    enemyUnitList = {},
+
+    animationList = {},
+
+    playerGeneral = null,
+    enemyGeneral = null,
+    
+    //Clear active and hover units
+    activeUnit = null,
+    hoverUnit = {},
+
+    //Reset win conditions
+    fullRetreatPlayer = false,
+    fullRetreatEnemy = false,
+    gameOver = false;
+
+    givingOrder = false,
+    queuingOrders = false,
+    selector = new Selector(25, 2, 2, 1/6);
+
+    gameBoard = null;
 }

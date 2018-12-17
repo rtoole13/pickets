@@ -54,13 +54,13 @@ function tutorialScene(){
     dt = (currentFrame - lastFrame)/1000.0;
     lastFrame = currentFrame;
     count = 0;
-
     if (checkTutorialSceneChange()){
         return;
     }
-
     tutorialArrowLeft.update(dt);
     tutorialArrowRight.update(dt);
+    
+    gameBoard.board.checkGoals();
     gameBoard.update(dt);
     
     drawTutorialScene(dt);
@@ -71,17 +71,26 @@ function tutorialScene(){
 
 //Loop conditions
 function checkTutorialSceneChange(){
+    var changed = false;
     if (tutorialArrowLeft.clicked){
         currentTutorial -= 1;
+        tutorialArrowLeft.clicked = false;
+        changed = true;
     }
     else if (tutorialArrowRight.clicked){
         currentTutorial += 1;
+        tutorialArrowRight.clicked = false;
+        changed = true;
     }
-    if (currentTutorial < 0 || currentTutorial > tutorialSceneCount - 1){
+
+    if (currentTutorial < 0 || currentTutorial > (tutorialSceneCount - 1)){
         sceneHandler.changeScene(scenes.titleScene);
         return true;
     }
 
+    if (changed){
+        changeTutorialScene(currentTutorial);
+    }
     return false;
 }
 
@@ -134,4 +143,12 @@ function checkWinCondition(){
         sceneHandler.changeScene(scenes.endScene, {playerVictory: playerVictory, condition: condition});
     }
     return ending;
+}
+
+function changeTutorialScene(tutorialSceneNumber){
+    resetObjects();
+
+    var board = boards[tutorialBoardNames[tutorialSceneNumber]];
+    gameBoard = new GameBoard(30, 40, board);
+    gameBoard.initializeBoard();
 }
