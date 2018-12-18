@@ -1,6 +1,6 @@
 "use strict";
 
-function mainTitle(){
+function loopMainTitle(){
     var howToHighLighted, beginHighlighted;
     howToHighLighted = beginHighlighted = false;
     
@@ -19,14 +19,40 @@ function mainTitle(){
 
     drawTitleScene(howToHighLighted, beginHighlighted);
 
-    if (checkSceneChange()){
+    if (checkTitleSceneChange()){
         return;
     }
 
-    requestAnimationFrame(mainTitle);
+    requestAnimationFrame(loopMainTitle);
 }
 
-function mainGame(){
+function loopHowTo(){
+    var backHighLighted, tutorialHighlighted;
+    backHighLighted = tutorialHighlighted = false;
+    
+    if (CollisionEngine.pointInAABB(mouseX, mouseY, backHitBox.xMin, backHitBox.xMax, backHitBox.yMin, backHitBox.yMax)){
+        backHighLighted = true;
+        tutorialHighlighted = false;
+    }
+    else if (CollisionEngine.pointInAABB(mouseX, mouseY, tutorialHitBox.xMin, tutorialHitBox.xMax, tutorialHitBox.yMin, tutorialHitBox.yMax)){
+        backHighLighted = false;
+        tutorialHighlighted = true;
+    }
+    else{
+        backHighLighted = false;
+        tutorialHighlighted = false;
+    }
+
+    drawHowToScene(backHighLighted, tutorialHighlighted);
+
+    if (checkHowToSceneChange()){
+        return;
+    }
+
+    requestAnimationFrame(loopHowTo);
+}
+
+function loopMainGame(){
     //Main loop
     //Time calculations
     currentFrame = new Date();
@@ -44,10 +70,10 @@ function mainGame(){
     draw(dt);
     
     audioHandler.updatePools();
-    requestAnimationFrame(mainGame);
+    requestAnimationFrame(loopMainGame);
 }
 
-function tutorialScene(){
+function loopTutorialScene(){
     //Tutorial loop
     //Time calculations
     currentFrame = new Date();
@@ -66,7 +92,7 @@ function tutorialScene(){
     drawTutorialScene(dt);
     
     audioHandler.updatePools();
-    requestAnimationFrame(tutorialScene);
+    requestAnimationFrame(loopTutorialScene);
 }
 
 //Loop conditions
@@ -94,13 +120,25 @@ function checkTutorialSceneChange(){
     return false;
 }
 
-function checkSceneChange(){
+function checkTitleSceneChange(){
     if (playClicked){
         sceneHandler.changeScene(scenes.gameScene);
         return true;
     }
     else if (howToClicked){
         sceneHandler.changeScene(scenes.howToScene);
+        return true;    
+    }
+    return false;
+}
+
+function checkHowToSceneChange(){
+    if (tutorialClicked){
+        sceneHandler.changeScene(scenes.tutorialScene);
+        return true;
+    }
+    else if (backClicked){
+        sceneHandler.changeScene(scenes.titleScene);
         return true;    
     }
     return false;

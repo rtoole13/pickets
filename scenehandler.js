@@ -19,8 +19,8 @@ class SceneHandler {
                 this.endTitleScene();
                 break;
             case scenes.howToScene:
-                //this.endHowToScene();
-                this.endTutorialScene();
+                this.endHowToScene();
+                //this.endTutorialScene();
                 break;
             case scenes.tutorialScene:
                 this.endTutorialScene();
@@ -42,8 +42,8 @@ class SceneHandler {
                 this.beginTitleScene();
                 break;
             case scenes.howToScene:
-                //this.beginHowToScene();
-                this.beginTutorialScene();
+                this.beginHowToScene();
+                //this.beginTutorialScene();
                 break;
             case scenes.tutorialScene:
                 this.beginTutorialScene();
@@ -67,13 +67,27 @@ class SceneHandler {
         canvas.addEventListener("mousemove", getMousePositionTitle, false);
         canvas.addEventListener("mousedown", handleTitleMouseDown, false);
         //Enter title screen game loop
-        mainTitle();
+        loopMainTitle();
     }
 
     beginGameScene(){
         initializePlayableState(boards.main, true);
         //Enter main game loop
-        mainGame();
+        loopMainGame();
+    }
+
+    beginHowToScene(){
+        map_bg = new Image(800, 600);
+        map_bg.src = 'assets/tutorial_map.png';
+        tutorialHitBox = {xMin: canvas.width/2 - 65, xMax: canvas.width/2 + 65, yMin: canvas.height/2 + 160, yMax: canvas.height/2 + 190};
+        backHitBox = {xMin: canvas.width/2 - 35, xMax: canvas.width/2 + 35, yMin: canvas.height/2 + 120, yMax: canvas.height/2 + 150};
+        playClicked = howToClicked = false;
+        
+        canvas.addEventListener("mousemove", getMousePositionTitle, false);
+        canvas.addEventListener("mousedown", handleHowToMouseDown, false);
+        
+        //Enter title screen game loop
+        loopHowTo();
     }
 
     beginTutorialScene(){
@@ -85,16 +99,12 @@ class SceneHandler {
         //tutorial arrows
         tutorialArrowLeft = new TutorialArrow(100, 500, 80, 80, true);
         tutorialArrowRight = new TutorialArrow(700, 500, 80, 80, false);
-        
-        //set tutorial event listeners
-        canvas.addEventListener("mousemove", getMousePositionTitle, false);
-        canvas.addEventListener("mousedown", handleTutorialMouseDown, false);
 
         //Set tutorial params and gameboard
         initializePlayableState(boards[tutorialBoardNames[currentTutorial]], false);
 
         //Enter tutorial loop
-        tutorialScene();
+        loopTutorialScene();
     }
 
     beginEndScene(variableArgs){
@@ -124,8 +134,18 @@ class SceneHandler {
         window.removeEventListener("keyup", handleKeyRelease, false);
     }
 
+    endHowToScene(){
+        canvas.removeEventListener("mousemove", getMousePositionTitle, false);
+        canvas.removeEventListener("mousedown", handleHowToMouseDown, false);
+
+        backHitBox = null;
+        tutorialHitBox = null;
+        backClicked = null;
+        tutorialClicked = null;
+        
+    }
+
     endTutorialScene(){
-        //Game's over, remove event listeners
         canvas.removeEventListener("mousedown", handleTutorialMouseDown, false);
         canvas.removeEventListener("contextmenu", handleRightClickUp, false);
         canvas.removeEventListener("mousemove", getMousePosition, false);

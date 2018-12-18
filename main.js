@@ -23,6 +23,12 @@ var howToHitBox,
 	howToClicked,
 	playClicked;
 
+//HowTo Objects//
+var backHitBox,
+	tutorialHitBox,
+	backClicked,
+	tutorialClicked;
+
 //Tutorial Objects//
 var tutorialArrowLeft,
 	tutorialArrowRight,
@@ -418,6 +424,20 @@ function handleTitleMouseDown(e){
 	}
 	else{
 		playClicked = howToClicked = false;
+	}
+}
+
+function handleHowToMouseDown(e){
+	if (CollisionEngine.pointInAABB(mouseX, mouseY, backHitBox.xMin, backHitBox.xMax, backHitBox.yMin, backHitBox.yMax)){
+	    backClicked = true;
+	    return;
+	}
+	else if (CollisionEngine.pointInAABB(mouseX, mouseY, tutorialHitBox.xMin, tutorialHitBox.xMax, tutorialHitBox.yMin, tutorialHitBox.yMax)){
+	    tutorialClicked = true;
+	    return;
+	}
+	else{
+		tutorialClicked = backClicked = false;
 	}
 }
 

@@ -1337,50 +1337,6 @@ function drawGeneral(general, showCommandRadius){
 
 
 }
-function drawDebugTitle(){
-	canvasContext.save();
-	canvasContext.fillStyle = greenAlpha;
-	canvasContext.fillRect(howToHitBox.xMin, howToHitBox.yMin, howToHitBox.xMax - howToHitBox.xMin, howToHitBox.yMax - howToHitBox.yMin);
-	canvasContext.restore();
-
-	canvasContext.save();
-	canvasContext.fillStyle = grayAlpha;
-	canvasContext.fillRect(playHitBox.xMin, playHitBox.yMin, playHitBox.xMax - playHitBox.xMin, playHitBox.yMax - playHitBox.yMin);
-	canvasContext.restore();
-
-}
-
-function drawTitleScene(howToMouseOver, playMouseOver){
-	drawBackground();
-	drawScreen();
-	//drawDebugTitle();
-	var titleStr, howToStr, playStr;
-	titleStr = 'Pickets';
-	howToStr = 'How to play';
-	playStr  = 'Begin';
-
-	canvasContext.save();
-	canvasContext.fillStyle = playerColor;
-	canvasContext.font = '50px sans-serif';
-	canvasContext.textAlign = 'center';
-	canvasContext.fillText(titleStr, canvas.width/2 , -65 + canvas.height/2);
-	canvasContext.restore();
-
-	canvasContext.save();
-	canvasContext.fillStyle = (howToMouseOver)? enemyColor : playerColor;
-	canvasContext.font = '20px sans-serif';
-	canvasContext.textAlign = 'center';
-	canvasContext.fillText(howToStr, canvas.width/2 , -5 + canvas.height/2);
-	canvasContext.restore();
-
-	canvasContext.save();
-	canvasContext.fillStyle = (playMouseOver)? enemyColor : playerColor;
-	canvasContext.font = '20px sans-serif';
-	canvasContext.textAlign = 'center';
-	canvasContext.fillText(playStr, canvas.width/2 , 45 + canvas.height/2);
-	canvasContext.restore();
-
-}
 
 function drawEndGame(playerVictory, condition){
 	drawBackground();
@@ -1452,8 +1408,6 @@ function drawEndGame(playerVictory, condition){
 }
 
 function drawBackground(){
-	//canvasContext.fillStyle = 'AntiqueWhite';
-	//canvasContext.fillRect(0, 0, canvas.width, canvas.height);
     canvasContext.drawImage(map_bg, 0, 0, 800, 600);
 }
 
