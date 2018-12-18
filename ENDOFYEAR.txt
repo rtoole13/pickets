@@ -1,0 +1,78 @@
+
+major tasks
+- tutorial work
+    -howto page changes
+        list all controls
+        home button
+        tutorial button
+    - scenes
+        one - move and attack
+        two - fallback and artillery
+        three - courier capture
+    - assets
+        arrows left and right
+        arrows left and right depressed
+        arrows left and right clicked
+        scene label - one, two, and three
+        home button
+    - mechanics
+        goals
+        key and mouse input restrictions
+        config restrictions
+            unit health modification
+            unit damage modification
+
+- sound
+    - sounds needed
+        ambient sound
+        click sounds
+        artillery sounds
+        movement command
+        fallback command
+        attack command
+        courier captured sound?
+    - add always present volume control button
+    - have sound mixing affected by # of units in combat
+        looping ambient music
+        looping battle screams
+
+- morale system
+    - asset needed
+        morale art
+            unit overlay of slowly fading red to white 
+    - big time revisit
+    - reflect the enemyGeneral's units at risk logic
+
+- bugs
+    - add max dt to prevent window/tab change issues
+    - have path be considered invalid before courier is sent rather than on arrival
+    - prevent pathfinding for locations off of map
+        - most likely to happen with a retreating enemy general
+
+- other
+    - couriers reroute around static enemies
+    - artillery unit
+        unit with a slighty different combat mechanic, requiring
+        explicit orders to attack unless threatened w/o friendlies
+        in LOF
+    - HUD display of active command type
+
+- polish and balance
+    - balance (dmg, hp, morale, etc.)
+    - modify friendly reroute logic slightly to keep it from looking like units move
+        in perfect lockstep
+    - fiddle with sound pitch variance
+    - override placeholders
+        - UI elements
+            unit HUD
+            menu items
+            game title
+            fonts
+        - mouse art
+        - selector art
+        - combat explosion art
+
+
+
+
+
