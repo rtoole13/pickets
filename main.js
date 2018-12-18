@@ -23,7 +23,7 @@ var howToHitBox,
 	howToClicked,
 	playClicked;
 
-//HowTo Objects//
+//Tutorial Objects//
 var tutorialArrowLeft,
 	tutorialArrowRight,
 	homeButton,
@@ -115,7 +115,7 @@ window.onload = function(){
 }
 
 function init(){
-	scenes = Object.freeze({titleScene:1, howToScene:2, gameScene:3, endScene:4});
+	scenes = Object.freeze({titleScene:1, howToScene:2, tutorialScene: 3, gameScene: 4, endScene: 5});
 	boards = Object.freeze({main: new MainBoard(), tutorialOne: new TutorialOneBoard(), 
 							tutorialTwo: new TutorialTwoBoard(), tutorialThree: new TutorialThreeBoard()});
 	tutorialBoardNames = Object.keys(boards).filter(elem => elem.includes('tutorial'));
@@ -421,7 +421,7 @@ function handleTitleMouseDown(e){
 	}
 }
 
-function handleHowToMouseDown(e){
+function handleTutorialMouseDown(e){
 	var left, right;
 	left = tutorialArrowLeft;
 	right = tutorialArrowRight;

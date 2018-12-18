@@ -11,7 +11,6 @@ class SceneHandler {
         return SceneHandler.instance;
     }
     changeScene(targetScene, variableArgs){
-        //scenes = Object.freeze({titleScene:1, howToScene:2, gameScene:3, endScene:4});
         switch(this.currentScene){
             default:
                 this.endGameScene();
@@ -20,7 +19,11 @@ class SceneHandler {
                 this.endTitleScene();
                 break;
             case scenes.howToScene:
-                this.endHowToScene();
+                //this.endHowToScene();
+                this.endTutorialScene();
+                break;
+            case scenes.tutorialScene:
+                this.endTutorialScene();
                 break;
             case scenes.gameScene:
                 this.endGameScene();
@@ -39,7 +42,11 @@ class SceneHandler {
                 this.beginTitleScene();
                 break;
             case scenes.howToScene:
-                this.beginHowToScene();
+                //this.beginHowToScene();
+                this.beginTutorialScene();
+                break;
+            case scenes.tutorialScene:
+                this.beginTutorialScene();
                 break;
             case scenes.gameScene:
                 this.beginGameScene();
@@ -69,7 +76,7 @@ class SceneHandler {
         mainGame();
     }
 
-    beginHowToScene(){
+    beginTutorialScene(){
         map_bg = new Image(800, 600);
         map_bg.src = 'assets/tutorial_map.png';
 
@@ -81,7 +88,7 @@ class SceneHandler {
         
         //set tutorial event listeners
         canvas.addEventListener("mousemove", getMousePositionTitle, false);
-        canvas.addEventListener("mousedown", handleHowToMouseDown, false);
+        canvas.addEventListener("mousedown", handleTutorialMouseDown, false);
 
         //Set tutorial params and gameboard
         initializePlayableState(boards[tutorialBoardNames[currentTutorial]], false);
@@ -117,9 +124,9 @@ class SceneHandler {
         window.removeEventListener("keyup", handleKeyRelease, false);
     }
 
-    endHowToScene(){
+    endTutorialScene(){
         //Game's over, remove event listeners
-        canvas.removeEventListener("mousedown", handleHowToMouseDown, false);
+        canvas.removeEventListener("mousedown", handleTutorialMouseDown, false);
         canvas.removeEventListener("contextmenu", handleRightClickUp, false);
         canvas.removeEventListener("mousemove", getMousePosition, false);
 
@@ -182,7 +189,7 @@ function initializePlayableState(board, mainGame){
         canvas.addEventListener("mousedown", handleMouseDown, false);
     }
     else{
-        canvas.addEventListener("mousedown", handleHowToMouseDown, false);
+        canvas.addEventListener("mousedown", handleTutorialMouseDown, false);
     }
 
     //Enums 
