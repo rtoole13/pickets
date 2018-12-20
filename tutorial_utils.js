@@ -1,12 +1,12 @@
 "use strict";
 
 class TutorialGoal {
-    constructor(message, completionCallBack, disabledEvents){
+    constructor(message, completionCallback, disabledEvents){
         //this class is to serve as an abstract for all goals
         this.objective = null;
         this.message = (message == undefined)? 'EMPTY MESSAGE' : message;
         this.completionCallback = (completionCallback != undefined)? completionCallback : undefined;
-        this.disabledEvents = (disabledEvents != undefined) disabledEvents : undefined;
+        this.disabledEvents = (disabledEvents != undefined)? disabledEvents : undefined;
         this.defaultDisabledEvents = null;
     }
     initiate(){
@@ -49,7 +49,7 @@ class SelectUnitGoal extends TutorialGoal{
 
 class MoveTargetToLocationGoal extends TutorialGoal {
     constructor(message, targetUnit, location, radius, completionCallback, disabledEvents){
-        super(message);
+        super(message, completionCallback, disabledEvents);
         this.targetUnit = targetUnit;
         this.location = location;
         this.radius = radius;
