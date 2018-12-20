@@ -20,7 +20,6 @@ class SceneHandler {
                 break;
             case scenes.howToScene:
                 this.endHowToScene();
-                //this.endTutorialScene();
                 break;
             case scenes.tutorialScene:
                 this.endTutorialScene();
@@ -43,7 +42,6 @@ class SceneHandler {
                 break;
             case scenes.howToScene:
                 this.beginHowToScene();
-                //this.beginTutorialScene();
                 break;
             case scenes.tutorialScene:
                 this.beginTutorialScene();
@@ -66,12 +64,14 @@ class SceneHandler {
         
         canvas.addEventListener("mousemove", getMousePositionTitle, false);
         canvas.addEventListener("mousedown", handleTitleMouseDown, false);
+        
         //Enter title screen game loop
         loopMainTitle();
     }
 
     beginGameScene(){
         initializePlayableState(boards.main, true);
+        
         //Enter main game loop
         loopMainGame();
     }
@@ -96,6 +96,7 @@ class SceneHandler {
 
         tutorialSceneCount = tutorialBoardNames.length;
         currentTutorial = 0;
+        
         //tutorial arrows
         tutorialArrowLeft = new TutorialArrow(100, 500, 80, 80, true);
         tutorialArrowRight = new TutorialArrow(700, 500, 80, 80, false);
@@ -110,6 +111,7 @@ class SceneHandler {
     beginEndScene(variableArgs){
         //Add a restart game key event listener
         window.addEventListener("keydown", handleEndGameKeyPress, false);
+        
         //Go to end screen.
         drawEndGame(variableArgs.playerVictory, variableArgs.condition);
     }

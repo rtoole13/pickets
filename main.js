@@ -23,7 +23,7 @@ var howToHitBox,
 	playHitBox,
 	howToClicked,
 	playClicked;
-
+	
 //HowTo Objects//
 var backHitBox,
 	tutorialHitBox,

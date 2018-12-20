@@ -112,7 +112,7 @@ function checkTutorialSceneChange(){
     }
 
     if (currentTutorial < 0 || currentTutorial > (tutorialSceneCount - 1)){
-        sceneHandler.changeScene(scenes.titleScene);
+        sceneHandler.changeScene(scenes.howToScene);
         return true;
     }
 

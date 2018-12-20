@@ -32,7 +32,7 @@ class TutorialArrow {
                 color = 'yellow';
             }
             else{
-                color = 'red';
+                color = 'magenta';
             }
         }
         canvasContext.save()

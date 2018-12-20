@@ -68,18 +68,21 @@ class TutorialOneBoard extends TutorialBoard {
 	}
 	initializeGoals(){
 		this.goals.add(new SelectUnitGoal('Select your general, marked by the blue star, by left clicking the marker.', playerGeneral));
-		
-		var callback = function(){
+		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your general to the <br>location marked by the green circle by right clicking!', 
+													playerGeneral, {x:175, y:375}, 25));
+
+		var spawnUnitCallback = function(){
 			var playerInf = addPlayerInfantry(-20, 350, 0, "Brigade");
 			playerInf.updateCommand({type: commandTypes.move, target: null, x: 250, y: 350, angle: 45, date: Date.now()});
 
 			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade");
 			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
 		};
-		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your general to this location by right clicking in the green circle!', 
-													playerGeneral, {x:175, y:375}, 25));
-		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', playerGeneral, {x:205, y:440}, 25, callback));
+		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', playerGeneral, {x:205, y:440}, 25, spawnUnitCallback));
 		this.currentGoal = this.goals.remove();
+		if (this.currentGoal != null){
+			this.currentGoal.initiate();
+		}
 	}
 }
 
