@@ -1,10 +1,6 @@
 
 major tasks
 - tutorial work
-    -howto page changes
-        list all controls
-        home button
-        tutorial button
     - scenes
         one - move and attack
         two - fallback and artillery
@@ -44,10 +40,9 @@ major tasks
     - reflect the enemyGeneral's units at risk logic
 
 - bugs
-    - add max dt to prevent window/tab change issues
     - have path be considered invalid before courier is sent rather than on arrival
     - prevent pathfinding for locations off of map
-        - most likely to happen with a retreating enemy general
+        - most likely to happen with a retreating enemy general - SOLVED?
     - make general rotate wayyyy quicker or not have to at all.
 
 - other
@@ -57,8 +52,6 @@ major tasks
         explicit orders to attack unless threatened w/o friendlies
         in LOF
     - HUD display of active command type
-    - Add offmap conditions
-        - if unit is offmap, move to nearest valid coordinate first.
         
 - polish and balance
     - balance (dmg, hp, morale, etc.)
@@ -79,3 +72,6 @@ major tasks
 
 
 
+- notes
+    - worth separating game logic and draw methods into two different loops,
+        the former run by setInterval, the latter by requestAnimationFrame

@@ -6,7 +6,6 @@ class BoardPreset {
 	}
 	load(){
 		this.addUnits();
-		this.initializeGoals();
 	}
 	addUnits(){
 
@@ -22,15 +21,11 @@ class MainBoard extends BoardPreset{
 		addEnemyGeneral(450, 200, -135, 10);
 
 		addPlayerInfantry(500, 360, -135, "Brigade");
-		//addPlayerInfantry(400, 200, -135, "Brigade");
 		addPlayerInfantry(600, 400, 0, "Brigade");
 		addPlayerInfantry(400, 400, 0, "Brigade");
 
 		addEnemyInfantry(500, 260, -135, "Brigade");
-		//addEnemyInfantry(200, 260, -135, "Brigade");	
-		var enemyUnit = addEnemyInfantry(200, 200, -135, "Brigade");
-		//enemyUnit.updateCommand({type: commandTypes.move, target: null, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
-		//addEnemyInfantry(600, 100, -135, "Brigade");
+		addEnemyInfantry(200, 200, -135, "Brigade");
 	}
 }
 
@@ -39,6 +34,10 @@ class TutorialBoard extends BoardPreset{
 		super();
 		this.goals = new Queue();
 		this.currentGoal = null;
+	}
+	load(){
+		super.load();
+		this.initializeGoals();
 	}
 	initializeGoals(){
 		throw 'Inheriting classes must override \'initializeGoals\'!';
@@ -50,7 +49,9 @@ class TutorialBoard extends BoardPreset{
 		}
 		if (this.currentGoal.checkObjective()){
 			this.currentGoal = this.goals.remove();
-			this.currentGoal.initiate();
+			if (this.currentGoal != null){
+				this.currentGoal.initiate();
+			}
 		}
 	}
 }
@@ -62,22 +63,22 @@ class TutorialOneBoard extends TutorialBoard {
 	addUnits(){
 		//move and attack tutorial
 		//move a unit into skirmish range of an enemy unit
-		addPlayerGeneral(245, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10);
+		addPlayerGeneral(50, 350, 45, 10);
+		addEnemyGeneral(650, 150, -135, 10);
 	}
 	initializeGoals(){
 		this.goals.add(new SelectUnitGoal('Select your general, marked by the blue star, by left clicking the marker.', playerGeneral));
 		
 		var callback = function(){
-			var playerInf = addPlayerInfantry(50, 350, -135, "Brigade");
-			playerInf.updateCommand({type: commandTypes.move, target: null, x: 350, y: 350, angle: null, date: Date.now()});
+			var playerInf = addPlayerInfantry(-20, 350, 0, "Brigade");
+			playerInf.updateCommand({type: commandTypes.move, target: null, x: 250, y: 350, angle: 45, date: Date.now()});
 
-			var enemyInf = addEnemyInfantry(450, 50, -135, "Brigade");
-			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 400, y: 375, angle: null, date: Date.now()});
+			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade");
+			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
 		};
 		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your general to this location by right clicking in the green circle!', 
-													playerGeneral, {x:300, y:300}, 25, callback));
-		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', playerGeneral, {x:200, y:300}, 25));
+													playerGeneral, {x:175, y:375}, 25));
+		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', playerGeneral, {x:205, y:440}, 25, callback));
 		this.currentGoal = this.goals.remove();
 	}
 }

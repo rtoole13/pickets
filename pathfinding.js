@@ -9,8 +9,8 @@ class Pathfinder{
 		var closedSet = [];
 		var startNode, targetNode;
 		gameBoard.grid.update(currentUnit, ignoreList);
-		startNode = gameBoard.grid.getNodeFromLocation(startX, startY);
-		targetNode = gameBoard.grid.getNodeFromLocation(targetX, targetY);
+		startNode = gameBoard.grid.getClosestValidNodeFromLocation(startX, startY);
+		targetNode = gameBoard.grid.getClosestValidNodeFromLocation(targetX, targetY);
 		openSet.push(startNode);
 		
 		while (openSet.length > 0){
@@ -225,9 +225,32 @@ class Grid{
 		var i,j;
 		i = Math.floor(x / this.gridSpacing.x);
 		j = Math.floor(y / this.gridSpacing.y);
-		return this.elem[i][j];
+
+		if (i >= 0 && i < this.columns && j >= 0 && j < this.rows){
+			return this.elem[i][j];
+		}
+		return null;
 	}
 
+	getClosestValidNodeFromLocation(x, y){
+		var i,j;
+		i = Math.floor(x / this.gridSpacing.x);
+		j = Math.floor(y / this.gridSpacing.y);
+
+		if (i < 0){
+			i = 0;
+		}
+		else if (i >= this.columns){
+			i = this.columns - 1;
+		}
+		if (j < 0){
+			j = 0;
+		}
+		else if (j >= this.rows){
+			j = this.rows - 1;
+		}
+		return this.elem[i][j];
+	}
 	isLocationWalkable(x, y){
 		var i,j;
 		i = Math.floor(x / this.gridSpacing.x);

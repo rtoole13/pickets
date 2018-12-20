@@ -57,6 +57,7 @@ function loopMainGame(){
     //Time calculations
     currentFrame = new Date();
     dt = (currentFrame - lastFrame)/1000.0;
+    dt = (dt < dtMax)? dt : dtMax; //cap dt in the event of tabbing away
     lastFrame = currentFrame;
     count = 0;
     //Game over?
@@ -78,6 +79,7 @@ function loopTutorialScene(){
     //Time calculations
     currentFrame = new Date();
     dt = (currentFrame - lastFrame)/1000.0;
+    dt = (dt < dtMax)? dt : dtMax; //cap dt in the event of tabbing away
     lastFrame = currentFrame;
     count = 0;
     if (checkTutorialSceneChange()){
@@ -86,7 +88,6 @@ function loopTutorialScene(){
     tutorialArrowLeft.update(dt);
     tutorialArrowRight.update(dt);
     
-    checkTutorialGoals();
     gameBoard.board.checkGoals();
     gameBoard.update(dt);
     
@@ -97,10 +98,6 @@ function loopTutorialScene(){
 }
 
 //Loop conditions
-function checkTutorialGoals(){
-
-}
-
 function checkTutorialSceneChange(){
     var changed = false;
     if (tutorialArrowLeft.clicked){
