@@ -6,6 +6,7 @@ class BoardPreset {
 	}
 	load(){
 		this.addUnits();
+		this.initializeGoals();
 	}
 	addUnits(){
 
@@ -37,14 +38,20 @@ class TutorialBoard extends BoardPreset{
 	constructor(){
 		super();
 		this.goals = new Queue();
-		this.initializeGoals();
 		this.currentGoal = null;
 	}
 	initializeGoals(){
 		throw 'Inheriting classes must override \'initializeGoals\'!';
 	}
 	checkGoals(){
-		throw 'Inheriting classes must override \'checkGoals\'!';
+		//returns true if over
+		if (this.currentGoal == null){
+			return true;
+		}
+		if (this.currentGoal.checkObjective()){
+			this.currentGoal = this.goals.remove();
+			this.currentGoal.initiate();
+		}
 	}
 }
 
@@ -55,14 +62,23 @@ class TutorialOneBoard extends TutorialBoard {
 	addUnits(){
 		//move and attack tutorial
 		//move a unit into skirmish range of an enemy unit
-		addPlayerGeneral(550, 450, 45, 10);
+		addPlayerGeneral(245, 450, 45, 10);
 		addEnemyGeneral(450, 200, -135, 10);
 	}
 	initializeGoals(){
+		this.goals.add(new SelectUnitGoal('Select your general, marked by the blue star, by left clicking the marker.', playerGeneral));
+		
+		var callback = function(){
+			var playerInf = addPlayerInfantry(50, 350, -135, "Brigade");
+			playerInf.updateCommand({type: commandTypes.move, target: null, x: 350, y: 350, angle: null, date: Date.now()});
 
-	}
-	checkGoals(){
-
+			var enemyInf = addEnemyInfantry(450, 50, -135, "Brigade");
+			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 400, y: 375, angle: null, date: Date.now()});
+		};
+		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your general to this location by right clicking in the green circle!', 
+													playerGeneral, {x:300, y:300}, 25, callback));
+		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', playerGeneral, {x:200, y:300}, 25));
+		this.currentGoal = this.goals.remove();
 	}
 }
 
@@ -78,10 +94,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		addEnemyGeneral(450, 200, -135, 10);
 	}
 	initializeGoals(){
-
-	}
-	checkGoals(){
-
+		this.currentGoal = this.goals.remove();
 	}
 }
 
@@ -96,10 +109,7 @@ class TutorialThreeBoard extends TutorialBoard {
 		addEnemyGeneral(450, 200, -135, 10);
 	}
 	initializeGoals(){
-
-	}
-	checkGoals(){
-
+		this.currentGoal = this.goals.remove();
 	}
 }
 
@@ -119,6 +129,7 @@ function addPlayerInfantry(x, y, angle, element){
 	playerInfantryList[id] = unit;
 	playerUnitList[id] = unit;
 	unitList[id] = unit;
+	return unit;
 }
 
 function addPlayerCourier(x, y, angle, general, target, order){

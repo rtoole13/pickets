@@ -48,6 +48,7 @@ major tasks
     - have path be considered invalid before courier is sent rather than on arrival
     - prevent pathfinding for locations off of map
         - most likely to happen with a retreating enemy general
+    - make general rotate wayyyy quicker or not have to at all.
 
 - other
     - couriers reroute around static enemies
@@ -56,7 +57,9 @@ major tasks
         explicit orders to attack unless threatened w/o friendlies
         in LOF
     - HUD display of active command type
-
+    - Add offmap conditions
+        - if unit is offmap, move to nearest valid coordinate first.
+        
 - polish and balance
     - balance (dmg, hp, morale, etc.)
     - modify friendly reroute logic slightly to keep it from looking like units move

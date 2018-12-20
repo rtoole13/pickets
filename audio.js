@@ -213,27 +213,3 @@ class AudioPool {
     }
 }
 
-class Queue {
-    constructor(){
-        this.data = [];
-    }
-    add(entry){
-        this.data.unshift(entry);
-    }
-    remove(){
-        return this.data.pop();
-    }
-    cut(i){
-        return this.data.splice(i,1);
-    }
-    getFront(){
-        return this.data[this.data.length - 1];
-    }
-    getBack(){
-        return this.data[0];
-    }
-    getLength(){
-        return this.data.length;
-    }
-}
-

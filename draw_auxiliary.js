@@ -38,7 +38,6 @@ class TutorialArrow {
         canvasContext.save()
         canvasContext.fillStyle = color;
         canvasContext.translate(this.x, this.y);
-        //canvasContext.strokeRect(-gridNode.width/4, -gridNode.height/4, gridNode.width/2, gridNode.height/2);
         canvasContext.fillRect(-this.width/2, -this.height/2, this.width, this.height);
         canvasContext.restore();
     }
@@ -51,9 +50,17 @@ function drawArrows(){
     tutorialArrowRight.draw();
 }
 
+function drawGoal(){
+    var goal = gameBoard.board.currentGoal;
+    if (goal != null){
+        goal.draw();
+    }
+}
+
 function drawTutorialScene(dt){
     draw(dt);
     drawArrows();
+    drawGoal();
 }
 
 function drawDebugTitle(){

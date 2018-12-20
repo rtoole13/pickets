@@ -86,6 +86,7 @@ function loopTutorialScene(){
     tutorialArrowLeft.update(dt);
     tutorialArrowRight.update(dt);
     
+    checkTutorialGoals();
     gameBoard.board.checkGoals();
     gameBoard.update(dt);
     
@@ -96,6 +97,10 @@ function loopTutorialScene(){
 }
 
 //Loop conditions
+function checkTutorialGoals(){
+
+}
+
 function checkTutorialSceneChange(){
     var changed = false;
     if (tutorialArrowLeft.clicked){
