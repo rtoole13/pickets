@@ -10,13 +10,15 @@ var canvas = document.getElementById('gameCanvas'),
 	mouseX,
 	mouseY,
     debugState = false,
+    activeEventListeners,
     count = 0,
     scenes,
     boards,
     tutorialBoardNames,
     map_bg,
     sceneHandler,
-    audioHandler;
+    audioHandler,
+    eventHandler;
 
 //Title Objects//
 var howToHitBox,
@@ -35,7 +37,8 @@ var tutorialArrowLeft,
 	tutorialArrowRight,
 	homeButton,
 	tutorialSceneCount,
-	currentTutorial;
+	currentTutorial,
+	customEventListeners;
 
 //Game Objects//
 var gameBoard,
@@ -123,10 +126,9 @@ window.onload = function(){
 
 function init(){
 	scenes = Object.freeze({titleScene:1, howToScene:2, tutorialScene: 3, gameScene: 4, endScene: 5});
-	boards = Object.freeze({main: new MainBoard(), tutorialOne: new TutorialOneBoard(), 
-							tutorialTwo: new TutorialTwoBoard(), tutorialThree: new TutorialThreeBoard()});
+	boards = Object.freeze({main: 1, tutorialOne: 2, tutorialTwo: 3, tutorialThree: 4});
 	tutorialBoardNames = Object.keys(boards).filter(elem => elem.includes('tutorial'));
-	
+	customEventListeners = Object.freeze({defaults:1, moveOnly:2, attackMoveOnly: 3})
 	orderColor = hexToRGB(playerColor, 0.25);
     enemyOrderColor = hexToRGB(enemyColor, 0.25);
     crimsonAlpha = hexToRGB(crimson, 0.85);
@@ -141,6 +143,7 @@ function init(){
 
 	sceneHandler = new SceneHandler();
 	audioHandler = new AudioHandler();
+	eventHandler = new EventHandler();
 
 	//Begin game
 	sceneHandler.beginTitleScene();
@@ -488,7 +491,6 @@ function handleKeyRelease(e){
 			return;
 	}
 }
-
 
 function getMousePosition(e){
 	var rect = canvas.getBoundingClientRect(),

@@ -52,6 +52,7 @@ major tasks
         explicit orders to attack unless threatened w/o friendlies
         in LOF
     - HUD display of active command type
+    - Fix win/loss final screen. Have the ability to  navigate back to the main menu or retry the game
         
 - polish and balance
     - balance (dmg, hp, morale, etc.)

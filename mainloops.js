@@ -188,7 +188,7 @@ function checkWinCondition(){
 function changeTutorialScene(tutorialSceneNumber){
     resetObjects();
 
-    var board = boards[tutorialBoardNames[tutorialSceneNumber]];
+    var board = sceneHandler.loadGameBoardPreset(boards[tutorialBoardNames[tutorialSceneNumber]]);
     gameBoard = new GameBoard(30, 40, board);
     gameBoard.initializeBoard();
 }

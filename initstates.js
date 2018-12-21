@@ -54,6 +54,14 @@ class TutorialBoard extends BoardPreset{
 			}
 		}
 	}
+	clearGoals(){
+		this.goals.clearData();
+		this.goals = new Queue();
+	}
+	resetGoals(){
+		this.clearGoals();
+		this.initializeGoals();
+	}
 }
 
 class TutorialOneBoard extends TutorialBoard {

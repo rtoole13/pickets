@@ -54,7 +54,20 @@ class SceneHandler {
                 break;
         }
     }
-
+    loadGameBoardPreset(boardName){
+        switch(boardName){
+            default: 
+                return new MainBoard();
+            case boards.main:
+                return new MainBoard();
+            case boards.tutorialOne:
+                return new TutorialOneBoard();
+            case boards.tutorialTwo:
+                return new TutorialTwoBoard();
+            case boards.tutorialThree:
+                return new TutorialThreeBoard();
+        }
+    }
     beginTitleScene(){
         map_bg = new Image(800, 600);
         map_bg.src = 'assets/main_map.png';
@@ -62,15 +75,15 @@ class SceneHandler {
         playHitBox = {xMin: canvas.width/2 - 35, xMax: canvas.width/2 + 35, yMin: canvas.height/2 + 20, yMax: canvas.height/2 + 60};
         playClicked = howToClicked = false;
         
-        canvas.addEventListener("mousemove", getMousePositionTitle, false);
-        canvas.addEventListener("mousedown", handleTitleMouseDown, false);
+        eventHandler.addEventListener('canvas', "mousemove", getMousePositionTitle, false);
+        eventHandler.addEventListener('canvas', "mousedown", handleTitleMouseDown, false);
         
         //Enter title screen game loop
         loopMainTitle();
     }
 
     beginGameScene(){
-        initializePlayableState(boards.main, true);
+        initializePlayableState(sceneHandler.loadGameBoardPreset(boards.main), true);
         
         //Enter main game loop
         loopMainGame();
@@ -83,8 +96,8 @@ class SceneHandler {
         backHitBox = {xMin: canvas.width/2 - 35, xMax: canvas.width/2 + 35, yMin: canvas.height/2 + 120, yMax: canvas.height/2 + 150};
         playClicked = howToClicked = false;
         
-        canvas.addEventListener("mousemove", getMousePositionTitle, false);
-        canvas.addEventListener("mousedown", handleHowToMouseDown, false);
+        eventHandler.addEventListener('canvas', "mousemove", getMousePositionTitle, false);
+        eventHandler.addEventListener('canvas', "mousedown", handleHowToMouseDown, false);
         
         //Enter title screen game loop
         loopHowTo();
@@ -102,7 +115,7 @@ class SceneHandler {
         tutorialArrowRight = new TutorialArrow(700, 500, 80, 80, false);
 
         //Set tutorial params and gameboard
-        initializePlayableState(boards[tutorialBoardNames[currentTutorial]], false);
+        initializePlayableState(sceneHandler.loadGameBoardPreset(boards[tutorialBoardNames[currentTutorial]]), false);
 
         //Enter tutorial loop
         loopTutorialScene();
@@ -110,15 +123,15 @@ class SceneHandler {
 
     beginEndScene(variableArgs){
         //Add a restart game key event listener
-        window.addEventListener("keydown", handleEndGameKeyPress, false);
+        eventHandler.addEventListener('window', "keydown", handleEndGameKeyPress, false);
         
         //Go to end screen.
         drawEndGame(variableArgs.playerVictory, variableArgs.condition);
     }
 
     endTitleScene(){
-        canvas.removeEventListener("mousemove", getMousePositionTitle, false);
-        canvas.removeEventListener("mousedown", handleTitleMouseDown, false);
+        eventHandler.removeEventListenersByEvent("mousemove");
+        eventHandler.removeEventListenersByEvent("mousedown");
 
         howToHitBox = null;
         playHitBox = null;
@@ -128,17 +141,16 @@ class SceneHandler {
 
     endGameScene(){
         //Game's over, remove event listeners
-        canvas.removeEventListener("mousedown", handleMouseDown, false);
-        canvas.removeEventListener("contextmenu", handleRightClickUp, false);
-        canvas.removeEventListener("mousemove", getMousePosition, false);
-
-        window.removeEventListener("keydown", handleKeyPress, false);
-        window.removeEventListener("keyup", handleKeyRelease, false);
+        eventHandler.removeEventListenersByEvent("mousedown");
+        eventHandler.removeEventListenersByEvent("contextmenu");
+        eventHandler.removeEventListenersByEvent("mousemove");
+        eventHandler.removeEventListenersByEvent("keydown");
+        eventHandler.removeEventListenersByEvent("keyup");
     }
 
     endHowToScene(){
-        canvas.removeEventListener("mousemove", getMousePositionTitle, false);
-        canvas.removeEventListener("mousedown", handleHowToMouseDown, false);
+        eventHandler.removeEventListenersByEvent("mousemove");
+        eventHandler.removeEventListenersByEvent("mousedown");
 
         backHitBox = null;
         tutorialHitBox = null;
@@ -148,12 +160,11 @@ class SceneHandler {
     }
 
     endTutorialScene(){
-        canvas.removeEventListener("mousedown", handleTutorialMouseDown, false);
-        canvas.removeEventListener("contextmenu", handleRightClickUp, false);
-        canvas.removeEventListener("mousemove", getMousePosition, false);
-
-        window.removeEventListener("keydown", handleKeyPress, false);
-        window.removeEventListener("keyup", handleKeyRelease, false);
+        eventHandler.removeEventListenersByEvent("mousedown");
+        eventHandler.removeEventListenersByEvent("contextmenu");
+        eventHandler.removeEventListenersByEvent("mousemove");
+        eventHandler.removeEventListenersByEvent("keydown");
+        eventHandler.removeEventListenersByEvent("keyup");
 
         tutorialArrowLeft = null;
         tutorialArrowRight = null;
@@ -164,7 +175,7 @@ class SceneHandler {
 
     endEndScene(){
         //Remove end game listeners
-        window.removeEventListener("keydown", handleEndGameKeyPress, false);
+        eventHandler.removeEventListenersByEvent("keydown");
     }
 }
 
@@ -203,15 +214,15 @@ function initializePlayableState(board, mainGame){
     selector = new Selector(25, 2, 2, 1/6);
 
     //Event listeners
-    canvas.addEventListener("contextmenu", handleRightClickUp, false);
-    canvas.addEventListener("mousemove", getMousePosition, false);
-    window.addEventListener("keydown", handleKeyPress, false);
-    window.addEventListener("keyup", handleKeyRelease, false);
+    eventHandler.addEventListener('canvas', "contextmenu", handleRightClickUp, false);
+    eventHandler.addEventListener('canvas', "mousemove", getMousePosition, false);
+    eventHandler.addEventListener('window', "keydown", handleKeyPress, false);
+    eventHandler.addEventListener('window', "keyup", handleKeyRelease, false);
     if (mainGame){
-        canvas.addEventListener("mousedown", handleMouseDown, false);
+        eventHandler.addEventListener('canvas', "mousedown", handleMouseDown, false);
     }
     else{
-        canvas.addEventListener("mousedown", handleTutorialMouseDown, false);
+        eventHandler.addEventListener('canvas', "mousedown", handleTutorialMouseDown, false);
     }
 
     //Enums 

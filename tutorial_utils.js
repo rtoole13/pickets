@@ -52,8 +52,8 @@ class TutorialGoal {
 }
 
 class SelectUnitGoal extends TutorialGoal{
-    constructor(message, targetUnit){
-        super(message);
+    constructor(message, targetUnit, completionCallback, disabledEvents, enabledEvents){
+        super(message, completionCallback, disabledEvents, enabledEvents);
         this.targetUnit = targetUnit;
     }
     checkObjective(){
@@ -87,14 +87,91 @@ class MoveTargetToLocationGoal extends TutorialGoal {
         }
     }
 
+    disableEvents(){
+        if (this.disabledEvents != undefined){
+            console.log('disable custom events');
+        }
+        else{
+            
+        }
+    }
+    enableEvents(){
+        if (this.enabledEvents != undefined){
+            console.log('enable custom events');
+        }
+        else{
+            window.addEventListener("keydown", handleKeyPressMoveOnly, false);    
+        }
+    }
+
     draw(){
         super.draw();
         drawCircle(this.location.x, this.location.y, this.radius, this.color);
     }
 }
 
-function disableKeys(keys){
-    for (var i = 0; i < keys.length; i++){
-        var key = keys[i];
+function handleKeyPressMoveOnly(e){
+    var keyCode = e.keyCode;
+    commandType = commandTypes.move;
+    switch (keyCode){
+        case 27:
+            //Escape
+            if (activeUnit != undefined){
+                activeUnit = undefined;
+            }
+            commandType = commandTypes.move;
+            break;
+        case 32:
+            //Space
+            displayingCommandRadii = true;
+            break;
+        case 16:
+            //Shift
+            queuingOrders = true;
+            break;
+        
+        default:
+            return;
     }
+}
+
+function handleKeyPressAttackMoveOnly(e){
+    var keyCode = e.keyCode;
+    commandType = commandTypes.attackmove;
+    switch (keyCode){
+        case 27:
+            //Escape
+            if (activeUnit != undefined){
+                activeUnit = undefined;
+            }
+            commandType = commandTypes.attackmove;
+            break;
+        case 32:
+            //Space
+            displayingCommandRadii = true;
+            break;
+        case 16:
+            //Shift
+            queuingOrders = true;
+            break;
+        
+        default:
+            return;
+    }
+}
+
+function addDefaultListeners(){
+    eventHandler.addEventListener('canvas', "contextmenu", handleRightClickUp, false);
+    eventHandler.addEventListener('canvas', "mousemove", getMousePosition, false);
+    eventHandler.addEventListener('window', "keydown", handleKeyPress, false);
+    eventHandler.addEventListener('window', "keyup", handleKeyRelease, false);
+    eventHandler.addEventListener('canvas', "mousedown", handleTutorialMouseDown, false);
+}
+
+function killDefaultListeners(){
+    eventHandler.removeEventListenersByEvent("mousedown");
+    eventHandler.removeEventListenersByEvent("contextmenu");
+    eventHandler.removeEventListenersByEvent("mousemove");
+    eventHandler.removeEventListenersByEvent("keydown");
+    eventHandler.removeEventListenersByEvent("keyup");
 }
