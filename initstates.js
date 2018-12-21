@@ -16,6 +16,7 @@ class MainBoard extends BoardPreset{
 	constructor(){
 		super();
 	}
+
 	addUnits(){
 		addPlayerGeneral(550, 450, 45, 10);
 		addEnemyGeneral(450, 200, -135, 10);
@@ -35,12 +36,21 @@ class TutorialBoard extends BoardPreset{
 		this.goals = new Queue();
 		this.currentGoal = null;
 	}
+
 	load(){
 		super.load();
 		this.initializeGoals();
 	}
+
 	initializeGoals(){
 		throw 'Inheriting classes must override \'initializeGoals\'!';
+	}
+
+	beginGoals(){
+		this.currentGoal = this.goals.remove();
+		if (this.currentGoal != null){
+			this.currentGoal.initiate();
+		}
 	}
 	checkGoals(){
 		//returns true if over
@@ -54,10 +64,12 @@ class TutorialBoard extends BoardPreset{
 			}
 		}
 	}
+
 	clearGoals(){
 		this.goals.clearData();
 		this.goals = new Queue();
 	}
+
 	resetGoals(){
 		this.clearGoals();
 		this.initializeGoals();
@@ -68,29 +80,38 @@ class TutorialOneBoard extends TutorialBoard {
 	constructor(){
 		super();
 	}
+
 	addUnits(){
 		//move and attack tutorial
 		//move a unit into skirmish range of an enemy unit
 		addPlayerGeneral(50, 350, 45, 10);
 		addEnemyGeneral(650, 150, -135, 10);
 	}
+
 	initializeGoals(){
-		this.goals.add(new SelectUnitGoal('Select your general, marked by the blue star, by left clicking the marker.', playerGeneral));
+		var eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
+
+		var generalID, infantryID;
+		generalID = playerGeneral.id;
+		infantryID = 'INFA';
+
+		this.goals.add(new SelectUnitGoal('Select your general, marked by the blue star, by left clicking the marker.', generalID, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your general to the <br>location marked by the green circle by right clicking!', 
-													playerGeneral, {x:175, y:375}, 25));
+													generalID, {x:175, y:375}, 25, undefined, eventOverrides));
 
 		var spawnUnitCallback = function(){
-			var playerInf = addPlayerInfantry(-20, 350, 0, "Brigade");
-			playerInf.updateCommand({type: commandTypes.move, target: null, x: 250, y: 350, angle: 45, date: Date.now()});
+			var playerInf = addPlayerInfantry(-20, 350, 0, "Brigade", infantryID);
+			playerInf.updateCommand({type: commandTypes.move, target: null, x: 100, y: 350, angle: 45, date: Date.now()});
 
 			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade");
 			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
 		};
-		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', playerGeneral, {x:205, y:440}, 25, spawnUnitCallback));
-		this.currentGoal = this.goals.remove();
-		if (this.currentGoal != null){
-			this.currentGoal.initiate();
-		}
+		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, 25, spawnUnitCallback, undefined, eventOverrides));
+		this.goals.add(new DurationGoal('Enemy infantry are arriving from the north, and friendly infantry from the west.', 5000, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Select your infanty unit and move it into position.', infantryID, {x:250, y:390}, 25, undefined, eventOverrides));
+		this.goals.add(new DurationGoal('You can specify a unit\'s angle while issuing an order<br> by holding your right click and dragging.', 5000, undefined, eventOverrides));
+		this.beginGoals();
 	}
 }
 
@@ -98,6 +119,7 @@ class TutorialTwoBoard extends TutorialBoard {
 	constructor(){
 		super();
 	}
+
 	addUnits(){
 		//courier capture tutorial
 		//your units nearly surround an enemy unit
@@ -105,6 +127,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		addPlayerGeneral(550, 450, 45, 10);
 		addEnemyGeneral(450, 200, -135, 10);
 	}
+
 	initializeGoals(){
 		this.currentGoal = this.goals.remove();
 	}
@@ -114,14 +137,26 @@ class TutorialThreeBoard extends TutorialBoard {
 	constructor(){
 		super();
 	}
+
 	addUnits(){
 		//fallback and artillery tutorial
 		//have a unit fallback to friendly lines, then attack enemy with artillery
 		addPlayerGeneral(550, 450, 45, 10);
 		addEnemyGeneral(450, 200, -135, 10);
 	}
+
 	initializeGoals(){
 		this.currentGoal = this.goals.remove();
+	}
+}
+
+//Class to hopefully clean up passing event listeners to be enabled/disabled to the goals.
+class CustomEventListenerSet {
+	constructor(){
+		this.data = {};
+	}
+	addListener(target, eventName, callback){
+		this.data[eventName] = {target: target, callback: callback};
 	}
 }
 
@@ -134,8 +169,8 @@ function addPlayerGeneral(x, y, angle, courierCount){
 	unitList[id] = playerGeneral;
 }
 
-function addPlayerInfantry(x, y, angle, element){
-	var id = getUniqueID(5, unitList);
+function addPlayerInfantry(x, y, angle, element, overrideID){
+	var id = overrideID || getUniqueID(5, unitList);
 	var unit = new InfantryUnit(x, y, angle, element, armies.blue);
 	unit.id = id;
 	playerInfantryList[id] = unit;

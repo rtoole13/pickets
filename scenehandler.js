@@ -214,15 +214,12 @@ function initializePlayableState(board, mainGame){
     selector = new Selector(25, 2, 2, 1/6);
 
     //Event listeners
-    eventHandler.addEventListener('canvas', "contextmenu", handleRightClickUp, false);
-    eventHandler.addEventListener('canvas', "mousemove", getMousePosition, false);
-    eventHandler.addEventListener('window', "keydown", handleKeyPress, false);
-    eventHandler.addEventListener('window', "keyup", handleKeyRelease, false);
     if (mainGame){
+        eventHandler.addEventListener('canvas', "contextmenu", handleRightClickUp, false);
+        eventHandler.addEventListener('canvas', "mousemove", getMousePosition, false);
         eventHandler.addEventListener('canvas', "mousedown", handleMouseDown, false);
-    }
-    else{
-        eventHandler.addEventListener('canvas', "mousedown", handleTutorialMouseDown, false);
+        eventHandler.addEventListener('window', "keydown", handleKeyPress, false);
+        eventHandler.addEventListener('window', "keyup", handleKeyRelease, false);
     }
 
     //Enums 

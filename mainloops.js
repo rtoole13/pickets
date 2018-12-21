@@ -88,7 +88,7 @@ function loopTutorialScene(){
     tutorialArrowLeft.update(dt);
     tutorialArrowRight.update(dt);
     
-    gameBoard.board.checkGoals();
+    gameBoard.board.checkGoals(); //change scene when goals are accomplished
     gameBoard.update(dt);
     
     drawTutorialScene(dt);

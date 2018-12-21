@@ -1,35 +1,43 @@
 "use strict";
 
 class TutorialGoal {
-    constructor(message, completionCallback, disabledEvents, enabledEvents){
+    constructor(message, completionCallback, eventOverrides){
         //this class is to serve as an abstract for all goals
         this.objective = null;
         this.message = (message == undefined)? 'EMPTY MESSAGE' : message;
         this.completionCallback = (completionCallback != undefined)? completionCallback : undefined;
-        this.disabledEvents = (disabledEvents != undefined)? disabledEvents : undefined;
-        this.enabledEvents = (enabledEvents != undefined)? enabledEvents : undefined;
+        this.eventOverrides = (eventOverrides != undefined)? eventOverrides : undefined;
         this.defaultDisabledEvents = null;
     }
+
     initiate(){
-        this.disableEvents();
         this.enableEvents();
     }
+
+    onCompletion(){
+        this.disableEvents();
+        if (this.completionCallback != undefined){
+            this.completionCallback();
+        }
+        return true;
+    }
+
     disableEvents(){
-        if (this.disabledEvents != undefined){
-            console.log('disable custom events');
-        }
-        else{
-            console.log('disable default events')
-        }
+        eventHandler.removeAllEventListeners();    
     }
+
     enableEvents(){
-        if (this.enabledEvents != undefined){
-            console.log('enable custom events');
+        addDefaultListeners();
+        if (this.eventOverrides == undefined){
+            return;
         }
-        else{
-            console.log('enable default events')
+        for (var eventName in this.eventOverrides.data){
+            eventHandler.removeEventListenersByEvent(eventName);
+            var eventData = this.eventOverrides.data[eventName];
+            eventHandler.addEventListener(eventData.target, eventName, eventData.callback, false);
         }
     }
+
     checkObjective(){
         return false;
     } 
@@ -52,62 +60,82 @@ class TutorialGoal {
 }
 
 class SelectUnitGoal extends TutorialGoal{
-    constructor(message, targetUnit, completionCallback, disabledEvents, enabledEvents){
-        super(message, completionCallback, disabledEvents, enabledEvents);
-        this.targetUnit = targetUnit;
+    constructor(message, targetID, completionCallback, eventOverrides){
+        super(message, completionCallback, eventOverrides);
+        this.targetID = targetID;
     }
+
     checkObjective(){
-        if (activeUnit == this.targetUnit){
-            return true;
+        if (activeUnit != undefined && activeUnit.id == this.targetID){
+            return this.onCompletion();
         }
         else{
             return false;
         }
     }
+
+    initiate(){
+        super.initiate();
+    }
 }
 
 class MoveTargetToLocationGoal extends TutorialGoal {
-    constructor(message, targetUnit, location, radius, completionCallback, disabledEvents, enabledEvents){
-        super(message, completionCallback, disabledEvents, enabledEvents);
-        this.targetUnit = targetUnit;
+    constructor(message, targetID, location, radius, completionCallback, eventOverrides){
+        super(message, completionCallback, eventOverrides);
+        this.targetID = targetID;
+        this.targetUnit = null;
         this.location = location;
         this.radius = radius;
         this.radiusSq = radius * radius;
         this.color = greenAlpha;
     }
+
     checkObjective(){
         if (getDistanceSq(this.targetUnit.x, this.targetUnit.y, this.location.x, this.location.y) < this.radiusSq){
-            if (this.completionCallback != undefined){
-                this.completionCallback();
-            }
-            return true;
+            return this.onCompletion();
         }
         else{
             return false;
         }
     }
 
-    disableEvents(){
-        if (this.disabledEvents != undefined){
-            console.log('disable custom events');
-        }
-        else{
-            
-        }
-    }
-    enableEvents(){
-        if (this.enabledEvents != undefined){
-            console.log('enable custom events');
-        }
-        else{
-            window.addEventListener("keydown", handleKeyPressMoveOnly, false);    
-        }
+    initiate(){
+        super.initiate();
+        this.targetUnit = playerUnitList[this.targetID];
     }
 
     draw(){
         super.draw();
         drawCircle(this.location.x, this.location.y, this.radius, this.color);
     }
+}
+
+class DurationGoal extends TutorialGoal {
+    constructor(message, duration, completionCallback, eventOverrides){
+        super(message, completionCallback, eventOverrides);
+        this.duration = duration;
+        this.goalTimer = new Timer(this.duration, false);
+    }
+
+    checkObjective(){
+        if (this.goalTimer.checkTime()){
+            return this.onCompletion();
+        }
+        else{
+            return false;
+        }
+    }
+    initiate(){
+        super.initiate();
+        this.goalTimer.start();
+    }
+    draw(){
+        super.draw();
+        //var relativeFill = (this.duration - this.goalTimer.getElapsedTime()) / this.duration;
+        var relativeFill = this.goalTimer.getElapsedTime() / this.duration;
+        drawPartialCirlce(canvas.width/2, 80, 25, greenAlpha, relativeFill,  -Math.PI / 2, true);
+    }
+
 }
 
 function handleKeyPressMoveOnly(e){
@@ -166,12 +194,4 @@ function addDefaultListeners(){
     eventHandler.addEventListener('window', "keydown", handleKeyPress, false);
     eventHandler.addEventListener('window', "keyup", handleKeyRelease, false);
     eventHandler.addEventListener('canvas', "mousedown", handleTutorialMouseDown, false);
-}
-
-function killDefaultListeners(){
-    eventHandler.removeEventListenersByEvent("mousedown");
-    eventHandler.removeEventListenersByEvent("contextmenu");
-    eventHandler.removeEventListenersByEvent("mousemove");
-    eventHandler.removeEventListenersByEvent("keydown");
-    eventHandler.removeEventListenersByEvent("keyup");
 }

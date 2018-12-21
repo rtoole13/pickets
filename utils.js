@@ -111,6 +111,7 @@ class EventHandler {
     constructor(){
         this.activeEvents = {};
     }
+    
     addEventListener(target, eventName, callback, bubble){
         if (this.activeEvents[eventName] == undefined){
             this.activeEvents[eventName] = [];
@@ -127,6 +128,7 @@ class EventHandler {
             throw 'Currently only accepting events tied to the canvas or the window!'
         }
     }
+
     removeEventListenersByEvent(eventName){
         var attachedEvents = this.activeEvents[eventName];
         if (attachedEvents == undefined){
@@ -147,6 +149,7 @@ class EventHandler {
             i -= 1;
         }
     }
+
     removeAllEventListeners(){
         for (var eventName in this.activeEvents){
             this.removeEventListenersByEvent(eventName);

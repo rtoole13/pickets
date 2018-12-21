@@ -767,6 +767,7 @@ function initializeSpriteSheets(){
 	red_courier = new Image(200, 25);
 	red_courier.src = 'assets/red_courier.svg';
 }
+
 function initializeSpriteSheet(unit){
 	switch(unit.unitType){
 		default:
@@ -1132,7 +1133,6 @@ function drawActiveUnitPath(){
 	
 }
 function getPathColors(command){
-
 	var colors = {mid: 'magenta', last: 'magenta'}; 
 	switch(command){
 		case commandTypes.move:
@@ -1152,11 +1152,22 @@ function getPathColors(command){
 }
 
 function drawCircle(xLoc, yLoc, radius, fillColor){
-	
 	canvasContext.save();
 	canvasContext.fillStyle = fillColor;
 	canvasContext.beginPath();
 	canvasContext.arc(xLoc, yLoc, radius, 0, 2 * Math.PI);
+	canvasContext.fill();
+	canvasContext.restore();
+}
+
+function drawPartialCirlce(xLoc, yLoc, radius, fillColor, relativeFill, phaseOffset, ccw){
+	canvasContext.save();
+	canvasContext.fillStyle = fillColor;
+	canvasContext.translate(xLoc, yLoc);
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, radius, phaseOffset, phaseOffset + relativeFill * 2 * Math.PI, ccw);
+	canvasContext.lineTo(0,0);
+	canvasContext.closePath();
 	canvasContext.fill();
 	canvasContext.restore();
 }
