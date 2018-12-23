@@ -92,13 +92,13 @@ class TutorialOneBoard extends TutorialBoard {
 		var eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
 
-		var generalID, infantryID;
+		var generalID, infantryID, enemyInfantryID;
 		generalID = playerGeneral.id;
 		infantryID = 'INFA';
-
+		enemyInfantryID = 'INFB';
 		this.goals.add(new SelectUnitGoal('Select your general, marked by the blue star, by left clicking the marker.', generalID, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your general to the <br>location marked by the green circle by right clicking!', 
-													generalID, {x:175, y:375}, 25, undefined, eventOverrides));
+													generalID, {x:175, y:375}, null, 25, undefined, eventOverrides));
 
 		var spawnUnitCallback = function(){
 			var playerInf = addPlayerInfantry(-20, 350, 0, "Brigade", infantryID);
@@ -107,10 +107,12 @@ class TutorialOneBoard extends TutorialBoard {
 			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade");
 			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
 		};
-		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, 25, spawnUnitCallback, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, null, 25, spawnUnitCallback, undefined, eventOverrides));
 		this.goals.add(new DurationGoal('Enemy infantry are arriving from the north, and friendly infantry from the west.', 5000, undefined, eventOverrides));
-		this.goals.add(new MoveTargetToLocationGoal('Select your infanty unit and move it into position.', infantryID, {x:250, y:390}, 25, undefined, eventOverrides));
-		this.goals.add(new DurationGoal('You can specify a unit\'s angle while issuing an order<br> by holding your right click and dragging.', 5000, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Select your infanty unit and move it into position.', infantryID, {x:250, y:390}, null, 25, undefined, eventOverrides));
+		this.goals.add(new DurationGoal('You can specify a unit\'s angle while issuing an order<br> by holding right click and dragging.', 3000, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Move your infantry here and rotate to the angle indicated by the arrow.', infantryID, {x:300, y:350}, {x:0, y:1}, 25, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Now rotate to face the enemy!', infantryID, {x:300, y:350}, {x:0.79, y:-0.6}, 25, undefined, eventOverrides));
 		this.beginGoals();
 	}
 }

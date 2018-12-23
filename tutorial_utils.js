@@ -80,19 +80,29 @@ class SelectUnitGoal extends TutorialGoal{
 }
 
 class MoveTargetToLocationGoal extends TutorialGoal {
-    constructor(message, targetID, location, radius, completionCallback, eventOverrides){
+    constructor(message, targetID, location, dir, radius, completionCallback, eventOverrides){
         super(message, completionCallback, eventOverrides);
+        this.angleTolerance = 15;
         this.targetID = targetID;
         this.targetUnit = null;
         this.location = location;
+        this.dir = (dir != null)? normalizeVector(dir.x, dir.y) : null;
+        this.angle = (this.dir != null)? getAngleFromDir(this.dir.x, this.dir.y) : null;
         this.radius = radius;
         this.radiusSq = radius * radius;
         this.color = greenAlpha;
     }
 
     checkObjective(){
-        if (getDistanceSq(this.targetUnit.x, this.targetUnit.y, this.location.x, this.location.y) < this.radiusSq){
-            return this.onCompletion();
+        if (getDistanceSq(this.targetUnit.x, this.targetUnit.y, this.location.x, this.location.y) < this.radiusSq) {
+            if (this.dir == null){
+                return this.onCompletion();
+            }
+            else{
+                if (Math.abs(getAngle(this.targetUnit.dirX, this.targetUnit.dirY, this.dir.x, this.dir.y, true)) < this.angleTolerance) {
+                    return this.onCompletion();
+                }
+            }
         }
         else{
             return false;
@@ -107,6 +117,9 @@ class MoveTargetToLocationGoal extends TutorialGoal {
     draw(){
         super.draw();
         drawCircle(this.location.x, this.location.y, this.radius, this.color);
+        if (this.dir != null){
+            drawAngledArrow(this.location.x, this.location.y, this.radius + 10, this.color, this.angle);
+        }
     }
 }
 

@@ -84,7 +84,7 @@ class Unit{
 		this.targetSigmaFinal = 5;
 		this.targetAngleSigma = 3; //deg 
 		this.redundantCommandSigma = 25;
-		this.turnAngleTol = 90;
+		this.turnAngleTol = 70;
 		this.command = null;
 		this.commandQueue = [];
 		this.army = army;

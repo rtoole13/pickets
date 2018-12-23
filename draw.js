@@ -737,7 +737,6 @@ class CurveSegment{
 function draw(dt){
 	drawBackground();
 	drawDebug();
-	//drawFortifications();
 	drawInfantryTrails();
 	drawPlayerUnits();
 	drawEnemyUnits();
@@ -1169,6 +1168,21 @@ function drawPartialCirlce(xLoc, yLoc, radius, fillColor, relativeFill, phaseOff
 	canvasContext.lineTo(0,0);
 	canvasContext.closePath();
 	canvasContext.fill();
+	canvasContext.restore();
+}
+
+function drawAngledArrow(xLoc, yLoc, radius, fillColor, angle){	
+	canvasContext.save();
+	canvasContext.fillStyle = fillColor;
+	canvasContext.translate(xLoc, yLoc);
+	canvasContext.rotate(-angle * Math.PI/180);
+	canvasContext.beginPath();
+	canvasContext.moveTo(radius + 8, 0);
+	canvasContext.lineTo(radius, -8);
+	canvasContext.lineTo(radius, 8);
+	canvasContext.closePath();
+	canvasContext.fill();
+
 	canvasContext.restore();
 }
 

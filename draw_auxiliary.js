@@ -59,8 +59,9 @@ function drawGoal(){
 
 function drawTutorialScene(dt){
     draw(dt);
-    drawArrows();
     drawGoal();
+    drawOrder(); //being called twice.. once in draw, then again here.
+    drawArrows();
 }
 
 function drawDebugTitle(){

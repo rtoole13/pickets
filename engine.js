@@ -395,6 +395,10 @@ function getAngleFromDir(dirX, dirY){
 	}
 }
 
+function getAngleFromNormalizedDir(dirX, dirY){
+	var dir = normalizeVector(dirX, dirY);
+	return getAngleFromDir(dir.x, dir.y);
+}
 function getDirFromAngle(angle){
 	return {x: Math.cos((angle) * Math.PI/180), y: - Math.sin((angle) * Math.PI/180)};
 }
