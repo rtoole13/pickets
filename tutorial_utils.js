@@ -143,10 +143,25 @@ class DurationGoal extends TutorialGoal {
         this.goalTimer.start();
     }
     draw(){
-        super.draw();
-        //var relativeFill = (this.duration - this.goalTimer.getElapsedTime()) / this.duration;
+
+        var message, x, y, circleOffsetY;
+        message = this.message.split("<br>");
+        canvasContext.save();
+        canvasContext.fillStyle = playerColor;
+        canvasContext.font = '20px sans-serif';
+        canvasContext.textAlign = 'left';
+
+        x = canvas.width / 2 - 240;
+        y = canvas.height / 2 - 250;
+        circleOffsetY = -30 - (12 * (message.length - 1));
+        for (var i = 0; i < message.length; i++){
+            canvasContext.fillText(message[i], x + 40, y);
+            y += 24;
+        }
+        canvasContext.restore();
+
         var relativeFill = this.goalTimer.getElapsedTime() / this.duration;
-        drawPartialCirlce(canvas.width/2, 80, 25, greenAlpha, relativeFill,  -Math.PI / 2, true);
+        drawPartialCircle(x, y + circleOffsetY, 25, orderColor, relativeFill,  -Math.PI / 2, true);
     }
 
 }

@@ -1159,7 +1159,7 @@ function drawCircle(xLoc, yLoc, radius, fillColor){
 	canvasContext.restore();
 }
 
-function drawPartialCirlce(xLoc, yLoc, radius, fillColor, relativeFill, phaseOffset, ccw){
+function drawPartialCircle(xLoc, yLoc, radius, fillColor, relativeFill, phaseOffset, ccw){
 	canvasContext.save();
 	canvasContext.fillStyle = fillColor;
 	canvasContext.translate(xLoc, yLoc);

@@ -108,7 +108,7 @@ class TutorialOneBoard extends TutorialBoard {
 			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
 		};
 		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, null, 25, spawnUnitCallback, undefined, eventOverrides));
-		this.goals.add(new DurationGoal('Enemy infantry are arriving from the north, and friendly infantry from the west.', 5000, undefined, eventOverrides));
+		this.goals.add(new DurationGoal('Enemy infantry are arriving from the north, <br>and friendly infantry from the west.', 5000, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('Select your infanty unit and move it into position.', infantryID, {x:250, y:390}, null, 25, undefined, eventOverrides));
 		this.goals.add(new DurationGoal('You can specify a unit\'s angle while issuing an order<br> by holding right click and dragging.', 3000, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('Move your infantry here and rotate to the angle indicated by the arrow.', infantryID, {x:300, y:350}, {x:0, y:1}, 25, undefined, eventOverrides));
