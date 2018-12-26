@@ -122,6 +122,11 @@ function checkTutorialSceneChange(){
     return false;
 }
 
+function restartTutorialScene(){
+    eventHandler.removeAllEventListeners();
+    changeTutorialScene(currentTutorial);
+}
+
 function checkTitleSceneChange(){
     if (playClicked){
         sceneHandler.changeScene(scenes.gameScene);

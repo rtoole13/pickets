@@ -19,7 +19,7 @@ class MainBoard extends BoardPreset{
 
 	addUnits(){
 		addPlayerGeneral(550, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10);
+		addEnemyGeneral(450, 200, -135, 10, true);
 
 		addPlayerInfantry(500, 360, -135, "Brigade");
 		addPlayerInfantry(600, 400, 0, "Brigade");
@@ -85,17 +85,18 @@ class TutorialOneBoard extends TutorialBoard {
 		//move and attack tutorial
 		//move a unit into skirmish range of an enemy unit
 		addPlayerGeneral(50, 350, 45, 10);
-		addEnemyGeneral(650, 150, -135, 10);
+		addEnemyGeneral(650, 150, -135, 10, false);
 	}
 
 	initializeGoals(){
 		var eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
-
 		var generalID, infantryID, enemyInfantryID;
 		generalID = playerGeneral.id;
 		infantryID = 'INFA';
 		enemyInfantryID = 'INFB';
+		this.goals.add(new ClickGoal('Press <R> at any point to restart the current tutorial,<br> or use the arrows to navigate between tutorials.', undefined));
+		this.goals.add(new ClickGoal('Tutorial One: Basics.', undefined));
 		this.goals.add(new SelectUnitGoal('Select your general, marked by the blue star, by left clicking the marker.', generalID, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your general to the <br>location marked by the green circle by right clicking!', 
 													generalID, {x:175, y:375}, null, 25, undefined, eventOverrides));
@@ -107,8 +108,16 @@ class TutorialOneBoard extends TutorialBoard {
 			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade");
 			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
 		};
-		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, null, 25, spawnUnitCallback, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, null, 25, spawnUnitCallback, eventOverrides));
 		this.goals.add(new DurationGoal('Enemy infantry are arriving from the north, <br>and friendly infantry from the west.', 5000, undefined, eventOverrides));
+		this.goals.add(new KeyPressGoal('Press <Space> to continue.', 32, undefined));
+		this.goals.add(new ClickGoal('Pressing <Space> at any point to reveal your general\'s command radius<br>\
+			and your infantry\'s battle and skirmish radii. Your units\' flanks and<br>\
+			front are also indicated in red and green, respectively.', undefined));
+		this.goals.add(new ClickGoal('Combat units will automatically skirmish with enemies within their skirmish radius.<br>\
+			Units will fortify themselves while skirmishing or disengaged, as indicated by the<br>triangles at each stationary unit\'s front.', undefined));
+		this.goals.add(new ClickGoal('Combat units will lock into battle with enemies within their battle radius.<br>\
+			Only ordering the unit to fallback will allow it to disengage.', undefined));
 		this.goals.add(new MoveTargetToLocationGoal('Select your infanty unit and move it into position.', infantryID, {x:250, y:390}, null, 25, undefined, eventOverrides));
 		this.goals.add(new DurationGoal('You can specify a unit\'s angle while issuing an order<br> by holding right click and dragging.', 3000, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('Move your infantry here and rotate to the angle indicated by the arrow.', infantryID, {x:300, y:350}, {x:0, y:1}, 25, undefined, eventOverrides));
@@ -127,7 +136,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		//your units nearly surround an enemy unit
 		//have a unit reroute to intercept a courier being sent by enemy general
 		addPlayerGeneral(550, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10);
+		addEnemyGeneral(450, 200, -135, 10, false);
 	}
 
 	initializeGoals(){
@@ -144,7 +153,7 @@ class TutorialThreeBoard extends TutorialBoard {
 		//fallback and artillery tutorial
 		//have a unit fallback to friendly lines, then attack enemy with artillery
 		addPlayerGeneral(550, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10);
+		addEnemyGeneral(450, 200, -135, 10, false);
 	}
 
 	initializeGoals(){
@@ -191,9 +200,9 @@ function addPlayerCourier(x, y, angle, general, target, order){
 }
 
 //Enemy Unit Init
-function addEnemyGeneral(x, y, angle, courierCount){
+function addEnemyGeneral(x, y, angle, courierCount, smart){
 	var id = getUniqueID(5, unitList);
-	enemyGeneral = new EnemyGeneral(x, y, angle, courierCount, armies.red);
+	enemyGeneral = new EnemyGeneral(x, y, angle, courierCount, armies.red, smart);
 	enemyGeneral.id = id;
 	enemyUnitList[id] = enemyGeneral;
 	unitList[id] = enemyGeneral;

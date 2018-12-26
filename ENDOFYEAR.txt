@@ -46,6 +46,8 @@ major tasks
     - make general rotate wayyyy quicker or not have to at all.
 
 - other
+    - change map grid!
+    - add courier count display!!
     - couriers reroute around static enemies
     - artillery unit
         unit with a slighty different combat mechanic, requiring

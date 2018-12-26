@@ -79,14 +79,51 @@ class SelectUnitGoal extends TutorialGoal {
     }
 }
 
+class ClickGoal extends TutorialGoal {
+    constructor(message, completionCallback){
+        var tempEventOverrides = new CustomEventListenerSet();
+        tempEventOverrides.addListener('window', "mousedown", handleClickToContinue);
+        super(message, completionCallback, tempEventOverrides);
+        this.clicked = false;
+    }
+    checkObjective(){
+        if (this.clicked){
+            return this.onCompletion();
+        }
+        else{
+            return false;
+        }
+    }
+    draw(){
+        var message, y;
+        message = this.message.split("<br>");
+        canvasContext.save();
+        canvasContext.fillStyle = playerColor;
+        canvasContext.font = '20px sans-serif';
+        canvasContext.textAlign = 'center';
+
+        y = canvas.height / 2 - 250;
+        for (var i = 0; i < message.length; i++){
+            canvasContext.fillText(message[i], canvas.width/2, y);
+            y += 24;
+        }
+
+        canvasContext.font = '16px sans-serif';
+        canvasContext.fillText('(click to continue)', canvas.width/2, y);
+        canvasContext.restore();
+    }
+}
 class KeyPressGoal extends TutorialGoal {
-    constructor(message, keyCode, completionCallback, eventOverrides){
-        super(message, completionCallback, eventOverrides);
+    constructor(message, keyCode, completionCallback){
+        var tempEventOverrides = new CustomEventListenerSet();
+        tempEventOverrides.addListener('window', "keydown", handleGoalSpecificKeyPress);
+        super(message, completionCallback, tempEventOverrides);
         this.keyCode = keyCode;
+        this.keyPressed = false;
     }
 
     checkObjective(){
-        if (activeUnit != undefined && activeUnit.id == this.targetID){
+        if (this.keyPressed){
             return this.onCompletion();
         }
         else{
@@ -200,7 +237,26 @@ function handleKeyPressMoveOnly(e){
             //Shift
             queuingOrders = true;
             break;
-        
+        case 82:
+            //R
+            restartTutorialScene();
+            break;
+        default:
+            return;
+    }
+}
+
+function handleGoalSpecificKeyPress(e){
+    var keyCode = e.keyCode;
+    commandType = commandTypes.move;
+    switch (keyCode){
+        case gameBoard.board.currentGoal.keyCode:
+            gameBoard.board.currentGoal.keyPressed = true;
+            break;
+        case 82:
+            //R
+            restartTutorialScene();
+            break;
         default:
             return;
     }
@@ -225,10 +281,32 @@ function handleKeyPressAttackMoveOnly(e){
             //Shift
             queuingOrders = true;
             break;
-        
+        case 82:
+            //R
+            restartTutorialScene();
+            break;
         default:
             return;
     }
+}
+
+function handleClickToContinue(){
+    var left, right;
+    left = tutorialArrowLeft;
+    right = tutorialArrowRight;
+    if (CollisionEngine.pointInAABB(mouseX, mouseY, left.xMin, left.xMax, left.yMin, left.yMax)){
+        left.clicked = true;
+        return;
+    }
+    else if (CollisionEngine.pointInAABB(mouseX, mouseY, right.xMin, right.xMax, right.yMin, right.yMax)){
+        right.clicked = true;
+        return;
+    }
+    else{
+        left.clicked = right.clicked = false;
+    }
+
+    gameBoard.board.currentGoal.clicked = true;
 }
 
 function addDefaultListeners(){

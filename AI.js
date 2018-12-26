@@ -1,7 +1,7 @@
 "use strict";
 
 class EnemyGeneral extends General{
-    constructor(x, y, angle, courierCount, army){
+    constructor(x, y, angle, courierCount, army, smart){
         super(x, y, angle, courierCount, army);
         this.flightRadius = 150;
         this.closeFriendlyRadius = 150;
@@ -24,10 +24,13 @@ class EnemyGeneral extends General{
         this.AIstates = enemyGenStates; //global enum surviving, rallying, commanding
         this.currentState = this.AIstates.commanding;
         this.recentlyAssistedUnitID = '';
+        this.smart = smart;
 
     }
     update(dt){
-        this.executeStateLogic();
+        if (this.smart){
+            this.executeStateLogic();
+        }
         super.update(dt);
         this.nearbyEnemies = [];
         this.nearbyFriendlies = [];
@@ -340,3 +343,4 @@ class EnemyGeneral extends General{
         }
     }
 }
+
