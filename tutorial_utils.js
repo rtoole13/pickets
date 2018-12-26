@@ -59,7 +59,7 @@ class TutorialGoal {
     } 
 }
 
-class SelectUnitGoal extends TutorialGoal{
+class SelectUnitGoal extends TutorialGoal {
     constructor(message, targetID, completionCallback, eventOverrides){
         super(message, completionCallback, eventOverrides);
         this.targetID = targetID;
@@ -76,6 +76,22 @@ class SelectUnitGoal extends TutorialGoal{
 
     initiate(){
         super.initiate();
+    }
+}
+
+class KeyPressGoal extends TutorialGoal {
+    constructor(message, keyCode, completionCallback, eventOverrides){
+        super(message, completionCallback, eventOverrides);
+        this.keyCode = keyCode;
+    }
+
+    checkObjective(){
+        if (activeUnit != undefined && activeUnit.id == this.targetID){
+            return this.onCompletion();
+        }
+        else{
+            return false;
+        }
     }
 }
 
@@ -143,7 +159,6 @@ class DurationGoal extends TutorialGoal {
         this.goalTimer.start();
     }
     draw(){
-
         var message, x, y, circleOffsetY;
         message = this.message.split("<br>");
         canvasContext.save();
