@@ -1022,6 +1022,9 @@ class Selector {
 		this.arcLength = relArcLength * 2 * Math.PI;
 	}
 	draw(dt){
+		if (activeUnit == undefined){
+			return;
+		}
 		this.norm += this.rotationRate * dt; 
 		this.norm = this.norm % 1;
 

@@ -117,6 +117,7 @@ class KeyPressGoal extends TutorialGoal {
     constructor(message, keyCode, completionCallback){
         var tempEventOverrides = new CustomEventListenerSet();
         tempEventOverrides.addListener('window', "keydown", handleGoalSpecificKeyPress);
+        tempEventOverrides.addListener('window', "mousedown", null);
         super(message, completionCallback, tempEventOverrides);
         this.keyCode = keyCode;
         this.keyPressed = false;
@@ -133,7 +134,11 @@ class KeyPressGoal extends TutorialGoal {
 }
 
 class MoveTargetToLocationGoal extends TutorialGoal {
-    constructor(message, targetID, location, dir, radius, completionCallback, eventOverrides){
+    constructor(message, targetID, location, dir, radius, activeArea, completionCallback, eventOverrides){
+        if (activeArea != null){
+            eventOverrides = limitMoveGoalActiveRegion(eventOverrides);
+        }
+        console.log(eventOverrides)
         super(message, completionCallback, eventOverrides);
         this.angleTolerance = 15;
         this.targetID = targetID;
@@ -143,6 +148,7 @@ class MoveTargetToLocationGoal extends TutorialGoal {
         this.angle = (this.dir != null)? getAngleFromDir(this.dir.x, this.dir.y) : null;
         this.radius = radius;
         this.radiusSq = radius * radius;
+        this.activeArea = activeArea;
         this.color = greenAlpha;
     }
 
@@ -246,6 +252,26 @@ function handleKeyPressMoveOnly(e){
     }
 }
 
+function limitMoveGoalActiveRegion(eventOverrides){
+    //only allow orders to be issued within activeArea
+    //return eventOverrides;
+    var newOverride = new CustomEventListenerSet();
+    newOverride.copy(eventOverrides);
+    if ("mousedown" in newOverride.data){
+        throw "A \'mousedown\' event override has already been specified!"
+    }
+    else{
+        newOverride.addListener('window', "mousedown", handleGoalSpecificMouseDown);
+    }
+    if ("contextmenu" in newOverride.data){
+        throw "A \'contextmenu\' event override has already been specified!"
+    }
+    else{
+        newOverride.addListener('window', "contextmenu", handleGoalSpecificRightClickUp);
+    }
+    return newOverride;
+}
+
 function handleGoalSpecificKeyPress(e){
     var keyCode = e.keyCode;
     commandType = commandTypes.move;
@@ -288,6 +314,25 @@ function handleKeyPressAttackMoveOnly(e){
         default:
             return;
     }
+}
+
+function handleGoalSpecificMouseDown(e){
+    var activeArea = gameBoard.board.currentGoal.activeArea;
+    if ((mouseX > activeArea.xMax || mouseX < activeArea.xMin) ||
+        (mouseY > activeArea.yMax || mouseY < activeArea.yMin)){
+        return;
+    }
+    handleTutorialMouseDown(e);
+}
+
+function handleGoalSpecificRightClickUp(e){
+    e.preventDefault();
+    var activeArea = gameBoard.board.currentGoal.activeArea;
+    if ((mouseX > activeArea.xMax || mouseX < activeArea.xMin) ||
+        (mouseY > activeArea.yMax || mouseY < activeArea.yMin)){
+        return;
+    }
+    handleRightClickUp(e);
 }
 
 function handleClickToContinue(){

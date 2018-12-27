@@ -99,7 +99,7 @@ class TutorialOneBoard extends TutorialBoard {
 		this.goals.add(new ClickGoal('Tutorial One: Basics.', undefined));
 		this.goals.add(new SelectUnitGoal('Select your general, marked by the blue star, by left clicking the marker.', generalID, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your general to the <br>location marked by the green circle by right clicking!', 
-													generalID, {x:175, y:375}, null, 25, undefined, eventOverrides));
+													generalID, {x:175, y:375}, null, 25, {xMin: 0, xMax: 300, yMin: 0, yMax: canvas.height}, undefined, eventOverrides));
 
 		var spawnUnitCallback = function(){
 			var playerInf = addPlayerInfantry(-20, 350, 0, "Brigade", infantryID);
@@ -107,10 +107,16 @@ class TutorialOneBoard extends TutorialBoard {
 
 			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade");
 			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
+			activeUnit = undefined;
 		};
-		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, null, 25, spawnUnitCallback, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, null, 25, {xMin: 0, xMax: 300, yMin: 0, yMax: canvas.height}, spawnUnitCallback, eventOverrides));
+		
+		eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
+		eventOverrides.addListener('window', "mousedown", null);
+
 		this.goals.add(new DurationGoal('Enemy infantry are arriving from the north, <br>and friendly infantry from the west.', 5000, undefined, eventOverrides));
-		this.goals.add(new KeyPressGoal('Press <Space> to continue.', 32, undefined));
+		this.goals.add(new KeyPressGoal('Hold <Space> a bit to continue.', 32, undefined));
 		this.goals.add(new ClickGoal('Pressing <Space> at any point to reveal your general\'s command radius<br>\
 			and your infantry\'s battle and skirmish radii. Your units\' flanks and<br>\
 			front are also indicated in red and green, respectively.', undefined));
@@ -118,10 +124,14 @@ class TutorialOneBoard extends TutorialBoard {
 			Units will fortify themselves while skirmishing or disengaged, as indicated by the<br>triangles at each stationary unit\'s front.', undefined));
 		this.goals.add(new ClickGoal('Combat units will lock into battle with enemies within their battle radius.<br>\
 			Only ordering the unit to fallback will allow it to disengage.', undefined));
-		this.goals.add(new MoveTargetToLocationGoal('Select your infanty unit and move it into position.', infantryID, {x:250, y:390}, null, 25, undefined, eventOverrides));
+
+		eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
+
+		this.goals.add(new MoveTargetToLocationGoal('Select your infanty unit and move it into position.', infantryID, {x:250, y:390}, null, 25, {xMin: 0, xMax: 350, yMin: 0, yMax: canvas.height}, undefined, eventOverrides));
 		this.goals.add(new DurationGoal('You can specify a unit\'s angle while issuing an order<br> by holding right click and dragging.', 3000, undefined, eventOverrides));
-		this.goals.add(new MoveTargetToLocationGoal('Move your infantry here and rotate to the angle indicated by the arrow.', infantryID, {x:300, y:350}, {x:0, y:1}, 25, undefined, eventOverrides));
-		this.goals.add(new MoveTargetToLocationGoal('Now rotate to face the enemy!', infantryID, {x:300, y:350}, {x:0.79, y:-0.6}, 25, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Move your infantry here and rotate to the angle indicated by the arrow.', infantryID, {x:300, y:350}, {x:0, y:1}, 25, {xMin: 0, xMax: 350, yMin: 0, yMax: canvas.height}, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Now rotate to face the enemy!', infantryID, {x:300, y:350}, {x:0.79, y:-0.6}, 25, null, undefined, eventOverrides));
 		this.beginGoals();
 	}
 }
@@ -168,6 +178,14 @@ class CustomEventListenerSet {
 	}
 	addListener(target, eventName, callback){
 		this.data[eventName] = {target: target, callback: callback};
+	}
+	copy(otherListenerSet){
+		if (otherListenerSet == undefined){
+        	return;
+    	}
+		for (var eventName in otherListenerSet.data){
+			this.data[eventName] = otherListenerSet.data[eventName];
+		}
 	}
 }
 
