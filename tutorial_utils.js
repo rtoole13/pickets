@@ -138,7 +138,6 @@ class MoveTargetToLocationGoal extends TutorialGoal {
         if (activeArea != null){
             eventOverrides = limitMoveGoalActiveRegion(eventOverrides);
         }
-        console.log(eventOverrides)
         super(message, completionCallback, eventOverrides);
         this.angleTolerance = 15;
         this.targetID = targetID;
@@ -277,6 +276,9 @@ function handleGoalSpecificKeyPress(e){
     commandType = commandTypes.move;
     switch (keyCode){
         case gameBoard.board.currentGoal.keyCode:
+            if (keyCode == 32){
+                displayingCommandRadii = true;
+            }   
             gameBoard.board.currentGoal.keyPressed = true;
             break;
         case 82:

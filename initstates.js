@@ -105,11 +105,12 @@ class TutorialOneBoard extends TutorialBoard {
 			var playerInf = addPlayerInfantry(-20, 350, 0, "Brigade", infantryID);
 			playerInf.updateCommand({type: commandTypes.move, target: null, x: 100, y: 350, angle: 45, date: Date.now()});
 
-			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade");
+			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade", enemyInfantryID);
 			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
+			playerGeneral.updateCommand(null, true);
 			activeUnit = undefined;
 		};
-		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:440}, null, 25, {xMin: 0, xMax: 300, yMin: 0, yMax: canvas.height}, spawnUnitCallback, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Now move your general to this location!', generalID, {x:205, y:460}, null, 25, {xMin: 0, xMax: 300, yMin: 0, yMax: canvas.height}, spawnUnitCallback, eventOverrides));
 		
 		eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
@@ -129,9 +130,11 @@ class TutorialOneBoard extends TutorialBoard {
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
 
 		this.goals.add(new MoveTargetToLocationGoal('Select your infanty unit and move it into position.', infantryID, {x:250, y:390}, null, 25, {xMin: 0, xMax: 350, yMin: 0, yMax: canvas.height}, undefined, eventOverrides));
-		this.goals.add(new DurationGoal('You can specify a unit\'s angle while issuing an order<br> by holding right click and dragging.', 3000, undefined, eventOverrides));
+		this.goals.add(new ClickGoal('Notice that your general had to issue the order by courier, as your<br>infantry unit was outside of your general\'s command radius.', undefined));
+		this.goals.add(new ClickGoal('You can specify a unit\'s angle while issuing an order<br> by holding right click and dragging.', undefined));
 		this.goals.add(new MoveTargetToLocationGoal('Move your infantry here and rotate to the angle indicated by the arrow.', infantryID, {x:300, y:350}, {x:0, y:1}, 25, {xMin: 0, xMax: 350, yMin: 0, yMax: canvas.height}, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('Now rotate to face the enemy!', infantryID, {x:300, y:350}, {x:0.79, y:-0.6}, 25, null, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Skirmish with the enemy infantry!', infantryID, {x:520, y:190}, null, 25, null, undefined, eventOverrides));
 		this.beginGoals();
 	}
 }
@@ -226,8 +229,8 @@ function addEnemyGeneral(x, y, angle, courierCount, smart){
 	unitList[id] = enemyGeneral;
 }
 
-function addEnemyInfantry(x, y, angle, element){
-	var id = getUniqueID(5, unitList);
+function addEnemyInfantry(x, y, angle, element, overrideID){
+	var id = overrideID || getUniqueID(5, unitList);
 	var unit = new InfantryUnit(x, y, angle, element, armies.red);
 	unit.id = id;
 	enemyInfantryList[id] = unit;
