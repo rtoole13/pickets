@@ -258,6 +258,7 @@ class CollisionEngine{
 			this.auxiliaryUnitCollision(unitB, idB, unitA, idA, distanceSq);
 			return;
 		}
+
 		var radiusA = unitA.skirmishRadius;
 		var radiusB = unitB.combatRadius;
 
@@ -276,6 +277,18 @@ class CollisionEngine{
 		unitA.isSkirmishing = true;
 		return true;
 		
+	}
+	static moveCollisionArtilleryEnemy(){
+		
+	}
+	static getRelevantMoveRadius(unit){
+		var radius;
+		if (unit.unitType == unitTypes.artillery){
+			radius = unit.sphereShotRadius;
+		}
+		else{
+			radius = unit.skirmishRadius;
+		}
 	}
 	static auxiliaryUnitCollision(unitAux, idAux, unitOther, idOther, distanceSq){
 		//general collision

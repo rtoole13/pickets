@@ -230,6 +230,31 @@ function checkMouseOver(){
 			continue;
 		}
 	}
+
+	//Check Artillery
+	for (var id in playerArtilleryList){
+		var unit = playerArtilleryList[id];
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, hitRadius)){
+			setHoverUnitAndToolTip(unit, true);
+			return;
+		}
+		else{
+			hoverUnit.hovered = false;
+			continue;
+		}
+	}
+
+	for (var id in enemyArtilleryList){
+		var unit = enemyArtilleryList[id];
+		if (CollisionEngine.pointInCircle(mouseX, mouseY, unit.x, unit.y, hitRadius)){
+			setHoverUnitAndToolTip(unit, true);
+			return;
+		}
+		else{
+			hoverUnit.hovered = false;
+			continue;
+		}
+	}
 }
 
 function setHoverUnitAndToolTip(unit, combat){
@@ -320,7 +345,7 @@ function handleRightClickDown(){
 			if (target != null){
 				var command = {type: commandType, target: target, x: targetOriginX, y: targetOriginY, angle: null, date: Date.now(), queue: queuingOrders};
 				if (queuingOrders){
-					orderStack.push(command)
+					orderStack.push(command);
 				}
 				else{
 					playerGeneral.issueCommand(activeUnit, command);

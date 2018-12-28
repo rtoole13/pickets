@@ -175,7 +175,7 @@ class MoveTargetToLocationGoal extends TutorialGoal {
         super.draw();
         drawCircle(this.location.x, this.location.y, this.radius, this.color);
         if (this.dir != null){
-            drawAngledArrow(this.location.x, this.location.y, this.radius + 10, this.color, this.angle);
+            drawAngledArrow(this.location.x, this.location.y, this.radius + 10, this.color, this.angle, 8, 0);
         }
     }
 }

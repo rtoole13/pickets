@@ -40,7 +40,7 @@ class GameBoard{
 			playerInfantryList[id].update(dt);
 		}
 		for (var id in playerArtilleryList){
-			playerCavalryList[id].update(dt);
+			playerArtilleryList[id].update(dt);
 		}
 
 		//Enemy updates second
@@ -259,30 +259,6 @@ class Unit{
 			this.commandQueue = [];
 			this.initiateCommand(order);
 		}
-		/*
-		this.command = order.type;
-		switch(this.command){
-			default:
-				this.command = null;
-				break;
-			
-			case commandTypes.move:
-				this.executeMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
-				break;
-			
-			case commandTypes.attackmove:
-				this.executeAttackMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
-				break;
-			
-			case commandTypes.fallback:
-				this.executeMoveOrder({x: order.x, y: order.y});
-				break;
-			
-			case commandTypes.retreat:
-				this.executeRetreatOrder(order.target);	
-				break;
-		}
-		*/
 	}
 
 	initiateCommand(order){
@@ -361,7 +337,7 @@ class CombatUnit extends Unit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, army);
 		this.element = element;
-		this.maxStrength =	initializeElement(this.element);
+		this.maxStrength =	initializeInfantryElement(this.element);
 		this.invMaxStrength = 1 / this.maxStrength;
 		this.strength = this.maxStrength;
 		this.retreatThreshold = 0.25; //Currently just checking relative strength
@@ -522,6 +498,38 @@ class CombatUnit extends Unit{
 			}
 		}
 	}
+
+	getFlankModifier(inBattle, xLoc, yLoc){
+		if (inBattle){
+			var dir, cosTheta;
+			dir = {x: xLoc - this.x, y: yLoc - this.y};
+			cosTheta = dotProduct(this.dirX, this.dirY, dir.x, dir.y) / getVectorMag(dir.x, dir.y); //Dot product relation. No need to get mag of this.dir as it's 1.
+			
+			if (cosTheta < this.cosFlankAngle){
+		  		return true;
+			}
+		}
+		return false;
+	}
+
+	getFortificationModifier(){
+		var modifier;
+		switch(this.state){
+			default:
+				modifier = fortifyModifiers.braced;
+				break;
+			case unitStates.marching:
+				modifier = fortifyModifiers.marching;
+				break;
+			case unitStates.braced:
+				modifier = fortifyModifiers.braced;
+				break;
+			case unitStates.entrenched:
+				modifier = fortifyModifiers.entrenched;
+				break;
+		}
+		return modifier;
+	}
 }
 
 class AuxiliaryUnit extends Unit{
@@ -643,38 +651,6 @@ class InfantryUnit extends CombatUnit{
         this.attackCooldown.start();
     }
 
-	getFlankModifier(inBattle, xLoc, yLoc){
-		if (inBattle){
-			var dir, cosTheta;
-			dir = {x: xLoc - this.x, y: yLoc - this.y};
-			cosTheta = dotProduct(this.dirX, this.dirY, dir.x, dir.y) / getVectorMag(dir.x, dir.y); //Dot product relation. No need to get mag of this.dir as it's 1.
-			
-			if (cosTheta < this.cosFlankAngle){
-		  		return true;
-			}
-		}
-		return false;
-	}
-
-	getFortificationModifier(){
-		var modifier;
-		switch(this.state){
-			default:
-				modifier = fortifyModifiers.braced;
-				break;
-			case unitStates.marching:
-				modifier = fortifyModifiers.marching;
-				break;
-			case unitStates.braced:
-				modifier = fortifyModifiers.braced;
-				break;
-			case unitStates.entrenched:
-				modifier = fortifyModifiers.entrenched;
-				break;
-		}
-		return modifier;
-	}
-
 	takefire(damage, inBattle, xLoc, yLoc){
 		if (this.getFlankModifier(inBattle, xLoc, yLoc)){
 			damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
@@ -748,13 +724,219 @@ class InfantryUnit extends CombatUnit{
 }
 
 class ArtilleryUnit extends CombatUnit {
-	constructor(x, y, angle, element, army){
+	constructor(x, y, angle, element, army) {
 		super(x, y, angle, element, army);
+		this.maxBatteryCount = initializeArtilleryElement(element);
+		this.gunsPerBattery = 6;
+		this.gunDetachment = 15;
+		this.maxGunCount = this.maxBatteryCount * this.gunsPerBattery; //30
+		this.gunCount = this.maxGunCount;
+		this.guns = [];
+		for (var i = 0; i < this.gunCount; i++){
+			this.guns.push(new ArtilleryPiece(this.gunDetachment));
+		}
 		this.derivativeSpeed = unitSpeeds.artillery;
 		this.unitType = unitTypes.artillery;
+		this.combatRadius = 22; //this will be used primarily for friendly collision
+		this.smallArmsRadius = 15;
+		this.cannisterRadius = 65;
+		this.sphereShotRadius = 155;
+		this.firingAngleRange = 45; //angles to left and right of direction that cannons can fire
+		this.sphereShotCooldownTime = 2500;
+		this.cannisterCooldownTime  = 1500;
+		this.sphereShotCooldown = new Timer(this.sphereShotCooldownTime, false);
+		this.cannisterCooldown  = new Timer(this.cannisterCooldownTime, false);
+		this.attackCooldown = this.sphereShotCooldown;
+		this.reloaded = true;
+		this.firingTarget = null;
+		this.multiplierSphereShot = 1; //all multipliers are * by guns
+		this.multiplierCannister  = 2;
+		this.multiplierFlank      = 2;
+		this.multiplierSmallArms  = 0.1;
+		this.targetFlankRange = 65; //angle frome direction perpendicular to target for which flank damage multiplier applies
+		this.flankedModifier = 1.5; //this modifies incoming damage.
+		this.state = unitStates.braced;
+		this.bracedTimer = new Timer(5000, false);
+		this.bracedTimer.start();
+		//this.spriteSheet = initializeSpriteSheet(this); FIXME need assets
+		this.trail = new Trail({x: this.x, y: this.y}, 4, 5, (this.army==armies.blue)?playerColor:enemyColor, 0.5, 0.75, 8000);
+		unitTrails.push(this.trail);
 	}
 
+	update(dt){
+		this.updateState();
+		this.checkCombatState();
+
+		super.update(dt);
+		this.trail.update({x:this.x, y:this.y});
+	}
+
+	updateState(){
+		var previousState = this.state;
+		if (this.isRotating || this.isMoving){
+			this.state = unitStates.marching;
+			//this.spriteSheet.YframeIndex = 2;
+		}
+		else{
+			if (this.state == unitStates.entrenched){
+				//this.spriteSheet.YframeIndex = 0;
+				return;
+			}
+			else if (previousState == unitStates.marching){
+				this.state = unitStates.braced;
+				this.bracedTimer.start();
+				//this.spriteSheet.YframeIndex = 1;
+			}
+			else{
+				if (this.inBattle){
+					this.bracedTimer.start();
+					return;
+				}
+				if (this.bracedTimer.checkTime()){
+					this.state = unitStates.entrenched;
+					//this.spriteSheet.YframeIndex = 0;
+				}
+				else{
+					this.state = unitStates.braced;
+					//this.spriteSheet.YframeIndex = 1;
+				}
+			}
+		}
+	}
+
+	attack(){
+		if (!this.reloaded){
+			return;
+		}
+		/*
+		if (this.inBattle){
+
+			if (this.combatCollisionList.length > 0){
+				createBattleAnimation(this, this.combatCollisionList, this.attackCooldownTime);
+				this.spriteSheet.startRumble();
+                this.reload();
+			} 
+
+			var damage = Math.floor(this.strength * this.multiplierCombat / this.combatCollisionList.length);
+			damage = Math.max(damage, 1);
+			for (var i = 0; i < this.combatCollisionList.length; i++){
+				var enemy = this.enemyList[this.combatCollisionList[i]];
+				if (~enemy.auxiliaryUnit){
+					enemy.takefire(damage, this.inBattle, this.x, this.y);
+				}
+			}
+            this.reload();
+		}
+		else{
+			//isSkirmishing
+			
+			if (this.skirmishCollisionList.length > 0){
+				createSkirmishAnimation(this, this.skirmishCollisionList, this.attackCooldownTime);
+                this.reload();
+			} 
+			
+			
+			var damage = Math.floor(this.strength * this.multiplierSkirmish / this.skirmishCollisionList.length);
+			damage = Math.max(damage, 1);
+			for (var i = 0; i < this.skirmishCollisionList.length; i++){
+				var enemy = this.enemyList[this.skirmishCollisionList[i]];
+				if (~enemy.auxiliaryUnit){
+					enemy.takefire(damage, this.inBattle, this.x, this.y);
+				}
+			}
+		}
+		*/
+	}
+
+    reload(){
+        this.reloaded = false;
+        this.attackCooldown.start();
+    }
+
+
+
+	takefire(damage, inBattle, xLoc, yLoc){
+		if (this.getFlankModifier(inBattle, xLoc, yLoc)){
+			damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
+			addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
+			this.wasRecentlyFlanked();
+		}
+		else{
+			damage = Math.floor(damage * this.getFortificationModifier());
+        	addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+		}
+		this.strength -= damage;
+		this.checkVitals();
+	}
+
+	checkVitals(){
+		if (this.gunCount < 1){
+			switch(this.army){
+			case armies.blue:
+				delete playerArtilleryList[this.id];
+				delete playerUnitList[this.id];
+				delete unitList[this.id];
+				break;
+			
+			case armies.red:
+				delete enemyArtilleryList[this.id];
+				delete enemyUnitList[this.id];
+				delete unitList[this.id];
+				break;
+
+			default:
+				console.log('Nonexistent army.');
+				break;
+			}
+		}
+	}
+
+	checkCombatState(){
+		super.checkCombatState();
+        if (this.attackCooldown.checkTime()){
+            this.reloaded = true;
+        }
+
+	}
+
+	adjustAngle(angle){
+		if ((this.command == commandTypes.fallback) || (this.command == commandTypes.retreat)){
+			angle += 180;
+			if (angle < -180){
+				angle += 360;
+			}
+			else if (angle > 180){
+				angle -= 360;
+			}
+		}
+		return angle;
+	}
+
+	adjustSpeed(){
+		if (this.command == commandTypes.fallback){
+			return -0.4 * this.derivativeSpeed;
+		}
+		else if (this.command == commandTypes.retreat){
+			return -0.75 * this.derivativeSpeed;
+		}
+		return this.derivativeSpeed;
+	}
+
+	updateSpriteSheet(dt){
+		//this.spriteSheet.update(dt); FIXME need spritesheet
+	}
 }
+
+class ArtilleryPiece{
+	constructor(strength){
+		this.maxStrength = strength;
+		this.strength = strength;
+	}
+	takeDamage(){
+
+	}
+}
+
 class CavalryUnit extends Unit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, element, army);

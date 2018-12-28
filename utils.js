@@ -63,7 +63,7 @@ function capitalizeFirstLetter(string){
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }
 // Unit functions
-function initializeElement(elementType){
+function initializeInfantryElement(elementType){
 	var strength;
 	switch(elementType){
 		default:
@@ -83,6 +83,24 @@ function initializeElement(elementType){
 	}
 	return strength;
 }
+
+function initializeArtilleryElement(elementType){
+    var batteries;
+    switch(elementType){
+        default:
+            console.log("Unsupported element type!!");
+        
+        case "Brigade":
+            batteries = 5;
+            break;
+        
+        case "Reserve":
+            batteries = 25;
+            break;
+    }
+    return batteries;
+}
+
 
 function sortDictByValue(thisDict){
 	//Given a dict, thisDict, of numbers, sort and return

@@ -737,7 +737,7 @@ class CurveSegment{
 function draw(dt){
 	drawBackground();
 	drawDebug();
-	drawInfantryTrails();
+	drawUnitTrails();
 	drawPlayerUnits();
 	drawEnemyUnits();
 	drawAnimations(dt);
@@ -1174,15 +1174,15 @@ function drawPartialCircle(xLoc, yLoc, radius, fillColor, relativeFill, phaseOff
 	canvasContext.restore();
 }
 
-function drawAngledArrow(xLoc, yLoc, radius, fillColor, angle){	
+function drawAngledArrow(xLoc, yLoc, radius, fillColor, angle, extents, offset){	
 	canvasContext.save();
 	canvasContext.fillStyle = fillColor;
 	canvasContext.translate(xLoc, yLoc);
 	canvasContext.rotate(-angle * Math.PI/180);
 	canvasContext.beginPath();
-	canvasContext.moveTo(radius + 8, 0);
-	canvasContext.lineTo(radius, -8);
-	canvasContext.lineTo(radius, 8);
+	canvasContext.moveTo(radius + offset + extents, 0);
+	canvasContext.lineTo(radius + offset, -extents);
+	canvasContext.lineTo(radius + offset, extents);
 	canvasContext.closePath();
 	canvasContext.fill();
 
@@ -1317,12 +1317,74 @@ function drawInfantryEngagementRadii(unit){
 	canvasContext.restore();
 }
 
+function drawArtilleryEngagementRadii(unit){
+	var frontPadding = 4;
+	//draw 'combat' radius
+	canvasContext.save();
+	
+	//front cone
+	canvasContext.fillStyle = frontAlpha;
+	canvasContext.translate(unit.x, unit.y);
+	canvasContext.rotate(-unit.angle * Math.PI/180);
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.combatRadius + frontPadding, -unit.flankAngle * Math.PI / 180, unit.flankAngle * Math.PI / 180);
+	canvasContext.lineTo(0, 0);
+	canvasContext.closePath();
+	canvasContext.fill();
+	
+	//flank cone
+	canvasContext.fillStyle = flankAlpha;
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.combatRadius, unit.flankAngle * Math.PI / 180, (360 - unit.flankAngle) * Math.PI / 180);
+	canvasContext.lineTo(0, 0);
+	canvasContext.closePath();
+	canvasContext.fill();
+
+	canvasContext.restore();
+
+	canvasContext.save();
+	//front cone
+	canvasContext.strokeStyle = skirmishAlpha;
+	canvasContext.translate(unit.x, unit.y);
+	canvasContext.rotate(-unit.angle * Math.PI/180);
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.sphereShotRadius, -unit.firingAngleRange * Math.PI / 180, unit.firingAngleRange * Math.PI / 180);
+	canvasContext.lineTo(0, 0);
+	canvasContext.closePath();
+	canvasContext.stroke();
+	canvasContext.restore();
+
+	if (unit.inBattle){
+		return;
+	}
+	//draw skirmish radius
+	canvasContext.save();
+	canvasContext.strokeStyle = skirmishAlpha;
+	canvasContext.beginPath();
+	canvasContext.arc(unit.x, unit.y, unit.skirmishRadius, 0, 2 * Math.PI);
+	canvasContext.stroke();
+	canvasContext.restore();
+}
+
 function drawCavalryUnit(){
 
 }
 
-function drawArtilleryUnit(){
+function drawArtilleryUnit(unit, drawRadii, color){
+	if (color == undefined){
+	    if (unit.army == armies.blue){
+	        color = playerColor;
+	    }
+	    else{
+	        color = enemyColor;
+	    }
+	}
 
+	if (drawRadii){
+		drawArtilleryEngagementRadii(unit);
+	}
+
+	drawAngledArrow(unit.x, unit.y, 0, color, unit.angle, 12, -6);
 }
 
 function drawCourier(unit){
@@ -1460,13 +1522,15 @@ function drawPlayerUnits(){
 	drawCouriers(playerCourierList);
 	drawGeneral(playerGeneral, displayingCommandRadii);
 	drawInfantry(playerInfantryList);
+	drawArtillery(playerArtilleryList);
 }
 function drawEnemyUnits(){
 	drawCouriers(enemyCourierList);
 	drawGeneral(enemyGeneral, displayingCommandRadii);
 	drawInfantry(enemyInfantryList);
+	drawArtillery(enemyArtilleryList);
 }
-function drawInfantryTrails(){
+function drawUnitTrails(){
 	unitTrails.forEach(function(element){
 		element.draw()
 	});
@@ -1479,5 +1543,10 @@ function drawCouriers(units){
 function drawInfantry(units){
 	for(var id in units){
 		drawInfantryUnit(units[id], displayingCommandRadii);
+	}
+}
+function drawArtillery(units){
+	for(var id in units){
+		drawArtilleryUnit(units[id], displayingCommandRadii);
 	}
 }
