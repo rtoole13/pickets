@@ -134,7 +134,15 @@ class TutorialOneBoard extends TutorialBoard {
 		this.goals.add(new ClickGoal('You can specify a unit\'s angle while issuing an order<br> by holding right click and dragging.', undefined));
 		this.goals.add(new MoveTargetToLocationGoal('Move your infantry here and rotate to the angle indicated by the arrow.', infantryID, {x:300, y:350}, {x:0, y:1}, 25, {xMin: 0, xMax: 350, yMin: 0, yMax: canvas.height}, undefined, eventOverrides));
 		this.goals.add(new MoveTargetToLocationGoal('Now rotate to face the enemy!', infantryID, {x:300, y:350}, {x:0.79, y:-0.6}, 25, null, undefined, eventOverrides));
-		this.goals.add(new MoveTargetToLocationGoal('Skirmish with the enemy infantry!', infantryID, {x:520, y:190}, null, 25, null, undefined, eventOverrides));
+		
+		var enemyFallBackCallback = function(){
+			var enemyInf = enemyInfantryList[enemyInfantryID];
+			enemyInf.updateCommand({type: commandTypes.fallback, target: null, x: 560, y: 150, angle: null, date: Date.now()});
+		};
+		this.goals.add(new SkirmishTargetGoal('Skirmish with the enemy infantry!', infantryID, enemyInfantryID, enemyFallBackCallback, eventOverrides));
+		this.goals.add(new BattleTargetGoal('The enemy is falling back! Select your attack move command by pressing<br>\
+			<A> and order your infantry to engage the enemy in full-fledged battle!', infantryID, enemyInfantryID, undefined, undefined));
+		this.goals.add(new ClickGoal('Congratulations! You completed the first tutorial.', undefined));
 		this.beginGoals();
 	}
 }
@@ -153,7 +161,10 @@ class TutorialTwoBoard extends TutorialBoard {
 	}
 
 	initializeGoals(){
-		this.currentGoal = this.goals.remove();
+		var eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
+		this.goals.add(new ClickGoal('Tutorial Two: Courier interception.', undefined));
+		this.beginGoals();
 	}
 }
 
@@ -170,7 +181,10 @@ class TutorialThreeBoard extends TutorialBoard {
 	}
 
 	initializeGoals(){
-		this.currentGoal = this.goals.remove();
+		var eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
+		this.goals.add(new ClickGoal('Tutorial Three: Artillery and falling back.', undefined));
+		this.beginGoals();
 	}
 }
 
@@ -211,6 +225,16 @@ function addPlayerInfantry(x, y, angle, element, overrideID){
 	return unit;
 }
 
+function addPlayerArtillery(x, y, angle, element, overrideID){
+	var id = overrideID || getUniqueID(5, unitList);
+	var unit = new ArtilleryUnit(x, y, angle, element, armies.blue);
+	unit.id = id;
+	playerArtilleryList[id] = unit;
+	playerUnitList[id] = unit;
+	unitList[id] = unit;
+	return unit;
+}
+
 function addPlayerCourier(x, y, angle, general, target, order){
 	var id = getUniqueID(5, unitList);
 	var unit = new Courier(x, y, angle, general, target, order, armies.blue);
@@ -234,6 +258,16 @@ function addEnemyInfantry(x, y, angle, element, overrideID){
 	var unit = new InfantryUnit(x, y, angle, element, armies.red);
 	unit.id = id;
 	enemyInfantryList[id] = unit;
+	enemyUnitList[id] = unit;
+	unitList[id] = unit;
+	return unit;
+}
+
+function addEnemyArtillery(x, y, angle, element, overrideID){
+	var id = overrideID || getUniqueID(5, unitList);
+	var unit = new ArtilleryUnit(x, y, angle, element, armies.red);
+	unit.id = id;
+	enemyArtilleryList[id] = unit;
 	enemyUnitList[id] = unit;
 	unitList[id] = unit;
 	return unit;

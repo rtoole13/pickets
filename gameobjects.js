@@ -539,8 +539,8 @@ class InfantryUnit extends CombatUnit{
 		this.attackCooldownTime = 2000;
 		this.attackCooldown = new Timer(this.attackCooldownTime, false);
         this.reloaded = true;
-		this.multiplierCombat = 1/500;
-		this.multiplierSkirmish = 1/3000;
+		this.multiplierCombat = 6/500;
+		this.multiplierSkirmish = 6/3000;
 		this.flankedModifier = 1.5;
 		this.combatRadius = 22;
 		this.skirmishRadius = 65;
@@ -549,17 +549,10 @@ class InfantryUnit extends CombatUnit{
 		this.bracedTimer.start();
 		this.unitType = unitTypes.infantry;
 		this.spriteSheet = initializeSpriteSheet(this);
-		//constructor(initialPosition, length, lineWidth, color, alphaStart, dashRatio, segmentLifeTime){
 		this.trail = new Trail({x: this.x, y: this.y}, 4, 5, (this.army==armies.blue)?playerColor:enemyColor, 0.5, 0.75, 8000);
 		unitTrails.push(this.trail);
 	}
 	update(dt){
-		// below will likely be the means of halting a unit on enemy collision
-		/*
-		if (this.command == null){
-			return;
-		}
-		*/
 		this.updateState();
 		this.checkCombatState();
 
@@ -738,6 +731,7 @@ class InfantryUnit extends CombatUnit{
 		}
 		return angle;
 	}
+
 	adjustSpeed(){
 		if (this.command == commandTypes.fallback){
 			return -0.4 * this.derivativeSpeed;
@@ -753,6 +747,14 @@ class InfantryUnit extends CombatUnit{
 	}
 }
 
+class ArtilleryUnit extends CombatUnit {
+	constructor(x, y, angle, element, army){
+		super(x, y, angle, element, army);
+		this.derivativeSpeed = unitSpeeds.artillery;
+		this.unitType = unitTypes.artillery;
+	}
+
+}
 class CavalryUnit extends Unit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, element, army);

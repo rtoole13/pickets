@@ -71,13 +71,15 @@ function initializeElement(elementType){
 		
 		case "Brigade":
 			strength = 3000;
+            break;
 		
 		case "Division":
 			strength = 12000;
+            break;
 		
 		case "Corps":
 			strength = 24000;
-		
+            break;
 	}
 	return strength;
 }

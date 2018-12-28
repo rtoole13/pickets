@@ -3,7 +3,6 @@
 class TutorialGoal {
     constructor(message, completionCallback, eventOverrides){
         //this class is to serve as an abstract for all goals
-        this.objective = null;
         this.message = (message == undefined)? 'EMPTY MESSAGE' : message;
         this.completionCallback = (completionCallback != undefined)? completionCallback : undefined;
         this.eventOverrides = (eventOverrides != undefined)? eventOverrides : undefined;
@@ -178,6 +177,70 @@ class MoveTargetToLocationGoal extends TutorialGoal {
         if (this.dir != null){
             drawAngledArrow(this.location.x, this.location.y, this.radius + 10, this.color, this.angle);
         }
+    }
+}
+
+class SkirmishTargetGoal extends TutorialGoal {
+    constructor(message, targetID, skirmishTargetID, completionCallback, eventOverrides){
+        super(message, completionCallback, eventOverrides);
+        this.targetID = targetID;
+        this.skirmishTargetID = skirmishTargetID;
+        this.targetUnit = null;
+        this.skirmishTargetUnit = null;
+        this.radiusSq = null;
+        this.color = greenAlpha;
+    }
+    checkObjective(){
+        if ((getDistanceSq(this.targetUnit.x, this.targetUnit.y, this.skirmishTargetUnit.x, this.skirmishTargetUnit.y) <= this.radiusSq) &&
+            (this.targetUnit.isSkirmishing)) {
+            return this.onCompletion();
+        }
+        else {
+            return false;
+        }
+    }
+    initiate(){
+        super.initiate();
+        this.targetUnit = playerUnitList[this.targetID];
+        this.skirmishTargetUnit = enemyUnitList[this.skirmishTargetID];
+        var dist = this.targetUnit.skirmishRadius + this.skirmishTargetUnit.combatRadius;
+        this.radiusSq = dist * dist;
+    }
+    draw(){
+        super.draw();
+        drawCircle(this.skirmishTargetUnit.x, this.skirmishTargetUnit.y, 15, this.color);
+    }
+}
+
+class BattleTargetGoal extends TutorialGoal {
+    constructor(message, targetID, battleTargetID, completionCallback, eventOverrides){
+        super(message, completionCallback, eventOverrides);
+        this.targetID = targetID;
+        this.battleTargetID = battleTargetID;
+        this.targetUnit = null;
+        this.battleTargetUnit = null;
+        this.radiusSq = null;
+        this.color = crimsonAlpha;
+    }
+    checkObjective(){
+        if ((getDistanceSq(this.targetUnit.x, this.targetUnit.y, this.battleTargetUnit.x, this.battleTargetUnit.y) <= this.radiusSq) &&
+            (this.targetUnit.inBattle)) {
+            return this.onCompletion();
+        }
+        else {
+            return false;
+        }
+    }
+    initiate(){
+        super.initiate();
+        this.targetUnit = playerUnitList[this.targetID];
+        this.battleTargetUnit = enemyUnitList[this.battleTargetID];
+        var dist = this.targetUnit.combatRadius + this.battleTargetUnit.combatRadius;
+        this.radiusSq = dist * dist;
+    }
+    draw(){
+        super.draw();
+        drawCircle(this.battleTargetUnit.x, this.battleTargetUnit.y, 15, this.color);
     }
 }
 
