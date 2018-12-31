@@ -45,7 +45,7 @@ class AudioHandler {
         this.initializePool('assets/audio/gunfire/volley4.ogg', 3, 0.1, 'volley4');
     }
     initializeAudioGroups(){
-        var skirmishDict, battleDict;
+        var skirmishDict, battleDict, artilleryDict;
         
         skirmishDict = {
             rifle1  : 1,
@@ -69,9 +69,13 @@ class AudioHandler {
             rifle11 : 1,
             rifle12 : 1
         }
-
+        artilleryDict = {
+            volley1 : 2
+        }
+        
         this.initializeAudioGroup('skirmish', 1, skirmishDict);
         this.initializeAudioGroup('battle', 1, battleDict);
+        this.initializeAudioGroup('artillery', 1, artilleryDict);
     }
 
     initializePool(clip, count, pitchVariance, id){
@@ -91,6 +95,7 @@ class AudioHandler {
         var audioGroup, poolID;
         audioGroup = this.audioGroups[id];
         poolID = this.audioGroups[id].getRandomClip();
+
         this.audioPools[poolID].playAvailableClip(varyPitch, audioGroup.volume);
     }
 
@@ -148,6 +153,7 @@ class AudioGroup {
             return this.getClipAtIndex(i);
             //this.debugAddTally(i);
         }
+        return this.getClipAtIndex(0);
     }
 
     debugAddTally(i){

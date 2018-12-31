@@ -303,10 +303,28 @@ function terminateSkirmishAnimation(id){
 	return;
 }
 
+function createArtilleryAnimation(unit, combatTarget, animationTime){
+	var id = getUniqueID(5, animationList);
+	var anim = new ArtilleryAnimation(id, unit.x, unit.y, 1000/animationTime, 1, unit.id, combatTarget);
+	animationList[id] = anim;
+}
+
 function createBattleAnimation(unit, combatTargets, animationTime){
 	var id = getUniqueID(5, animationList);
 	var anim = new BattleAnimation(id, unit.x, unit.y, 1000/animationTime, 1, unit.id, combatTargets);
 	animationList[id] = anim;
+}
+
+function terminateArtilleryAnimation(id){
+	for (var i = 0; i < animationList[id].circles.length; i++){
+		delete animationList[id].circles[i];
+	}
+	animationList[id].targets = [];
+	animationList[id].targets = null;
+	animationList[id].circles = [];
+	animationList[id].circles = null;
+	delete animationList[id];
+	return;
 }
 
 function terminateBattleAnimation(id){

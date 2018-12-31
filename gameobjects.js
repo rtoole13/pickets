@@ -752,6 +752,7 @@ class ArtilleryUnit extends CombatUnit {
 		this.firingAngleRange = 45; //angles to left and right of direction that cannons can fire
 		this.sphereShotCooldownTime = 2500;
 		this.cannisterCooldownTime  = 1500;
+		this.attackCooldownTime = this.sphereShotCooldownTime;
 		this.sphereShotCooldown = new Timer(this.sphereShotCooldownTime, false);
 		this.cannisterCooldown  = new Timer(this.cannisterCooldownTime, false);
 		this.attackCooldown = this.sphereShotCooldown;
@@ -904,7 +905,9 @@ class ArtilleryUnit extends CombatUnit {
 			}
 			shotMultiplier = (this.firingCannister)? this.multiplierCannister : this.multiplierSphereShot;
 			damage = Math.max(this.gunCount * shotMultiplier + flankBonus, 1);
+			createArtilleryAnimation(this, this.firingTarget, this.attackCooldownTime);
 			this.firingTarget.takeFire(damage, false, this.x, this.y);
+
 		}
 		
 		
@@ -915,9 +918,11 @@ class ArtilleryUnit extends CombatUnit {
         this.reloaded = false;
         if (this.firingCannister){
         	this.attackCooldown = this.cannisterCooldown;
+        	this.attackCooldownTime = this.cannisterCooldownTime;
         }
         else{
         	this.attackCooldown = this.sphereShotCooldown;
+        	this.attackCooldownTime = this.sphereShotCooldownTime;
         }
         this.attackCooldown.start();
     }

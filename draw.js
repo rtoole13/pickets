@@ -173,6 +173,7 @@ class FloatingText {
 			thisText.velY += this.accel;
 			thisText.x += thisText.velX;
 			thisText.y += thisText.velY;
+
 			var newColor = hexToRGB(this.color, this.baseAlpha * (this.duration - thisText.lifeTimer.getElapsedTime()) / this.duration);
 			drawText(thisText.text, thisText.x, thisText.y, newColor, this.font);
 		}
@@ -223,6 +224,60 @@ class Animation {
 	}
 }
 
+class ArtilleryAnimation extends Animation {
+	constructor(id, x, y, frameRate, frameCount, unitID, target){
+		super(id, x, y, frameRate, frameCount, false);
+		this.type = animationTypes.artillery;
+		this.unitID = unitID;
+		this.target = target;
+		this.circlesPerTargetPerFrame = 3;
+		this.circles = [];
+		this.distVariance = 3; //hardcoded infantry unit width currently
+		this.angleVariance = 360; //plus or minus
+		this.circleRadius = 10;
+		this.circleLifeTime = 900;
+		this.circleDelayMax = 500;
+		this.delayIter = this.circleDelayMax / this.circlesPerTargetPerFrame;
+
+		var unit = unitList[this.unitID];
+		switch(unit.army){
+			default:
+				this.color = playerColor;
+				break;
+			case armies.blue:
+				this.color = playerColor;
+				break;
+			case armies.red:
+				this.color = enemyColor;
+				break;
+		}
+		this.baseRadius = unit.combatRadius;
+	}
+
+	draw(isNewFrame, dt){
+		if (this.animationComplete){
+			return;
+		}
+		if (isNewFrame){
+			//Draw fading circles in the area around the target.
+			for (var j = 0; j < this.circlesPerTargetPerFrame; j++){	
+				var circleDist = this.baseRadius + getRandomFloat(-this.distVariance, this.distVariance); 
+				var circleDir = rotateVector(1, 0, getRandomFloat(-this.angleVariance, this.angleVariance), true);
+				var spawnDelay = j * this.delayIter;
+				var circle = new FadingCircle(this.target.x + circleDist * circleDir.x, this.target.y + circleDist * circleDir.y, 
+														 this.circleRadius, this.color, this.circleLifeTime, spawnDelay, this.type);
+				this.circles.push(circle);
+			}
+			
+		}
+
+		for (var i = 0; i < this.circles.length; i++){
+			//draw circles instantiated previously
+			this.circles[i].draw();
+		}
+	}
+}
+
 class BattleAnimation extends Animation {
 	constructor(id, x, y, frameRate, frameCount, unitID, targets){
 		super(id, x, y, frameRate, frameCount, false);
@@ -269,8 +324,8 @@ class BattleAnimation extends Animation {
 					var circleDist = this.baseRadius + getRandomFloat(-this.distVariance, this.distVariance); 
 					var circleDir = rotateVector(dir.x, dir.y, getRandomFloat(-this.angleVariance, this.angleVariance), true);
 					var spawnDelay = j * this.delayIter;
-					var circle = new SkirmishAnimationCircle(target.x + circleDist * circleDir.x, target.y + circleDist * circleDir.y, 
-															 this.circleRadius, this.color, this.circleLifeTime, spawnDelay, 'battle');
+					var circle = new FadingCircle(target.x + circleDist * circleDir.x, target.y + circleDist * circleDir.y, 
+															 this.circleRadius, this.color, this.circleLifeTime, spawnDelay, this.type);
 					this.circles.push(circle);
 				}
 
@@ -331,8 +386,8 @@ class SkirmishAnimation extends Animation {
 					var circleDist = getRandomFloat(this.minCircleDist, (maxDist>this.minCircleDist)?maxDist:this.minCircleDist); //returns this.minCircleDist if maxDist <min
 					var circleDir = rotateVector(dir.x, dir.y, getRandomFloat(-this.angleVariance, this.angleVariance), true);
 					var spawnDelay = j * this.delayIter;
-					var circle = new SkirmishAnimationCircle(unit.x + circleDist * circleDir.x, unit.y + circleDist * circleDir.y,
-															 this.circleRadius, this.color, this.circleLifeTime, spawnDelay, 'skirmish');
+					var circle = new FadingCircle(unit.x + circleDist * circleDir.x, unit.y + circleDist * circleDir.y,
+															 this.circleRadius, this.color, this.circleLifeTime, spawnDelay, this.type);
 					this.circles.push(circle);
 				}
 
@@ -347,13 +402,25 @@ class SkirmishAnimation extends Animation {
 	}
 }
 
-class SkirmishAnimationCircle {
-	constructor(x, y, radius, color, lifetime, delay){
+class FadingCircle {
+	constructor(x, y, radius, color, lifetime, delay, animationType){
 		this.x = x;
 		this.y = y;
 		this.radius = radius;
 		this.baseColor = color;
 		this.delay = delay;
+		this.animationType = animationType;
+		switch (this.animationType){
+			case animationTypes.skirmish:
+				this.soundType = 'skirmish';
+				break;
+			case animationTypes.battle:
+				this.soundType = 'battle';
+				break;
+			case animationTypes.artillery:
+				this.soundType = 'artillery';
+				break;
+		}
 		this.delayTimer = new Timer(delay, false);
 		this.delayTimer.start();
 		this.lifetime = lifetime;
@@ -368,7 +435,7 @@ class SkirmishAnimationCircle {
 				this.begun = true;
 				this.lifeTimer.start();
 				drawCircle(this.x, this.y, this.radius, this.baseColor);
-				audioHandler.playAudioGroup('skirmish', true);
+				audioHandler.playAudioGroup(this.soundType, true);
 				return false;
 			}
 			return false;
@@ -382,7 +449,21 @@ class SkirmishAnimationCircle {
 		drawCircle(this.x, this.y, this.radius, newColor);
 		return false;
 	}
-}
+	playCorrespondingSound(){
+		switch (this.animationType){
+			case animationTypes.skirmish:
+				audioHandler.playAudioGroup('skirmish', true);
+				break;
+			case animationTypes.battle:
+				audioHandler.playAudioGroup('battle', true);
+				break;
+			case animationTypes.artillery:
+				//audioHandler.playAudioGroup('artillery', true);
+				break;
+		}
+
+	}
+}	
 
 class HoverHealth {
 	constructor(width, height, border, color, borderColor){
@@ -829,17 +910,20 @@ function drawAnimations(dt){
 
 function drawAnimation(animation, dt){
 	switch(animation.type){
-		default:
-			return;
 		case animationTypes.skirmish:
-			drawSkirmish(animation, dt);
+			drawSkirmishAnim(animation, dt);
 			break;
 		case animationTypes.battle:
-			drawBattle(animation, dt);
+			drawBattleAnim(animation, dt);
 			break;
+		case animationTypes.artillery:
+			drawArtilleryAnim(animation, dt);
+			break;
+		default:
+			return;
 	}
 }
-function drawSkirmish(skirmish, dt){
+function drawSkirmishAnim(skirmish, dt){
 	if (skirmish.animationComplete){
 		return terminateSkirmishAnimation(skirmish.id);
 	}
@@ -847,12 +931,20 @@ function drawSkirmish(skirmish, dt){
 	skirmish.draw(isNewFrame, dt);
 }
 
-function drawBattle(battle, dt){
+function drawBattleAnim(battle, dt){
 	if (battle.animationComplete){
 		return terminateBattleAnimation(battle.id);
 	}
 	var isNewFrame = battle.update(dt);
 	battle.draw(isNewFrame, dt);
+}
+
+function drawArtilleryAnim(artillery, dt){
+	if (artillery.animationComplete){
+		return terminateArtilleryAnimation(artillery.id);
+	}
+	var isNewFrame = artillery.update(dt);
+	artillery.draw(isNewFrame, dt);
 }
 
 function drawDebug(){

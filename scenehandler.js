@@ -235,7 +235,7 @@ function initializePlayableState(board, mainGame){
     unitStates       = Object.freeze({marching:1, braced:2, entrenched:3});
     fortifyModifiers = Object.freeze({marching:1.5, braced:1, entrenched:0.8})
     armies           = Object.freeze({blue:1, red:2});
-    animationTypes   = Object.freeze({skirmish:1, battle:2});
+    animationTypes   = Object.freeze({skirmish:1, battle:2, artillery:3});
     tileTypes        = Object.freeze({plain:0, road:1, mountain:2});
     enemyGenStates   = Object.freeze({surviving:0, rallying:1, commanding:2});
     
