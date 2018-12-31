@@ -556,7 +556,12 @@ class UnitToolTip {
 		}
 		state = unit.element + ', ' + capitalizeFirstLetter(unitStateNames[unit.state - 1]);
 
-		strength = parseInt(unit.strength) + ' / ' + unit.maxStrength;
+		if (unit.unitType == unitTypes.artillery){
+			strength = 'Guns: ' + parseInt(unit.gunCount) + ' / ' + unit.maxGunCount;
+		}
+		else{
+			strength = parseInt(unit.strength) + ' / ' + unit.maxStrength;
+		}
 
 		//Unit Name
 		xLoc = this.x + this.textPaddingX;

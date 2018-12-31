@@ -274,6 +274,19 @@ class CollisionEngine{
 		}
 	}
 
+	static attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
+		if (unitB.auxiliaryUnit){
+			this.auxiliaryUnitCollision(unitB, idB, unitA, idA, distanceSq);
+			return;
+		}
+
+		switch (unitA.unitType){
+			case unitTypes.artillery:
+				return this.attackMoveCollisionArtilleryEnemy(unitA, idA, unitB, idB, distanceSq);
+			default:
+				return this.attackMoveCollisionDefaultEnemy(unitA, idA, unitB, idB, distanceSq);
+		}
+	}
 
 	static staticCollisionDefaultEnemy(unitA, idA, unitB, idB, distanceSq){
 		var radiusA = unitA.skirmishRadius;
@@ -312,6 +325,18 @@ class CollisionEngine{
 		return true;
 	}
 
+	static attackMoveCollisionDefaultEnemy(unitA, idA, unitB, idB, distanceSq){
+		var radiusA = unitA.combatRadius;
+		var radiusB = unitB.combatRadius;
+
+		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+			return false;
+		}
+		unitA.combatCollisionList.push(idB);
+		this.resolveCombatCollision(unitA, unitB, idB);
+		return true;
+	}
+
 	static staticCollisionArtilleryEnemy(unitA, idA, unitB, idB, distanceSq){
 		if (distanceSq > unitA.sphereShotRadiusSq){
 			return;
@@ -320,6 +345,13 @@ class CollisionEngine{
 			if (distanceSq <= unitA.cannisterRadiusSq){
 				unitA.cannisterCollisionList.push(idB);
 				unitA.isSkirmishing = true;
+
+				var radiusA = unitA.smallArmsRadius;
+				var radiusB = (unitB.unitType == unitTypes.artillery)? unitB.smallArmsRadius : unitB.combatRadius;
+				if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
+					return;
+				}
+				unitA.combatCollisionList.push(idB);
 			}
 			else{
 				unitA.sphereShotCollisionList.push(idB);
@@ -351,6 +383,31 @@ class CollisionEngine{
 		}
 	}
 
+	static attackMoveCollisionArtilleryEnemy(unitA, idA, unitB, idB, distanceSq){
+		if (unitB.auxiliaryUnit){
+			this.auxiliaryUnitCollision(unitB, idB, unitA, idA, distanceSq);
+			return;
+		}
+		if (distanceSq > unitA.sphereShotRadiusSq){
+			return false;
+		}
+		var radiusA = unitA.smallArmsRadius;
+		var radiusB = (unitB.unitType == unitTypes.artillery)? unitB.smallArmsRadius : unitB.combatRadius;
+		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
+			unitA.cannisterCollisionList.push(idB);
+			unitA.combatCollisionList.push(idB);
+			return this.resolveArtilleryCombatCollision(unitA, unitB, idB, true);
+		}
+		else if (distanceSq <= unitA.cannisterRadiusSq){
+			unitA.cannisterCollisionList.push(idB);
+			return this.resolveArtilleryCombatCollision(unitA, unitB, idB, false);
+		}
+		else{
+			unitA.sphereShotCollisionList.push(idB);
+			return false;
+		}
+		
+	}
 
 	static auxiliaryUnitCollision(unitAux, idAux, unitOther, idOther, distanceSq){
 		//general collision
@@ -379,56 +436,50 @@ class CollisionEngine{
 		}
 	}
 
-	static attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
-		if (unitB.auxiliaryUnit){
-			this.auxiliaryUnitCollision(unitB, idB, unitA, idA, distanceSq);
-			return;
-		}
+	static resolveSkirmishCollision(unit, otherUnit, otherID, isSkirmishing){
+		if (unit.target != null){
+			if (unit.target == otherUnit){
+				// rotate to otherUnit
+				var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
 
-		switch (unitA.unitType){
-			case unitTypes.artillery:
-				return this.attackMoveCollisionArtilleryEnemy(unitA, idA, unitB, idB, distanceSq);
-			default:
-				return this.attackMoveCollisionDefaultEnemy(unitA, idA, unitB, idB, distanceSq);
-		}
-	}
-
-	static attackMoveCollisionDefaultEnemy(){
-		var radiusA = unitA.combatRadius;
-		var radiusB = unitB.combatRadius;
-
-		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
-			return false;
-		}
-		unitA.combatCollisionList.push(idB);
-		this.resolveCombatCollision(unitA, unitB, idB);
-		return true;
-	}
-	
-	static attackMoveCollisionArtilleryEnemy(unitA, idA, unitB, idB, distanceSq){
-		if (unitB.auxiliaryUnit){
-			this.auxiliaryUnitCollision(unitB, idB, unitA, idA, distanceSq);
-			return;
-		}
-		if (distanceSq > unitA.sphereShotRadiusSq){
-			return false;
-		}
-		var radiusA = unitA.smallArmsRadius;
-		var radiusB = (unitB.unitType == unitTypes.artillery)? unitB.smallArmsRadius : unitB.combatRadius;
-		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
-			unitA.cannisterCollisionList.push(idB);
-			unitA.combatCollisionList.push(idB);
-			return this.resolveArtilleryCombatCollision(unitA, unitB, idB, true);
-		}
-		else if (distanceSq <= unitA.cannisterRadiusSq){
-			unitA.cannisterCollisionList.push(idB);
-			return this.resolveArtilleryCombatCollision(unitA, unitB, idB, false);
+				unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
+				unit.updateCommand(null, true);
+				
+			}
+			else{
+				// don't rotate to otherUnit
+			}
 		}
 		else{
-			unitA.sphereShotCollisionList.push(idB);
-			return false;
+			// no target unit specified
+			var targetFinalPosition = (unit.path.length > 0) ? unit.path[unit.path.length - 1] : unit.targetPosition;
+			if (getDistanceSq(targetFinalPosition.x, targetFinalPosition.y, unit.x, unit.y) > Math.pow(unit.combatTargetProximityTol, 2)){
+			// if not near specified target location, dont rotate to specified orientation
+				unit.targetAngleFinal = null;
+			}
 		}
-		
+		if (!isSkirmishing){
+			unit.updateCommand(null, true);
+		}
+	}
+
+	static resolveCombatCollision(unit, otherUnit, otherID){
+		if (!unit.inBattle){
+			var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
+			unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
+		}
+		unit.updateCommand(null, true);
+	}
+
+	static fallBackCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
+		//TODO fallback collision logic
+		// if unitB is in front of unitA, do nothing.
+		if (dotProduct(unitA.dirX, unitA.dirY, unitB.x - unitA.x, unitB.y - unitB.y) > 0){
+			return;
+		}
+		else{
+			this.attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
+		}
 	}
 
 	static resolveArtilleryMoveCollision(unit, otherUnit, otherID, inCannisterRange, isSkirmishing){
@@ -443,6 +494,7 @@ class CollisionEngine{
 						//not in cone, rotate
 						unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
 					}
+					unit.firingTarget = unit.target;
 					unit.updateCommand(null, true);
 				}
 				else{
@@ -482,48 +534,14 @@ class CollisionEngine{
 							//not in cone, rotate
 							unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
 						}
+						unit.firingTarget = unit.target;
 						unit.updateCommand(null, true);
 					}
 					else{
 						//do nothing
 					}
 				}
-				else{
-					// no target unit specified
-					var targetFinalPosition = (unit.path.length > 0) ? unit.path[unit.path.length - 1] : unit.targetPosition;
-					if (getDistanceSq(targetFinalPosition.x, targetFinalPosition.y, unit.x, unit.y) > Math.pow(unit.combatTargetProximityTol, 2)){
-					// if not near specified target location, dont rotate to specified orientation
-						unit.targetAngleFinal = null;
-					}
-				}
 			}
-		}
-	}
-
-	static resolveSkirmishCollision(unit, otherUnit, otherID, isSkirmishing){
-		if (unit.target != null){
-			if (unit.target == otherUnit){
-				// rotate to otherUnit
-				var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
-
-				unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
-				unit.updateCommand(null, true);
-				
-			}
-			else{
-				// don't rotate to otherUnit
-			}
-		}
-		else{
-			// no target unit specified
-			var targetFinalPosition = (unit.path.length > 0) ? unit.path[unit.path.length - 1] : unit.targetPosition;
-			if (getDistanceSq(targetFinalPosition.x, targetFinalPosition.y, unit.x, unit.y) > Math.pow(unit.combatTargetProximityTol, 2)){
-			// if not near specified target location, dont rotate to specified orientation
-				unit.targetAngleFinal = null;
-			}
-		}
-		if (!isSkirmishing){
-			unit.updateCommand(null, true);
 		}
 	}
 
@@ -538,6 +556,7 @@ class CollisionEngine{
 				var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
 
 				unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
+				unit.firingTarget = unit.target;
 				unit.updateCommand(null, true);
 				return true;
 			}
@@ -546,25 +565,6 @@ class CollisionEngine{
 			}
 		}
 		return false;
-	}
-
-	static resolveCombatCollision(unit, otherUnit, otherID){
-		if (!unit.inBattle){
-			var dir = normalizeVector(otherUnit.x - unit.x, otherUnit.y - unit.y);
-			unit.targetAngleFinal = getAngleFromDir(dir.x, dir.y);
-		}
-		unit.updateCommand(null, true);
-	}
-
-	static fallBackCollisionEnemy(unitA, idA, unitB, idB, distanceSq){
-		//TODO fallback collision logic
-		// if unitB is in front of unitA, do nothing.
-		if (dotProduct(unitA.dirX, unitA.dirY, unitB.x - unitA.x, unitB.y - unitB.y) > 0){
-			return;
-		}
-		else{
-			this.attackMoveCollisionEnemy(unitA, idA, unitB, idB, distanceSq);
-		}
 	}
 
 	static pointInCircle(x, y, xt, yt, radius){
@@ -867,7 +867,7 @@ function sortListByDistToPoint(x, y, idList, unitDict){
 			}
 		}
 	}	
-	return sortedList
+	return sortedList;
 }
 
 class Timer{

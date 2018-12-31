@@ -377,7 +377,6 @@ class CombatUnit extends Unit{
 
 	update(dt){
 		this.checkMorale();
-		this.checkCombatLists();
 		this.attack();
 		super.update(dt);
 		
@@ -385,13 +384,6 @@ class CombatUnit extends Unit{
 
 	attack(){
 		throw 'CombatUnit\'s attack() function currently must be overriden by subclass!';
-	}
-	checkCombatLists(){
-		for (var i = 0; i < this.skirmishCollisionList.length; i++){
-			if (this.combatCollisionList.includes(this.skirmishCollisionList[i])){
-				this.skirmishCollisionList.splice(i,1);
-			}
-		}
 	}
 	executeMoveOrder(location, angle, target){
 		this.targetAngleFinal = angle;
@@ -401,6 +393,11 @@ class CombatUnit extends Unit{
 			this.updateRouteTimer.start();
 		}
 		else{
+			var dist = getDistance(location.x, location.y, this.x, this.y);
+			if (dist < this.redundantCommandSigma){
+				this.getNextWaypoint();
+				return;
+			}
 			this.path = Pathfinder.findPath(this.x, this.y, location.x, location.y, this);
 		}
 		this.getNextWaypoint();
@@ -434,8 +431,6 @@ class CombatUnit extends Unit{
 	}
 
 	checkCombatState(){
-		//this.combatCollisionList = []; //Enemies in combat range this frame
-		//this.skirmishCollisionList = []; //Enemies in skirmish range this frame
 		if (this.combatCollisionList.length > 0){
 			//combat, no skirmish
 			this.inBattle = true;
@@ -561,7 +556,7 @@ class InfantryUnit extends CombatUnit{
 	update(dt){
 		this.updateState();
 		this.checkCombatState();
-
+		this.checkCombatLists();
 		super.update(dt);
 		//clean up lists
 		this.combatCollisionList = []; //Enemies in combat range this frame 
@@ -602,6 +597,13 @@ class InfantryUnit extends CombatUnit{
 		}
 	}
 
+	checkCombatLists(){
+		for (var i = 0; i < this.skirmishCollisionList.length; i++){
+			if (this.combatCollisionList.includes(this.skirmishCollisionList[i])){
+				this.skirmishCollisionList.splice(i,1);
+			}
+		}
+	}
 	attack(){
 		if (!this.reloaded){
 			return;
@@ -613,7 +615,6 @@ class InfantryUnit extends CombatUnit{
 			if (this.combatCollisionList.length > 0){
 				createBattleAnimation(this, this.combatCollisionList, this.attackCooldownTime);
 				this.spriteSheet.startRumble();
-                this.reload();
 			} 
 
 			var damage = Math.floor(this.strength * this.multiplierCombat / this.combatCollisionList.length);
@@ -621,7 +622,7 @@ class InfantryUnit extends CombatUnit{
 			for (var i = 0; i < this.combatCollisionList.length; i++){
 				var enemy = this.enemyList[this.combatCollisionList[i]];
 				if (~enemy.auxiliaryUnit){
-					enemy.takefire(damage, this.inBattle, this.x, this.y);
+					enemy.takeFire(damage, this.inBattle, this.x, this.y);
 				}
 			}
             this.reload();
@@ -640,7 +641,7 @@ class InfantryUnit extends CombatUnit{
 			for (var i = 0; i < this.skirmishCollisionList.length; i++){
 				var enemy = this.enemyList[this.skirmishCollisionList[i]];
 				if (~enemy.auxiliaryUnit){
-					enemy.takefire(damage, this.inBattle, this.x, this.y);
+					enemy.takeFire(damage, this.inBattle, this.x, this.y);
 				}
 			}
 		}
@@ -652,7 +653,7 @@ class InfantryUnit extends CombatUnit{
         this.attackCooldown.start();
     }
 
-	takefire(damage, inBattle, xLoc, yLoc){
+	takeFire(damage, inBattle, xLoc, yLoc){
 		if (this.getFlankModifier(inBattle, xLoc, yLoc)){
 			damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
 			addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
@@ -736,6 +737,9 @@ class ArtilleryUnit extends CombatUnit {
 		for (var i = 0; i < this.gunCount; i++){
 			this.guns.push(new ArtilleryPiece(this.gunDetachment));
 		}
+		this.maxStrength = this.gunCount * this.gunDetachment;
+		this.strength = this.maxStrength;
+		this.invMaxStrength = 1 / this.maxStrength;
 		this.derivativeSpeed = unitSpeeds.artillery;
 		this.unitType = unitTypes.artillery;
 		this.combatRadius = 22; //this will be used primarily for friendly collision
@@ -753,6 +757,7 @@ class ArtilleryUnit extends CombatUnit {
 		this.attackCooldown = this.sphereShotCooldown;
 		this.reloaded = true;
 		this.firingTarget = null;
+		this.firingCannister = false;
 		this.multiplierSphereShot = 1; //all multipliers are * by guns
 		this.multiplierCannister  = 2;
 		this.multiplierFlank      = 2;
@@ -772,9 +777,10 @@ class ArtilleryUnit extends CombatUnit {
 	update(dt){
 		this.updateState();
 		this.checkCombatState();
-
 		super.update(dt);
+		
 		//clean up lists
+		this.combatCollisionList = []; //Small arms range
 		this.cannisterCollisionList = []; //Enemies in cannister range this frame 
 		this.sphereShotCollisionList = []; //Enemies in sphere shot range this frame
 		this.trail.update({x:this.x, y:this.y});
@@ -813,58 +819,96 @@ class ArtilleryUnit extends CombatUnit {
 		}
 	}
 
-	attack(){
-		if (!this.reloaded){
+	updateFiringTarget(){
+		if (this.firingTarget != null){
+			var angle = getAngle(this.firingTarget.x - this.x, this.firingTarget.y - this.y, this.dirX, this.dirY, true);
+			if (angle <= this.firingAngleRange){
+				//in cone
+				if (getDistanceSq(this.x, this.y, this.firingTarget.x, this.firingTarget.y) <= this.cannisterRadiusSq){
+					this.firingCannister = true;
+				}
+				else{
+					this.firingCannister = false;
+				}
+				return;
+			}
+		}
+
+		this.cannisterCollisionList = sortListByDistToPoint(this.x, this.y, this.cannisterCollisionList, this.enemyList);
+		for (var i = 0; i < this.cannisterCollisionList.length; i++){
+			var otherUnit, angle;
+			otherUnit = this.enemyList[this.cannisterCollisionList[i]];
+			angle = getAngle(otherUnit.x - this.x, otherUnit.y - this.y, this.dirX, this.dirY, true);
+			if (angle > this.firingAngleRange){
+				//not in cone
+				continue;
+			}
+			this.firingCannister = true;
+			this.firingTarget = otherUnit;
 			return;
 		}
-		/*
-		if (this.inBattle){
 
+		this.sphereShotCollisionList = sortListByDistToPoint(this.x, this.y, this.sphereShotCollisionList, this.enemyList);
+		for (var i = 0; i < this.sphereShotCollisionList.length; i++){
+			var otherUnit, angle;
+			otherUnit = this.enemyList[this.sphereShotCollisionList[i]];
+			angle = getAngle(otherUnit.x - this.x, otherUnit.y - this.y, this.dirX, this.dirY, true);
+			if (angle > this.firingAngleRange){
+				//not in cone
+				continue;
+			}
+			this.firingCannister = false;
+			this.firingTarget = otherUnit;
+			return;
+		}
+		this.firingTarget = null;
+	}
+
+	attack(){
+		if (!this.reloaded || this.isRotating || this.isMoving){
+			//the rotating and moving checks are the only thing keeping the firing target
+			//set from the engine from being potentially and immediately wiped out.
+			return;
+		}
+		if (this.inBattle){
+			//small arms fire
 			if (this.combatCollisionList.length > 0){
 				createBattleAnimation(this, this.combatCollisionList, this.attackCooldownTime);
-				this.spriteSheet.startRumble();
-                this.reload();
+				//this.spriteSheet.startRumble();
 			} 
 
-			var damage = Math.floor(this.strength * this.multiplierCombat / this.combatCollisionList.length);
+			var damage = Math.floor(this.strength * this.multiplierSmallArms / this.combatCollisionList.length);
 			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.combatCollisionList.length; i++){
 				var enemy = this.enemyList[this.combatCollisionList[i]];
 				if (~enemy.auxiliaryUnit){
-					enemy.takefire(damage, this.inBattle, this.x, this.y);
+					enemy.takeFire(damage, this.inBattle, this.x, this.y);
 				}
 			}
-            this.reload();
 		}
 		else{
-			//isSkirmishing
-			
-			if (this.skirmishCollisionList.length > 0){
-				createSkirmishAnimation(this, this.skirmishCollisionList, this.attackCooldownTime);
-                this.reload();
-			} 
-			
-			
-			var damage = Math.floor(this.strength * this.multiplierSkirmish / this.skirmishCollisionList.length);
-			damage = Math.max(damage, 1);
-			for (var i = 0; i < this.skirmishCollisionList.length; i++){
-				var enemy = this.enemyList[this.skirmishCollisionList[i]];
-				if (~enemy.auxiliaryUnit){
-					enemy.takefire(damage, this.inBattle, this.x, this.y);
-				}
-			}
+			//normal operation
+			this.updateFiringTarget();
 		}
-		*/
+		
+		
+		this.reload();
 	}
 
     reload(){
         this.reloaded = false;
+        if (this.firingCannister){
+        	this.attackCooldown = this.cannisterCooldown;
+        }
+        else{
+        	this.attackCooldown = this.sphereShotCooldown;
+        }
         this.attackCooldown.start();
     }
 
 
 
-	takefire(damage, inBattle, xLoc, yLoc){
+	takeFire(damage, inBattle, xLoc, yLoc){
 		if (this.getFlankModifier(inBattle, xLoc, yLoc)){
 			damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
 			addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
@@ -874,7 +918,22 @@ class ArtilleryUnit extends CombatUnit {
 			damage = Math.floor(damage * this.getFortificationModifier());
         	addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
 		}
+
+		//var gunTargetIndex = getRandomInt(0, this.gunCount);
 		this.strength -= damage;
+		while (damage > 0){
+			if (this.gunCount > 0){
+				var output = this.guns[0].takeFire(damage); 
+				damage = output.damage;
+				if (!output.isAlive){
+					this.guns.shift();
+					this.gunCount -= 1;
+				}
+			}
+			else {
+				damage = 0;
+			}
+		} 
 		this.checkVitals();
 	}
 
@@ -905,7 +964,6 @@ class ArtilleryUnit extends CombatUnit {
         if (this.attackCooldown.checkTime()){
             this.reloaded = true;
         }
-
 	}
 
 	adjustAngle(angle){
@@ -941,8 +999,19 @@ class ArtilleryPiece{
 		this.maxStrength = strength;
 		this.strength = strength;
 	}
-	takeDamage(){
-
+	takeFire(damage){
+		this.strength -= damage;
+		var spillOver, alive;
+		if (this.strength <= 0){
+			spillOver = - this.strength;
+			alive = false;
+		}
+		else{
+			spillOver = 0;
+			alive = true;
+		}
+		
+		return {isAlive: alive, damage: spillOver};
 	}
 }
 
