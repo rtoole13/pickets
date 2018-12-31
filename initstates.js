@@ -19,12 +19,12 @@ class MainBoard extends BoardPreset{
 
 	addUnits(){
 		addPlayerGeneral(550, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10, true);
+		addEnemyGeneral(450, 200, -135, 10, false);
 
-		//addPlayerArtillery(600, 400, 0, "Brigade");
+		addPlayerArtillery(600, 400, 0, "Brigade");
 		addPlayerInfantry(500, 360, -135, "Brigade");
-		addPlayerInfantry(600, 400, 0, "Brigade");
-		addPlayerInfantry(400, 400, 0, "Brigade");
+		//addPlayerInfantry(600, 400, 0, "Brigade");
+		//addPlayerInfantry(400, 400, 0, "Brigade");
 
 		addEnemyInfantry(500, 260, -135, "Brigade");
 		addEnemyInfantry(200, 200, -135, "Brigade");
@@ -157,8 +157,10 @@ class TutorialTwoBoard extends TutorialBoard {
 		//courier capture tutorial
 		//your units nearly surround an enemy unit
 		//have a unit reroute to intercept a courier being sent by enemy general
-		addPlayerGeneral(550, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10, false);
+		addPlayerGeneral(205, 460, 45, 10);
+		addEnemyGeneral(650, 150, -135, 10, false);
+		addPlayerArtillery(200, 380, 0, "Brigade");
+		addEnemyInfantry(520, 190, -135, "Brigade", enemyInfantryID);
 	}
 
 	initializeGoals(){
@@ -178,7 +180,7 @@ class TutorialThreeBoard extends TutorialBoard {
 		//fallback and artillery tutorial
 		//have a unit fallback to friendly lines, then attack enemy with artillery
 		addPlayerGeneral(550, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10, false);
+		addEnemyGeneral(650, 150, -135, 10, false);
 	}
 
 	initializeGoals(){

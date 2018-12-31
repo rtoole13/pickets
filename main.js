@@ -100,6 +100,8 @@ var gameBoard,
     flankAlpha,
     frontAlpha,
     skirmishAlpha,
+    sphereShotAlpha,
+    cannisterAlpha,
 
 	activeUnit,
 	hoverUnit,
@@ -137,7 +139,9 @@ function init(){
     flankAlpha = hexToRGB(crimson, 0.25);
     frontAlpha = hexToRGB(forestGreen, 0.25);
     skirmishAlpha = hexToRGB(forestGreen, 0.45);
-
+    sphereShotAlpha = hexToRGB("#F39C12", 0.15);
+    cannisterAlpha = hexToRGB(crimson, 0.15);
+    
     //reference external .svgs
     initializeSpriteSheets();
 

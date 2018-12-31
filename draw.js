@@ -1327,7 +1327,7 @@ function drawArtilleryEngagementRadii(unit){
 	canvasContext.translate(unit.x, unit.y);
 	canvasContext.rotate(-unit.angle * Math.PI/180);
 	canvasContext.beginPath();
-	canvasContext.arc(0, 0, unit.combatRadius + frontPadding, -unit.flankAngle * Math.PI / 180, unit.flankAngle * Math.PI / 180);
+	canvasContext.arc(0, 0, unit.smallArmsRadius, -unit.flankAngle * Math.PI / 180, unit.flankAngle * Math.PI / 180);
 	canvasContext.lineTo(0, 0);
 	canvasContext.closePath();
 	canvasContext.fill();
@@ -1335,7 +1335,7 @@ function drawArtilleryEngagementRadii(unit){
 	//flank cone
 	canvasContext.fillStyle = flankAlpha;
 	canvasContext.beginPath();
-	canvasContext.arc(0, 0, unit.combatRadius, unit.flankAngle * Math.PI / 180, (360 - unit.flankAngle) * Math.PI / 180);
+	canvasContext.arc(0, 0, unit.smallArmsRadius, unit.flankAngle * Math.PI / 180, (360 - unit.flankAngle) * Math.PI / 180);
 	canvasContext.lineTo(0, 0);
 	canvasContext.closePath();
 	canvasContext.fill();
@@ -1343,27 +1343,52 @@ function drawArtilleryEngagementRadii(unit){
 	canvasContext.restore();
 
 	canvasContext.save();
-	//front cone
-	canvasContext.strokeStyle = skirmishAlpha;
+	//sphere shot fill
+	canvasContext.fillStyle = sphereShotAlpha;
 	canvasContext.translate(unit.x, unit.y);
-	canvasContext.rotate(-unit.angle * Math.PI/180);
+	canvasContext.rotate(-(unit.angle + unit.firingAngleRange) * Math.PI / 180);
 	canvasContext.beginPath();
-	canvasContext.arc(0, 0, unit.sphereShotRadius, -unit.firingAngleRange * Math.PI / 180, unit.firingAngleRange * Math.PI / 180);
-	canvasContext.lineTo(0, 0);
+	canvasContext.arc(0, 0, unit.sphereShotRadius, 0, 2 * unit.firingAngleRange * Math.PI / 180);
+	canvasContext.arc(0, 0, unit.cannisterRadius, 2 * unit.firingAngleRange * Math.PI / 180, 0, true);
+	canvasContext.closePath();
+	canvasContext.fill();
+
+	//cannister shot fill
+	canvasContext.fillStyle = cannisterAlpha;
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.cannisterRadius, 0, 2 * unit.firingAngleRange * Math.PI / 180);
+	canvasContext.arc(0, 0, unit.smallArmsRadius, 2 * unit.firingAngleRange * Math.PI / 180, 0, true);
+	canvasContext.closePath();
+	canvasContext.fill();
+
+	//sphere shot outline
+	canvasContext.strokeStyle = skirmishAlpha;
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.sphereShotRadius, 0, 2 * unit.firingAngleRange * Math.PI / 180);
+	canvasContext.lineTo(0,0);
 	canvasContext.closePath();
 	canvasContext.stroke();
+
+	//cannister shot outline
+	canvasContext.beginPath();
+	canvasContext.arc(0, 0, unit.cannisterRadius, 0, 2 * unit.firingAngleRange * Math.PI / 180);	
+	canvasContext.stroke();
+
 	canvasContext.restore();
 
 	if (unit.inBattle){
 		return;
 	}
+
 	//draw skirmish radius
+	/*
 	canvasContext.save();
 	canvasContext.strokeStyle = skirmishAlpha;
 	canvasContext.beginPath();
 	canvasContext.arc(unit.x, unit.y, unit.skirmishRadius, 0, 2 * Math.PI);
 	canvasContext.stroke();
 	canvasContext.restore();
+	*/
 }
 
 function drawCavalryUnit(){

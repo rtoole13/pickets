@@ -380,9 +380,7 @@ class CombatUnit extends Unit{
 		this.checkCombatLists();
 		this.attack();
 		super.update(dt);
-		//clean up lists
-		this.combatCollisionList = []; //Enemies in combat range this frame 
-		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
+		
 	}
 
 	attack(){
@@ -565,6 +563,9 @@ class InfantryUnit extends CombatUnit{
 		this.checkCombatState();
 
 		super.update(dt);
+		//clean up lists
+		this.combatCollisionList = []; //Enemies in combat range this frame 
+		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
 		this.trail.update({x:this.x, y:this.y});
 	}
 
@@ -739,8 +740,11 @@ class ArtilleryUnit extends CombatUnit {
 		this.unitType = unitTypes.artillery;
 		this.combatRadius = 22; //this will be used primarily for friendly collision
 		this.smallArmsRadius = 15;
-		this.cannisterRadius = 65;
-		this.sphereShotRadius = 155;
+		this.cannisterRadius = 80;
+		this.sphereShotRadius = 180;
+		this.smallArmsRadiusSq = this.smallArmsRadius * this.smallArmsRadius;
+		this.cannisterRadiusSq = this.cannisterRadius * this.cannisterRadius;
+		this.sphereShotRadiusSq = this.sphereShotRadius * this.sphereShotRadius;
 		this.firingAngleRange = 45; //angles to left and right of direction that cannons can fire
 		this.sphereShotCooldownTime = 2500;
 		this.cannisterCooldownTime  = 1500;
@@ -761,6 +765,8 @@ class ArtilleryUnit extends CombatUnit {
 		//this.spriteSheet = initializeSpriteSheet(this); FIXME need assets
 		this.trail = new Trail({x: this.x, y: this.y}, 4, 5, (this.army==armies.blue)?playerColor:enemyColor, 0.5, 0.75, 8000);
 		unitTrails.push(this.trail);
+		this.cannisterCollisionList  = [];
+		this.sphereShotCollisionList = [];
 	}
 
 	update(dt){
@@ -768,6 +774,9 @@ class ArtilleryUnit extends CombatUnit {
 		this.checkCombatState();
 
 		super.update(dt);
+		//clean up lists
+		this.cannisterCollisionList = []; //Enemies in cannister range this frame 
+		this.sphereShotCollisionList = []; //Enemies in sphere shot range this frame
 		this.trail.update({x:this.x, y:this.y});
 	}
 
