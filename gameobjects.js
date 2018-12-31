@@ -759,10 +759,10 @@ class ArtilleryUnit extends CombatUnit {
 		this.firingTarget = null;
 		this.firingCannister = false;
 		this.multiplierSphereShot = 1; //all multipliers are * by guns
-		this.multiplierCannister  = 2;
-		this.multiplierFlank      = 2;
+		this.multiplierCannister  = 2.5;
 		this.multiplierSmallArms  = 0.1;
-		this.targetFlankRange = 65; //angle frome direction perpendicular to target for which flank damage multiplier applies
+		this.bonusPerFlankDeg     = 1;
+		this.targetFlankRange = 50; //angle from target dir at which flank angle bonus starts
 		this.flankedModifier = 1.5; //this modifies incoming damage.
 		this.state = unitStates.braced;
 		this.bracedTimer = new Timer(5000, false);
@@ -821,6 +821,10 @@ class ArtilleryUnit extends CombatUnit {
 
 	updateFiringTarget(){
 		if (this.firingTarget != null){
+			if (this.firingTarget.strength < 1){
+				this.firingTarget = null;
+				return;
+			}
 			var angle = getAngle(this.firingTarget.x - this.x, this.firingTarget.y - this.y, this.dirX, this.dirY, true);
 			if (angle <= this.firingAngleRange){
 				//in cone
@@ -881,7 +885,7 @@ class ArtilleryUnit extends CombatUnit {
 			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.combatCollisionList.length; i++){
 				var enemy = this.enemyList[this.combatCollisionList[i]];
-				if (~enemy.auxiliaryUnit){
+				if (!enemy.auxiliaryUnit){
 					enemy.takeFire(damage, this.inBattle, this.x, this.y);
 				}
 			}
@@ -889,6 +893,18 @@ class ArtilleryUnit extends CombatUnit {
 		else{
 			//normal operation
 			this.updateFiringTarget();
+			if (this.firingTarget == null){
+				return;
+			}
+			var dir, flankAngle, flankBonus, shotMultiplier, damage;
+			dir = {x: this.x - this.firingTarget.x, y: this.y - this.firingTarget.y};
+			flankAngle = getAngle(dir.x, dir.y, this.firingTarget.dirX, this.firingTarget.dirY, true);
+			if (flankAngle > this.targetFlankRange){
+		  		flankBonus = this.bonusPerFlankDeg * (flankAngle - this.targetFlankRange);
+			}
+			shotMultiplier = (this.firingCannister)? this.multiplierCannister : this.multiplierSphereShot;
+			damage = Math.max(this.gunCount * shotMultiplier + flankBonus, 1);
+			this.firingTarget.takeFire(damage, false, this.x, this.y);
 		}
 		
 		

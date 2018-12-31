@@ -2,7 +2,6 @@
 major tasks
 - tutorial work
     - scenes
-        one - move and attack
         two - fallback and artillery
         three - courier capture
     - assets
@@ -50,11 +49,7 @@ major tasks
     - add courier count display!!
     - couriers reroute around static enemies
     - artillery unit
-        unit with a slighty different combat mechanic, requiring
-        explicit orders to attack unless threatened w/o friendlies
-        in LOF
-
-        serious debuff when in 'combat' range
+        artillery unit art!!!
         
     - HUD display of active command type
     - Fix win/loss final screen. Have the ability to  navigate back to the main menu or retry the game

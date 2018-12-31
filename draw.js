@@ -173,7 +173,6 @@ class FloatingText {
 			thisText.velY += this.accel;
 			thisText.x += thisText.velX;
 			thisText.y += thisText.velY;
-
 			var newColor = hexToRGB(this.color, this.baseAlpha * (this.duration - thisText.lifeTimer.getElapsedTime()) / this.duration);
 			drawText(thisText.text, thisText.x, thisText.y, newColor, this.font);
 		}
@@ -405,6 +404,10 @@ class HoverHealth {
 		}
 
 		var unit = unitList[hoverUnit.id];
+		if (unit == undefined){
+			//unit deleted before drawing, null pointer
+			return;
+		}
 		//Border
 		canvasContext.save()
 		canvasContext.fillStyle = this.borderColor;
