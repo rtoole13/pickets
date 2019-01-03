@@ -903,6 +903,9 @@ class ArtilleryUnit extends CombatUnit {
 			if (flankAngle > this.targetFlankRange){
 		  		flankBonus = this.bonusPerFlankDeg * (flankAngle - this.targetFlankRange);
 			}
+			else{
+				flankBonus = 0;
+			}
 			shotMultiplier = (this.firingCannister)? this.multiplierCannister : this.multiplierSphereShot;
 			damage = Math.max(this.gunCount * shotMultiplier + flankBonus, 1);
 			createArtilleryAnimation(this, this.firingTarget, this.attackCooldownTime);

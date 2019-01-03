@@ -19,15 +19,16 @@ class MainBoard extends BoardPreset{
 
 	addUnits(){
 		addPlayerGeneral(550, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10, false);
+		addEnemyGeneral(450, 200, -135, 10, true);
 
 		addPlayerArtillery(600, 400, 0, "Brigade");
 		addPlayerInfantry(500, 360, -135, "Brigade");
 		//addPlayerInfantry(600, 400, 0, "Brigade");
 		//addPlayerInfantry(400, 400, 0, "Brigade");
 
-		addEnemyInfantry(500, 260, -135, "Brigade");
+		var enemy = addEnemyInfantry(500, 260, -135, "Brigade");
 		addEnemyInfantry(200, 200, -135, "Brigade");
+		enemy.strength = 1000;
 	}
 }
 

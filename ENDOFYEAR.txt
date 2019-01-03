@@ -11,8 +11,8 @@ major tasks
         scene label - one, two, and three
         home button
     - mechanics
-        goals
-        key and mouse input restrictions
+        goals - mostly done
+        key and mouse input restrictions - done
         config restrictions
             unit health modification
             unit damage modification
@@ -40,7 +40,7 @@ major tasks
 
 - bugs
     - have path be considered invalid before courier is sent rather than on arrival
-    - prevent pathfinding for locations off of map
+    - prevent pathfinding for locations off of map - mostly done/done
         - most likely to happen with a retreating enemy general - SOLVED?
     - make general rotate wayyyy quicker or not have to at all.
 
