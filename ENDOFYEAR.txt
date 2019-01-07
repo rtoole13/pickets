@@ -39,6 +39,8 @@ major tasks
     - reflect the enemyGeneral's units at risk logic
 
 - bugs
+    - Desperately need to fix retreat logic
+        - units need to run for the edge of the map or something, not for the general. Forces the general to do really dumb things.
     - have path be considered invalid before courier is sent rather than on arrival
     - prevent pathfinding for locations off of map - mostly done/done
         - most likely to happen with a retreating enemy general - SOLVED?

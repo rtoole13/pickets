@@ -59,6 +59,13 @@ class GameBoard{
 		for (var id in enemyArtilleryList){
 			enemyCavalryList[id].update(dt);
 		}
+
+		//Clear termination list
+		for (var i = 0; i < unitTerminationList.length; i++){
+			var data = unitTerminationList[i];
+			terminateUnit(data.id, data.unitType, data.army);
+		}
+		unitTerminationList = [];
 	}
 }
 
@@ -331,6 +338,11 @@ class Unit{
 	updateSpriteSheet(dt){
 		this.spriteSheet.update(dt);
 	}
+
+	terminateSelf(){
+		var identification = {id: this.id, unitType: this.unitType, army: this.army};
+		unitTerminationList.push(identification);
+	}
 }
 
 class CombatUnit extends Unit{
@@ -362,11 +374,13 @@ class CombatUnit extends Unit{
 		//Reference enemy list
 		switch(this.army){
 			case armies.blue:
-				this.enemyList = enemyUnitList;
+				this.enemyList = enemyCombatUnitList;
+				this.friendlyList = playerCombatUnitList;
 				break;
 			
 			case armies.red:
-				this.enemyList = playerUnitList;
+				this.enemyList = playerCombatUnitList;
+				this.friendlyList = enemyCombatUnitList;
 				break;
 
 			default:
@@ -618,31 +632,23 @@ class InfantryUnit extends CombatUnit{
 			} 
 
 			var damage = Math.floor(this.strength * this.multiplierCombat / this.combatCollisionList.length);
-			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.combatCollisionList.length; i++){
 				var enemy = this.enemyList[this.combatCollisionList[i]];
-				if (~enemy.auxiliaryUnit){
-					enemy.takeFire(damage, this.inBattle, this.x, this.y);
-				}
+				enemy.takeFire(damage, this.inBattle, this.x, this.y, false);
 			}
             this.reload();
 		}
 		else{
 			//isSkirmishing
-			
 			if (this.skirmishCollisionList.length > 0){
 				createSkirmishAnimation(this, this.skirmishCollisionList, this.attackCooldownTime);
                 this.reload();
 			} 
 			
-			
 			var damage = Math.floor(this.strength * this.multiplierSkirmish / this.skirmishCollisionList.length);
-			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.skirmishCollisionList.length; i++){
 				var enemy = this.enemyList[this.skirmishCollisionList[i]];
-				if (~enemy.auxiliaryUnit){
-					enemy.takeFire(damage, this.inBattle, this.x, this.y);
-				}
+				enemy.takeFire(damage, this.inBattle, this.x, this.y, false);
 			}
 		}
         
@@ -653,15 +659,29 @@ class InfantryUnit extends CombatUnit{
         this.attackCooldown.start();
     }
 
-	takeFire(damage, inBattle, xLoc, yLoc){
-		if (this.getFlankModifier(inBattle, xLoc, yLoc)){
-			damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
-			addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
-			this.wasRecentlyFlanked();
+	takeFire(damage, inBattle, xLoc, yLoc, artilleryFire, cannisterShot){
+		if (artilleryFire){
+			damage = Math.floor(damage * this.getFortificationModifier());
+			damage = Math.max(damage, 1);
+			if (cannisterShot){
+				addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Cannister!*', this.x, this.y - 5, damageColor);
+			}
+			else{
+				addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+			}
 		}
 		else{
-			damage = Math.floor(damage * this.getFortificationModifier());
-        	addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+			if (this.getFlankModifier(inBattle, xLoc, yLoc)){
+				damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
+				damage = Math.max(damage, 1);
+				addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
+				this.wasRecentlyFlanked();
+			}
+			else{
+				damage = Math.floor(damage * this.getFortificationModifier());
+				damage = Math.max(damage, 1);
+	        	addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+			}
 		}
 		this.strength -= damage;
 		this.checkVitals();
@@ -669,23 +689,7 @@ class InfantryUnit extends CombatUnit{
 
 	checkVitals(){
 		if (this.strength < 1){
-			switch(this.army){
-			case armies.blue:
-				delete playerInfantryList[this.id];
-				delete playerUnitList[this.id];
-				delete unitList[this.id];
-				break;
-			
-			case armies.red:
-				delete enemyInfantryList[this.id];
-				delete enemyUnitList[this.id];
-				delete unitList[this.id];
-				break;
-
-			default:
-				console.log('Nonexistent army.');
-				break;
-			}
+			this.terminateSelf();
 		}
 	}
 
@@ -744,7 +748,7 @@ class ArtilleryUnit extends CombatUnit {
 		this.unitType = unitTypes.artillery;
 		this.combatRadius = 22; //this will be used primarily for friendly collision
 		this.smallArmsRadius = 15;
-		this.cannisterRadius = 80;
+		this.cannisterRadius = 90;
 		this.sphereShotRadius = 180;
 		this.smallArmsRadiusSq = this.smallArmsRadius * this.smallArmsRadius;
 		this.cannisterRadiusSq = this.cannisterRadius * this.cannisterRadius;
@@ -883,12 +887,9 @@ class ArtilleryUnit extends CombatUnit {
 			} 
 
 			var damage = Math.floor(this.strength * this.multiplierSmallArms / this.combatCollisionList.length);
-			damage = Math.max(damage, 1);
 			for (var i = 0; i < this.combatCollisionList.length; i++){
 				var enemy = this.enemyList[this.combatCollisionList[i]];
-				if (!enemy.auxiliaryUnit){
-					enemy.takeFire(damage, this.inBattle, this.x, this.y);
-				}
+				enemy.takeFire(damage, this.inBattle, this.x, this.y, false);
 			}
 		}
 		else{
@@ -898,6 +899,10 @@ class ArtilleryUnit extends CombatUnit {
 				return;
 			}
 			var dir, flankAngle, flankBonus, shotMultiplier, damage;
+			if (anyAlongRay(this.x, this.y, this.firingTarget.x, this.firingTarget.y, this.friendlyList, [this.id])){
+				//A friend is blocking the way, won't fire cannister
+				this.firingCannister = false;
+			}
 			dir = {x: this.x - this.firingTarget.x, y: this.y - this.firingTarget.y};
 			flankAngle = getAngle(dir.x, dir.y, this.firingTarget.dirX, this.firingTarget.dirY, true);
 			if (flankAngle > this.targetFlankRange){
@@ -907,9 +912,9 @@ class ArtilleryUnit extends CombatUnit {
 				flankBonus = 0;
 			}
 			shotMultiplier = (this.firingCannister)? this.multiplierCannister : this.multiplierSphereShot;
-			damage = Math.max(this.gunCount * shotMultiplier + flankBonus, 1);
+			damage = this.gunCount * shotMultiplier + flankBonus;
 			createArtilleryAnimation(this, this.firingTarget, this.attackCooldownTime);
-			this.firingTarget.takeFire(damage, false, this.x, this.y);
+			this.firingTarget.takeFire(damage, false, this.x, this.y, true, this.firingCannister);
 
 		}
 		
@@ -931,19 +936,31 @@ class ArtilleryUnit extends CombatUnit {
     }
 
 
-
-	takeFire(damage, inBattle, xLoc, yLoc){
-		if (this.getFlankModifier(inBattle, xLoc, yLoc)){
-			damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
-			addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
-			this.wasRecentlyFlanked();
+	takeFire(damage, inBattle, xLoc, yLoc, artilleryFire, cannisterShot){
+		if (artilleryFire){
+			damage = Math.floor(damage * this.getFortificationModifier());
+			damage = Math.max(damage, 1);
+			if (cannisterShot){
+				addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Cannister!*', this.x, this.y - 5, damageColor);
+			}
+			else{
+				addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+			}
 		}
 		else{
-			damage = Math.floor(damage * this.getFortificationModifier());
-        	addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+			if (this.getFlankModifier(inBattle, xLoc, yLoc)){
+				damage = Math.floor(damage * this.flankedModifier * this.getFortificationModifier());
+				damage = Math.max(damage, 1);
+				addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Flanked!*', this.x, this.y - 5, damageColor);
+				this.wasRecentlyFlanked();
+			}
+			else{
+				damage = Math.floor(damage * this.getFortificationModifier());
+				damage = Math.max(damage, 1);
+	        	addCombatText("-" + parseFloat(damage).toFixed(0), this.x, this.y - 5, damageColor);
+			}
 		}
-
-		//var gunTargetIndex = getRandomInt(0, this.gunCount);
+		
 		this.strength -= damage;
 		while (damage > 0){
 			if (this.gunCount > 0){
@@ -963,23 +980,7 @@ class ArtilleryUnit extends CombatUnit {
 
 	checkVitals(){
 		if (this.gunCount < 1){
-			switch(this.army){
-			case armies.blue:
-				delete playerArtilleryList[this.id];
-				delete playerUnitList[this.id];
-				delete unitList[this.id];
-				break;
-			
-			case armies.red:
-				delete enemyArtilleryList[this.id];
-				delete enemyUnitList[this.id];
-				delete unitList[this.id];
-				break;
-
-			default:
-				console.log('Nonexistent army.');
-				break;
-			}
+			this.terminateSelf();
 		}
 	}
 
@@ -1214,17 +1215,7 @@ class Courier extends AuxiliaryUnit{
 	reportToGeneral(success){
 		//if success, add back to courier count total
 		//need to make general for enemy
-		if (this.army == armies.blue){
-			delete playerCourierList[this.id];
-			delete playerUnitList[this.id];
-			delete unitList[this.id];
-		}
-		else{
-			delete enemyCourierList[this.id];
-			delete enemyUnitList[this.id];
-			delete unitList[this.id];
-		}
-
+		this.terminateSelf();
 		if (success){
 			this.general.addCourier();
 		}

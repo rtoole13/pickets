@@ -26,10 +26,9 @@ class MainBoard extends BoardPreset{
 		//addPlayerInfantry(600, 400, 0, "Brigade");
 		//addPlayerInfantry(400, 400, 0, "Brigade");
 
-		var enemy = addEnemyInfantry(500, 260, -135, "Brigade");
+		addEnemyInfantry(500, 260, -135, "Brigade");
 		addEnemyInfantry(200, 200, -135, "Brigade");
-		enemy.strength = 1000;
-	}
+	}	
 }
 
 class TutorialBoard extends BoardPreset{
@@ -224,6 +223,7 @@ function addPlayerInfantry(x, y, angle, element, overrideID){
 	var unit = new InfantryUnit(x, y, angle, element, armies.blue);
 	unit.id = id;
 	playerInfantryList[id] = unit;
+	playerCombatUnitList[id] = unit;
 	playerUnitList[id] = unit;
 	unitList[id] = unit;
 	return unit;
@@ -234,6 +234,7 @@ function addPlayerArtillery(x, y, angle, element, overrideID){
 	var unit = new ArtilleryUnit(x, y, angle, element, armies.blue);
 	unit.id = id;
 	playerArtilleryList[id] = unit;
+	playerCombatUnitList[id] = unit;
 	playerUnitList[id] = unit;
 	unitList[id] = unit;
 	return unit;
@@ -262,6 +263,7 @@ function addEnemyInfantry(x, y, angle, element, overrideID){
 	var unit = new InfantryUnit(x, y, angle, element, armies.red);
 	unit.id = id;
 	enemyInfantryList[id] = unit;
+	enemyCombatUnitList[id] = unit;
 	enemyUnitList[id] = unit;
 	unitList[id] = unit;
 	return unit;
@@ -272,6 +274,7 @@ function addEnemyArtillery(x, y, angle, element, overrideID){
 	var unit = new ArtilleryUnit(x, y, angle, element, armies.red);
 	unit.id = id;
 	enemyArtilleryList[id] = unit;
+	enemyCombatUnitList[id] = unit;
 	enemyUnitList[id] = unit;
 	unitList[id] = unit;
 	return unit;
@@ -284,6 +287,48 @@ function addEnemyCourier(x, y, angle, general, target, order){
 	enemyCourierList[id] = unit;
 	enemyUnitList[id] = unit;
 	unitList[id] = unit;
+}
+
+function terminateUnit(id, unitType, army){
+	if (army == armies.blue){
+		switch (unitType){
+			case unitTypes.infantry:
+				delete playerInfantryList[id];
+				delete playerCombatUnitList[id];
+				break;
+			case unitTypes.artillery:
+				delete playerArtilleryList[id];
+				delete playerCombatUnitList[id];
+				break;
+			case unitTypes.courier:
+				delete playerCourierList[id];
+				break;
+			default:
+				throw "Unexpected unit type"
+				break;
+		}
+		delete playerUnitList[id];
+	}
+	else{
+		switch (unitType){
+			case unitTypes.infantry:
+				delete enemyInfantryList[id];
+				delete enemyCombatUnitList[id];
+				break;
+			case unitTypes.artillery:
+				delete enemyArtilleryList[id];
+				delete enemyCombatUnitList[id];
+				break;
+			case unitTypes.courier:
+				delete enemyCourierList[id];
+				break;
+			default:
+				throw "Unexpected unit type"
+				break;
+		}
+		delete enemyUnitList[id];
+	}
+	delete unitList[id];
 }
 
 function createSkirmishAnimation(unit, skirmishTargets, animationTime){

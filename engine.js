@@ -743,6 +743,30 @@ function getMidpoint(xA, yA, xB, yB){
 	return {x: xA + ((xB - xA) / 2), y: yA + ((yB - yA) / 2)}
 }
 
+function anyAlongRay(xA, yA, xB, yB, unitDict, ignoreList){
+	//Give a ray origin (xA, yA) and terminating location (xB, yB),
+	//return true if any on ray, else false.
+	//ignore ids in ignoreList
+	var id, unit, vecA, vecB, perpA, perpDist;
+	vecB = {x: xB - xA, y: yB - yA};
+	for (var id in unitDict){
+		if (ignoreList.includes(id)){
+			continue;
+		}
+		unit = unitDict[id];
+		vecA = {x: unit.x - xA, y: unit.y - yA};
+
+		perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);
+		if (perpA == null){
+			continue;
+		}
+		perpDist = getVectorMag(perpA.x, perpA.y);
+		if (perpDist < unit.combatRadius){
+			return true;
+		}
+	}
+	return false;
+}
 function rayCastSegment(xA, yA, xB, yB, pathWidth, idList, unitDict, returnAll){
 	//Give a ray origin (xA, yA) and terminating location (xB, yB),
 	//return the first id along that path (to within pathWidth), else null.
