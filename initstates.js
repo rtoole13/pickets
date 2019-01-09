@@ -2,7 +2,7 @@
 
 class BoardPreset {
 	constructor(){
-
+		this.externalMap = false;
 	}
 	load(){
 		this.addUnits();
@@ -15,6 +15,7 @@ class BoardPreset {
 class MainBoard extends BoardPreset{
 	constructor(){
 		super();
+		this.externalMap = true;
 	}
 
 	addUnits(){
