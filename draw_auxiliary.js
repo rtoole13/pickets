@@ -161,22 +161,15 @@ function drawTitleScene(howToMouseOver, playMouseOver){
 
     canvasContext.save();
     canvasContext.fillStyle = playerColor;
-    canvasContext.font = '50px sans-serif';
+    canvasContext.font = '50px IM Fell English SC';
     canvasContext.textAlign = 'center';
     canvasContext.fillText(titleStr, canvas.width/2 , -65 + canvas.height/2);
-    canvasContext.restore();
 
-    canvasContext.save();
     canvasContext.fillStyle = (howToMouseOver)? enemyColor : playerColor;
-    canvasContext.font = '20px sans-serif';
-    canvasContext.textAlign = 'center';
+    canvasContext.font = '20px IM Fell English SC';
     canvasContext.fillText(howToStr, canvas.width/2 , -5 + canvas.height/2);
-    canvasContext.restore();
 
-    canvasContext.save();
     canvasContext.fillStyle = (playMouseOver)? enemyColor : playerColor;
-    canvasContext.font = '20px sans-serif';
-    canvasContext.textAlign = 'center';
     canvasContext.fillText(playStr, canvas.width/2 , 45 + canvas.height/2);
     canvasContext.restore();
 
@@ -205,14 +198,11 @@ function drawHowToScene(backHighLighted, tutorialHighlighted){
     tutorialStr  = 'Play tutorial';
     canvasContext.save();
     canvasContext.fillStyle = playerColor;
-    canvasContext.font = '40px sans-serif';
+    canvasContext.font = '40px IM Fell English SC';
     canvasContext.textAlign = 'center';
     canvasContext.fillText(titleStr, canvas.width/2 , -200 + canvas.height/2);
-    canvasContext.restore();
 
-    canvasContext.save();
-    canvasContext.fillStyle = playerColor;
-    canvasContext.font = '19px sans-serif';
+    canvasContext.font = '19px IM Fell English SC';
     canvasContext.textAlign = 'left';
     var horPosition = canvas.width/2 - 250;
     canvasContext.fillText(keysStr, horPosition + 25, -160 + canvas.height/2);
@@ -224,19 +214,14 @@ function drawHowToScene(backHighLighted, tutorialHighlighted){
     canvasContext.fillText(mouseStr, horPosition + 25, 30 + canvas.height/2);
     canvasContext.fillText(leftClickStr, horPosition, 60 + canvas.height/2);
     canvasContext.fillText(rightClickStr, horPosition, 90 + canvas.height/2);
-    canvasContext.restore();
 
-    canvasContext.save();
     canvasContext.fillStyle = (backHighLighted)? enemyColor : playerColor;
-    canvasContext.font = '20px sans-serif';
+    canvasContext.font = '20px IM Fell English SC';
     canvasContext.textAlign = 'center';
     canvasContext.fillText(backStr, canvas.width/2 , 150 + canvas.height/2);
-    canvasContext.restore();
-
-    canvasContext.save();
+    
     canvasContext.fillStyle = (tutorialHighlighted)? enemyColor : playerColor;
-    canvasContext.font = '20px sans-serif';
-    canvasContext.textAlign = 'center';
+    canvasContext.font = '20px IM Fell English SC';
     canvasContext.fillText(tutorialStr, canvas.width/2 , 190 + canvas.height/2);
     canvasContext.restore();
 }

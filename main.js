@@ -145,7 +145,6 @@ function init(){
     skirmishAlpha = hexToRGB(forestGreen, 0.45);
     sphereShotAlpha = hexToRGB("#F39C12", 0.15);
     cannisterAlpha = hexToRGB(crimson, 0.15);
-    
     //reference external .svgs
     initializeSpriteSheets();
 

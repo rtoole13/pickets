@@ -46,7 +46,7 @@ class TutorialGoal {
         message = this.message.split("<br>");
         canvasContext.save();
         canvasContext.fillStyle = playerColor;
-        canvasContext.font = '20px sans-serif';
+        canvasContext.font = '20px IM Fell English SC';
         canvasContext.textAlign = 'center';
 
         y = canvas.height / 2 - 250;
@@ -98,7 +98,7 @@ class ClickGoal extends TutorialGoal {
         message = this.message.split("<br>");
         canvasContext.save();
         canvasContext.fillStyle = playerColor;
-        canvasContext.font = '20px sans-serif';
+        canvasContext.font = '20px IM Fell English SC';
         canvasContext.textAlign = 'center';
 
         y = canvas.height / 2 - 250;
@@ -107,7 +107,7 @@ class ClickGoal extends TutorialGoal {
             y += 24;
         }
 
-        canvasContext.font = '16px sans-serif';
+        canvasContext.font = '16px IM Fell English SC';
         canvasContext.fillText('(click to continue)', canvas.width/2, y);
         canvasContext.restore();
     }
@@ -268,7 +268,7 @@ class DurationGoal extends TutorialGoal {
         message = this.message.split("<br>");
         canvasContext.save();
         canvasContext.fillStyle = playerColor;
-        canvasContext.font = '20px sans-serif';
+        canvasContext.font = '20px IM Fell English SC';
         canvasContext.textAlign = 'left';
 
         x = canvas.width / 2 - 240;

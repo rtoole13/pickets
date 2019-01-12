@@ -137,7 +137,7 @@ class CombatSpriteSheet extends SpriteSheet {
 
 class FloatingText {
 	constructor(font, velX, velY, duration, color){
-		this.font = '20px sans-serif';
+		this.font = '20px IM Fell English SC';
 		this.velX = velX || -0.5;
 		this.velY = velY || -1;
 		this.accel = 0.03;
@@ -551,13 +551,13 @@ class UnitToolTip {
 		this.height = height;
 		this.canvasPadding = canvasPadding;
 		this.color = color;
-		this.x = canvas.width - (this.width + this.canvasPadding); //TOP LEFT CORNER X
-		this.y = canvas.height - (this.height + this.canvasPadding); //TOP LEFT CORNER Y
+		this.x = canvas.width - (this.width + this.canvasPadding.x); //TOP LEFT CORNER X
+		this.y = canvas.height - (this.height + this.canvasPadding.y); //TOP LEFT CORNER Y
 		this.textPaddingX = 4; //Text padding from edges
 		this.textPaddingTopY = 22; //Text padding from edges
 		this.textPaddingBotY = 6; //Text padding from edges
-		this.font = '20px sans-serif';
-		this.italicFont = 'italic 18px sans-serif';
+		this.font = '20px IM Fell English SC';
+		this.italicFont = 'italic 18px IM Fell English SC';
 		this.boldFont = 'bold ' + this.font;
 		this.boldItalicFont = 'bold ' + this.italicFont;
 		this.rowHeight = 22;
@@ -621,7 +621,7 @@ class UnitToolTip {
 
 		rows = 3;
 		this.height = rows * this.rowHeight + this.textPaddingBotY;
-		this.y = canvas.height - (this.height + this.canvasPadding); //TOP LEFT CORNER Y
+		this.y = canvas.height - (this.height + this.canvasPadding.y); //TOP LEFT CORNER Y
 
 		//Panel
 		canvasContext.save()
@@ -670,7 +670,7 @@ class UnitToolTip {
 		}	
 		rows = 1;
 		this.height = rows * this.rowHeight + this.textPaddingBotY;
-		this.y = canvas.height - (this.height + this.canvasPadding); //TOP LEFT CORNER Y
+		this.y = canvas.height - (this.height + this.canvasPadding.y); //TOP LEFT CORNER Y
 		//Panel
 		canvasContext.save()
 		canvasContext.fillStyle = this.color;
@@ -958,7 +958,7 @@ function drawTextDebug(){
 	fps = fps.toFixed(1);
 	canvasContext.save();
 	canvasContext.fillStyle = 'magenta';
-	canvasContext.font = '20px sans-serif';
+	canvasContext.font = '20px IM Fell English SC';
 	canvasContext.fillText("fps: " + fps, 10, 50);
 	canvasContext.restore();
 }
@@ -1602,22 +1602,10 @@ function drawEndGame(playerVictory, condition){
 
 	canvasContext.save();
 	canvasContext.fillStyle = endColor;
-	canvasContext.font = '20px sans-serif';
+	canvasContext.font = '20px IM Fell English SC';
 	canvasContext.textAlign = 'center';
 	canvasContext.fillText(endStr, canvas.width/2 , 30 + canvas.height/2);
-	canvasContext.restore();
-
-	canvasContext.save();
-	canvasContext.fillStyle = endColor;
-	canvasContext.font = '20px sans-serif';
-	canvasContext.textAlign = 'center';
 	canvasContext.fillText(conditionStr, canvas.width/2 , -30 + canvas.height/2);
-	canvasContext.restore();
-
-	canvasContext.save();
-	canvasContext.fillStyle = endColor;
-	canvasContext.font = '20px sans-serif';
-	canvasContext.textAlign = 'center';
 	canvasContext.fillText('Press \"R\" to return to the main menu.', canvas.width/2 , 60 + canvas.height/2);
 	canvasContext.restore();
 

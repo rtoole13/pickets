@@ -39,7 +39,6 @@ major tasks
 - bugs
     - Desperately need to fix retreat logic
         - units need to run for the edge of the map or something, not for the general. Forces the general to do really dumb things.
-    - have path be considered invalid before courier is sent rather than on arrival
 
 - other
     - add courier count display!!
