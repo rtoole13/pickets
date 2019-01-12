@@ -1,4 +1,3 @@
-
 major tasks
 - tutorial work
     - scenes
@@ -26,7 +25,6 @@ major tasks
         fallback command
         attack command
         courier captured sound?
-    - add always present volume control button
     - have sound mixing affected by # of units in combat
         looping ambient music
         looping battle screams
@@ -42,19 +40,14 @@ major tasks
     - Desperately need to fix retreat logic
         - units need to run for the edge of the map or something, not for the general. Forces the general to do really dumb things.
     - have path be considered invalid before courier is sent rather than on arrival
-    - prevent pathfinding for locations off of map - mostly done/done
-        - most likely to happen with a retreating enemy general - SOLVED?
-    - make general rotate wayyyy quicker or not have to at all.
 
 - other
-    - change map grid for tutorials!
     - add courier count display!!
     - couriers reroute around static enemies
     - artillery unit
         artillery unit art!!!
         
     - HUD display of active command type
-    - Fix win/loss final screen. Have the ability to  navigate back to the main menu or retry the game
         
 - polish and balance
     - balance (dmg, hp, morale, etc.)

@@ -18,14 +18,44 @@ back to the appropriate available pool.
 //audio_bugle.ended to check if still playing.
 class AudioHandler {
     constructor(){
+        this._muted = false;
+        this._globalVolumeScale = 1;
         //create AudioPools
         this.audioPools = {};
         this.initializePools();
-        
+
         //create AudioGroups
         this.audioGroups = {};
         this.initializeAudioGroups();
     }
+
+    get muted(){
+        return this._muted;
+    }
+
+    set muted(value){
+        if (typeof(value)!='boolean'){
+            return;
+        }
+        this._muted = value; 
+    }
+
+    get globalVolumeScale(){
+        return this._globalVolumeScale;
+    }
+
+    set globalVolumeScale(value){
+        if (value <= 0){
+            this._globalVolumeScale = 0;
+        }
+        else if (value >= 1){
+            this._globalVolumeScale = 1;
+        }
+        else{
+            this._globalVolumeScale = value;
+        }
+    }
+
     initializePools(){
         this.initializePool('assets/audio/gunfire/rifle1.ogg', 3, 0.1, 'rifle1');
         this.initializePool('assets/audio/gunfire/rifle2.ogg', 3, 0.1, 'rifle2');
@@ -70,6 +100,7 @@ class AudioHandler {
             rifle12 : 1
         }
         artilleryDict = {
+            //FIXME add cannon sounds..
             volley1 : 2
         }
         
@@ -92,6 +123,9 @@ class AudioHandler {
     }
 
     playAudioGroup(id, varyPitch){
+        if (this.muted){
+            return;
+        }
         var audioGroup, poolID;
         audioGroup = this.audioGroups[id];
         poolID = this.audioGroups[id].getRandomClip();
@@ -106,6 +140,7 @@ class AudioHandler {
         }
         //console.log(unavailableSum);
     }
+
 
 }
 

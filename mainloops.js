@@ -16,7 +16,7 @@ function loopMainTitle(){
         howToHighLighted = false;
         beginHighlighted = false;
     }
-
+    muteButton.update();
     drawTitleScene(howToHighLighted, beginHighlighted);
 
     if (checkTitleSceneChange()){
@@ -42,7 +42,7 @@ function loopHowTo(){
         backHighLighted = false;
         tutorialHighlighted = false;
     }
-
+    muteButton.update();
     drawHowToScene(backHighLighted, tutorialHighlighted);
 
     if (checkHowToSceneChange()){
@@ -67,6 +67,7 @@ function loopMainGame(){
     }
 
     //Updates
+    muteButton.update();
     gameBoard.update(dt);
     draw(dt);
     
@@ -87,7 +88,7 @@ function loopTutorialScene(){
     }
     tutorialArrowLeft.update(dt);
     tutorialArrowRight.update(dt);
-    
+    muteButton.update();
     if (gameBoard.board.checkGoals()){ //change scene when goals are accomplished
         tutorialArrowRight.clicked = true;
     } 

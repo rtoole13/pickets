@@ -1,12 +1,11 @@
 "use strict";
 
-class TutorialArrow {
-    constructor(centerX, centerY, width, height, arrowLeft){
+class CanvasButton {
+    constructor(centerX, centerY, width, height){
         this.x = centerX;
         this.y = centerY;
         this.width = width;
         this.height = height;
-        this.arrowLeft = arrowLeft; //true if left, false if right
         this.xMin = this.x - this.width / 2;
         this.xMax = this.x + this.width / 2;
         this.yMin = this.y - this.height / 2;
@@ -21,7 +20,19 @@ class TutorialArrow {
         else{
             this.depressed = false;
         }
+        this.clicked = false;
     }
+
+    checkClick(){
+        if (CollisionEngine.pointInAABB(mouseX, mouseY, this.xMin, this.xMax, this.yMin, this.yMax)){
+            this.clicked = true;
+        }
+        else{
+            this.clicked = false;
+        }
+        return this.clicked;
+    }
+
     draw(){
         var color;
         if (this.clicked){
@@ -41,10 +52,57 @@ class TutorialArrow {
         canvasContext.fillRect(-this.width/2, -this.height/2, this.width, this.height);
         canvasContext.restore();
     }
-    onClick(){
-
+}
+class TutorialArrow extends CanvasButton{
+    constructor(centerX, centerY, width, height, arrowLeft){
+        super(centerX, centerY, width, height);
+        this.arrowLeft = arrowLeft; //true if left, false if right
+    }
+    draw(){
+        super.draw();
     }
 }
+class MuteButton extends CanvasButton {
+    constructor(centerX, centerY, width, height){
+        super(centerX, centerY, width, height);
+        this.state = false;
+    }
+    draw(){
+        var color;
+        if (this.clicked){
+            color = 'green';
+        }
+        else{
+            if (this.depressed){
+                color = 'yellow';
+            }
+            else if (!this.state){
+                //unmuted
+                color = 'magenta';
+            }
+            else{
+                //muted
+                color = 'blue';
+            }
+        }
+        canvasContext.save()
+        canvasContext.fillStyle = color;
+        canvasContext.translate(this.x, this.y);
+        canvasContext.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+        canvasContext.restore();
+    }
+    checkClick(){
+        if (CollisionEngine.pointInAABB(mouseX, mouseY, this.xMin, this.xMax, this.yMin, this.yMax)){
+            this.clicked = true;
+            this.state = !this.state;   
+        }
+        else{
+            this.clicked = false;
+        }
+        return this.clicked;
+    }
+}
+
 function drawArrows(){
     tutorialArrowLeft.draw();
     tutorialArrowRight.draw();
@@ -62,6 +120,7 @@ function drawTutorialScene(dt){
     drawGoal();
     drawOrder(); //being called twice.. once in draw, then again here.
     drawArrows();
+    muteButton.draw();
 }
 
 function drawDebugTitle(){
@@ -93,6 +152,7 @@ function drawDebugHowTo(){
 function drawTitleScene(howToMouseOver, playMouseOver){
     drawBackground();
     drawScreen();
+    muteButton.draw();
     //drawDebugTitle();
     var titleStr, howToStr, playStr;
     titleStr = 'Pickets';
@@ -125,6 +185,7 @@ function drawTitleScene(howToMouseOver, playMouseOver){
 function drawHowToScene(backHighLighted, tutorialHighlighted){
     drawBackground();
     drawScreen();
+    muteButton.draw();
     //drawDebugHowTo();
     var titleStr, keysStr, aStr, fStr, spaceStr, shiftStr, escStr, mouseStr, leftClickStr, rightClickStr, backStr, tutorialStr;
     

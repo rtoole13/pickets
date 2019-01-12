@@ -160,7 +160,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		addPlayerGeneral(205, 460, 45, 10);
 		addEnemyGeneral(650, 150, -135, 10, false);
 		addPlayerArtillery(200, 380, 0, "Brigade");
-		addEnemyInfantry(520, 190, -135, "Brigade", enemyInfantryID);
+		//addEnemyInfantry(520, 190, -135, "Brigade", enemyInfantryID);
 	}
 
 	initializeGoals(){
@@ -306,6 +306,9 @@ function terminateUnit(id, unitType, army){
 			default:
 				throw "Unexpected unit type"
 				break;
+		}
+		if (activeUnit.id == id){
+			activeUnit = undefined;
 		}
 		delete playerUnitList[id];
 	}

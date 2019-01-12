@@ -1053,7 +1053,7 @@ class General extends AuxiliaryUnit{
 		super(x, y, angle, army);
 		this.derivativeSpeed = unitSpeeds.general;
 		this.commandRadius = 100;
-		this.rotationRate = 120;
+		this.rotationRate = 160;
 		this.maxCourierCount = courierCount;
 		this.courierCount = this.maxCourierCount;
 		this.issuedCourierCount = 0;
@@ -1065,6 +1065,10 @@ class General extends AuxiliaryUnit{
 		this.captured = false;
 		this.spriteSheet = initializeSpriteSheet(this);
 		this.AIcontrolled = false;
+	}
+	rotate(dt){
+		this.angle = (this.targetAngle != null)? this.targetAngle : this.angle;
+		super.rotate(dt);
 	}
 	issueCommand(target, command){
 		if (target.retreating){

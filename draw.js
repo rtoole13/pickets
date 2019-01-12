@@ -831,7 +831,6 @@ function draw(dt){
 	drawEnemyUnits();
 	drawAnimations(dt);
 	drawSelection(dt);
-	drawOrder();
 	combatTextList.draw(dt);
 	drawHUD();
 }
@@ -894,9 +893,11 @@ function initializeSpriteSheet(unit){
 }
 
 function drawHUD(){
+	drawOrder();
 	unitToolTip.draw();
 	activeHealth.draw();
 	hoverHealth.draw();
+	muteButton.draw();
 }
 
 function drawAnimations(dt){
@@ -1617,7 +1618,7 @@ function drawEndGame(playerVictory, condition){
 	canvasContext.fillStyle = endColor;
 	canvasContext.font = '20px sans-serif';
 	canvasContext.textAlign = 'center';
-	canvasContext.fillText('Press \"R\" to restart.', canvas.width/2 , 60 + canvas.height/2);
+	canvasContext.fillText('Press \"R\" to return to the main menu.', canvas.width/2 , 60 + canvas.height/2);
 	canvasContext.restore();
 
 }

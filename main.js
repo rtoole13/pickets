@@ -18,7 +18,8 @@ var canvas = document.getElementById('gameCanvas'),
     map_bg,
     sceneHandler,
     audioHandler,
-    eventHandler;
+    eventHandler,
+    muteButton;
 
 //Title Objects//
 var howToHitBox,
@@ -151,6 +152,7 @@ function init(){
 	sceneHandler = new SceneHandler();
 	audioHandler = new AudioHandler();
 	eventHandler = new EventHandler();
+	muteButton 	 = new MuteButton(canvas.width - 30, canvas.height - 30, 25, 25);
 
 	//Begin game
 	sceneHandler.beginTitleScene();
@@ -166,7 +168,9 @@ function handleMouseDown(e){
 		case 2:
 			handleRightClickDown();
 			break;
-		
+	}
+	if (muteButton.checkClick()){
+		muteOrUnmuteGame();
 	}
 }
 
@@ -405,6 +409,10 @@ function clearOrderStack(){
 	orderStack = [];
 }
 
+function muteOrUnmuteGame(){
+	audioHandler.muted = muteButton.state;
+}
+
 function handleKeyPress(e){
 	var keyCode = e.keyCode;
 	switch (keyCode){
@@ -461,6 +469,9 @@ function handleTitleMouseDown(e){
 	else{
 		playClicked = howToClicked = false;
 	}
+	if (muteButton.checkClick()){
+		muteOrUnmuteGame();
+	}
 }
 
 function handleHowToMouseDown(e){
@@ -475,24 +486,18 @@ function handleHowToMouseDown(e){
 	else{
 		tutorialClicked = backClicked = false;
 	}
+	if (muteButton.checkClick()){
+		muteOrUnmuteGame();
+	}
 }
 
 function handleTutorialMouseDown(e){
-	var left, right;
-	left = tutorialArrowLeft;
-	right = tutorialArrowRight;
-	if (CollisionEngine.pointInAABB(mouseX, mouseY, left.xMin, left.xMax, left.yMin, left.yMax)){
-		left.clicked = true;
+	if (tutorialArrowLeft.checkClick()){
 		return;
 	}
-	else if (CollisionEngine.pointInAABB(mouseX, mouseY, right.xMin, right.xMax, right.yMin, right.yMax)){
-		right.clicked = true;
+	else if (tutorialArrowRight.checkClick()){
 		return;
 	}
-	else{
-		left.clicked = right.clicked = false;
-	}
-	//Call default handleMouseDown
 	handleMouseDown(e);
 }
 
@@ -501,7 +506,7 @@ function handleEndGameKeyPress(e){
 	switch (keyCode){
 		case 82:
 			//R
-			sceneHandler.changeScene(scenes.gameScene);
+			sceneHandler.changeScene(scenes.titleScene);
 		default:
 			return;
 	}
