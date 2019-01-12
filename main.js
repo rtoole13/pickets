@@ -363,7 +363,7 @@ function handleRightClickDown(){
 				}
 			}
 			else{
-			givingOrder = true;
+				givingOrder = true;
 			}
 		}
 	}
@@ -391,9 +391,15 @@ function handleRightClickUp(e){
 				   angle: targetAngle, date: Date.now(), queue: queuingOrders};
 
 		if (queuingOrders){
-			orderStack.push(command)
+			if (gameBoard.grid.isLocationImpassable(command.x, command.y)){
+				return;
+			}
+			orderStack.push(command);
 		}
 		else{
+			if (gameBoard.grid.isLocationImpassable(command.x, command.y)){
+				return;
+			}
 			playerGeneral.issueCommand(activeUnit, command);
 		}
 	}

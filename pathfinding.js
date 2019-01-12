@@ -260,11 +260,11 @@ class Grid{
 		}
 		return this.elem[i][j];
 	}
-	isLocationWalkable(x, y){
+	isLocationImpassable(x, y){
 		var i,j;
 		i = Math.floor(x / this.gridSpacing.x);
 		j = Math.floor(y / this.gridSpacing.y);
-		return this.elem[i][j].walkable;
+		return this.elem[i][j].impassable;
 	}
 }
 class GridNode{
