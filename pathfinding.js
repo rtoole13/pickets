@@ -105,12 +105,12 @@ class Pathfinder{
 }
 
 class Grid{
-	constructor(rows, columns, width, height){
+	constructor(rows, columns, width, height, externallyLoadedMap){
 		this.rows = rows;
 		this.columns = columns;
 		this.width = width;
 		this.height = height;
-
+		this.externallyLoadedMap = externallyLoadedMap;
 		this.gridSpacing = {x:null, y:null};
 		this.minDim = null;
 		this.elem = [];
@@ -138,11 +138,17 @@ class Grid{
 			var rowArray = [];
 			for (var j = 0; j < this.rows; j++){
 				var yLoc = this.gridSpacing.y / 2 + this.gridSpacing.y * j;
-				rowArray.push(new GridNode(xLoc, yLoc, this.gridSpacing.x, this.gridSpacing.y, i, j, true, 0));
+				var node = new GridNode(xLoc, yLoc, this.gridSpacing.x, this.gridSpacing.y, i, j, 0);
+				this.passableElem.push(node);
+				rowArray.push(node);
 			}
 			this.elem.push(rowArray);
 		}
 
+		if (!this.externallyLoadedMap){
+			return;
+		}
+		this.passableElem = [];
 		var elemInfo = mapData.split(';');
 		elemInfo.pop(1);
 		var rowOne, rowCount, colCount;
@@ -171,6 +177,9 @@ class Grid{
 				}
 			}
 		}
+	}
+	loadExternalMap(){
+
 	}
 
 	update(currentUnit, ignoreList){
@@ -259,7 +268,7 @@ class Grid{
 	}
 }
 class GridNode{
-	constructor(x, y, width, height, indX, indY, walkable, tileType){
+	constructor(x, y, width, height, indX, indY, tileType){
 		this.x = x;
 		this.y = y;
 		this.indX = indX;
@@ -267,22 +276,25 @@ class GridNode{
 
 		this.width = width;
 		this.height = height;
-		this.walkable = walkable;
-
+		this.tileType = tileType;
 		switch(this.tileType){
 			default:
 				this.impassable = false;
+				this.walkable = true;
 				this.movementPenalty = 3;
 			case tileTypes.mountain:
 				this.impassable = true;
+				this.walkable = false;
 				this.movementPenalty = 10;
 				break;
 			case tileTypes.plain:
 				this.impassable = false;
+				this.walkable = true;
 				this.movementPenalty = 3;
 				break;
 			case tileTypes.road:
 				this.impassable = false;
+				this.walkable = true;
 				this.movementPenalty = 0;
 				break;
 		}

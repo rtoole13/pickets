@@ -1,7 +1,7 @@
 "use strict";
 
 var map_bg = new Image(800, 600);
-map_bg.src = '../main_map.png';
+map_bg.src = '../assets/main_map.png';
 
 function draw(){
 	drawBackground();

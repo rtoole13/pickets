@@ -2,13 +2,16 @@
 
 class GameBoard{
 	constructor(rows, columns, board){
-		this.grid = new Grid(rows, columns, canvas.width, canvas.height);
+		this.rows = rows;
+		this.columns = columns;
+		this.grid = null;
 		this.collisionCheckTime = 200;
 		this.collisionTimer = Date.now();
 		this.board = board;
 	}
 
 	initializeBoard(){
+		this.grid = new Grid(this.rows, this.columns, canvas.width, canvas.height, this.board.externalMap);
 		this.board.load();
 	}
 
