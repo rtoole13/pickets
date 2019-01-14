@@ -292,6 +292,9 @@ function addEnemyCourier(x, y, angle, general, target, order){
 
 function terminateUnit(id, unitType, army){
 	if (army == armies.blue){
+		if (activeUnit.id == id){
+			activeUnit = undefined;
+		}
 		switch (unitType){
 			case unitTypes.infantry:
 				delete playerInfantryList[id];
@@ -307,9 +310,6 @@ function terminateUnit(id, unitType, army){
 			default:
 				throw "Unexpected unit type"
 				break;
-		}
-		if (activeUnit.id == id){
-			activeUnit = undefined;
 		}
 		delete playerUnitList[id];
 	}

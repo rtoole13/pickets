@@ -184,26 +184,36 @@ class Grid{
 
 	update(currentUnit, ignoreList){
 		this.reset();
-		
-		/*
-		//Doing a basic point in circle collision check temporarily.
-		for (var id in unitList){
-			var unit = unitList[id];
-			if (unit == currentUnit || inArray(unit, ignoreList) || unit.unitType == unitTypes.courier || unit.army != currentUnit.army){
+		if (currentUnit.auxiliaryUnit){
+			this.updateForAuxiliaryUnit(currentUnit, ignoreList);
+		}
+		else{
+			this.updateForCombatUnit(currentUnit, ignoreList);
+		}
+	}
+
+	updateForAuxiliaryUnit(currentUnit, ignoreList){
+		for (var id in currentUnit.enemyList){
+			var unit = currentUnit.enemyList[id];
+			if (inArray(unit, ignoreList)){
 				continue;
 			}
-			//NOTE: This line adds only  static units in unit's army the impassable list. Removing at the moment for debug purposes
-			//if (unit.command != null) continue;
-			continue;
-			for (var i = 0; i < this.passableElem.length; i++){
-				var elem = this.passableElem[i];
-				if (CollisionEngine.pointInCircle(elem.x, elem.y, unit.x, unit.y, 2 * this.minDim + unit.rerouteDistance)){
-					elem.walkable = false;
+			if (unit.command != null) continue; //unit is moving
+			this.getAllNodesInRadius(unit.x, unit.y, 2 * unit.combatRadius, true);
+		}
+	}
+
+	updateForCombatUnit(currentUnit, ignoreList){
+		if (currentUnit.retreating){
+			for (var id in currentUnit.enemyList){
+				var unit = currentUnit.enemyList[id];
+				if (inArray(unit, ignoreList)){
+					continue;
 				}
-				
+				if (unit.command != null) continue; //unit is moving
+				this.getAllNodesInRadius(unit.x, unit.y, 2 * unit.combatRadius, true);
 			}
 		}
-		*/
 	}
 
 	reset(){
@@ -241,6 +251,38 @@ class Grid{
 		return null;
 	}
 
+	getAllNodesInRadius(x, y, radius, setUnwalkable){
+		var nodes, radiusSq, rootNode, xExtent, yExtent;
+		nodes = [];
+		radiusSq = radius * radius;
+		rootNode = this.getNodeFromLocation(x, y);
+		nodes.push(rootNode);
+
+		xExtent = Math.floor(radius / this.gridSpacing.x);
+		yExtent = Math.floor(radius / this.gridSpacing.y);
+		for (var i = -xExtent; i <= xExtent; i++){
+			for (var j = -yExtent; j <= yExtent; j++){
+				if (i == 0 && j == 0){
+					continue;
+				}
+				var checkX = rootNode.indX + i;
+				var checkY = rootNode.indY + j;
+
+				if (checkX >= 0 && checkX < this.columns && checkY >= 0 && checkY < this.rows){
+					var elem = this.elem[checkX][checkY];
+					if (elem.impassable) continue; //Check this out.. might need to be walkable check
+					if (getDistanceSq(x, y, elem.x, elem.y) <= radiusSq){
+						if (setUnwalkable){
+							elem.walkable = false;	
+						}
+						nodes.push(elem);
+					}
+				}
+			}
+		}
+		return nodes;
+	}
+
 	getClosestValidNodeFromLocation(x, y){
 		var i,j;
 		i = Math.floor(x / this.gridSpacing.x);
@@ -260,6 +302,176 @@ class Grid{
 		}
 		return this.elem[i][j];
 	}
+
+	getWalkableNodeOnNearestSide(x, y, dirX, dirY){
+		//unit is retreating from x,y in preferred direction dirX, dirY
+		var currentNode, dists, sorted;
+		currentNode = this.getNodeFromLocation(x, y);
+		dists = {};
+		dists['left']  = currentNode.indX;
+		dists['right'] = this.columns - currentNode.indX;
+		dists['top']   = currentNode.indY;
+		dists['bot']   = this.rows - currentNode.indY;
+		
+		sorted = sortDictByValue(dists);
+		return this.findWalkableNodeOnEdge(sorted[0], currentNode, dirX, dirY, true);
+	}
+	
+	findWalkableNodeGreaterThanInColumn(xInd, targetNode){
+		var start = (targetNode.indY < (this.rows - 1))? targetNode.indY + 1 : (this.rows - 1);
+		for (var i = start; i < this.rows; i ++){
+			var node = this.elem[xInd][i];
+			if (node.walkable){
+				return node;
+			}
+		}
+		return null;
+	}
+
+	findWalkableNodeLessThanInColumn(xInd, targetNode){
+		var start = (targetNode.indY > 0)? targetNode.indY - 1 : 0;
+		for (var i = start; i >= 0; i--){
+			var node = this.elem[xInd][i];
+			if (node.walkable){
+				return node;
+			}
+		}
+		return null;
+	}
+
+	findWalkableNodeGreaterThanInRow(yInd, targetNode){
+		var start = (targetNode.indX < (this.columns - 1))? targetNode.indX + 1 : (this.columns - 1);
+		for (var i = start; i < this.columns; i ++){
+			var node = this.elem[i][yInd];
+			if (node.walkable){
+				return node;
+			}
+		}
+		return null;
+	}
+	
+	findWalkableNodeLessThanInRow(yInd, targetNode){
+		var start = (targetNode.indX > 0)? targetNode.indX - 1 : 0;
+		for (var i = start; i >= 0; i--){
+			var node = this.elem[i][yInd];
+			if (node.walkable){
+				return node;
+			}
+		}
+		return null;
+	}
+
+	findWalkableNodeInColumn(xInd, currentNode, dirY){
+		var targetNode = this.elem[xInd][currentNode.indY];
+		if (targetNode.walkable){
+			return targetNode;
+		}
+		if (dirY < 0){
+			//look up direction first
+			var node = this.findWalkableNodeLessThanInColumn(xInd, targetNode);
+			if (node == null){
+				//nothing. look down
+				node = this.findWalkableNodeGreaterThanInColumn(xInd, targetNode);	
+			}
+		}
+		else{
+			//look up direction first
+			var node = this.findWalkableNodeGreaterThanInColumn(xInd, targetNode);
+			if (node == null){
+				//nothing. look down
+				node = this.findWalkableNodeLessThanInColumn(xInd, targetNode);	
+			}
+		}
+		return node;
+	}
+
+	findWalkableNodeInRow(yInd, currentNode, dirX){
+		var targetNode = this.elem[currentNode.indX][yInd];
+		if (targetNode.walkable){
+			return targetNode;
+		}
+		if (dirX < 0){
+			//look left direction first
+			var node = this.findWalkableNodeLessThanInRow(yInd, targetNode);
+			if (node == null){
+				//nothing. look right
+				node = this.findWalkableNodeGreaterThanInRow(yInd, targetNode);	
+			}
+		}
+		else{
+			//look right direction first
+			var node = this.findWalkableNodeGreaterThanInRow(yInd, targetNode);
+			if (node == null){
+				//nothing. look left
+				node = this.findWalkableNodeLessThanInRow(yInd, targetNode);	
+			}
+		}
+		return node;
+	}
+
+	findWalkableNodeOnEdge(edge, currentNode, dirX, dirY, firstIter){
+		//prefer nodes in dirX, dirY direction. If it fails to find a node, try
+		//another edge. If that fails, drop out.
+		var targetNode;
+		if (edge == 'left'){
+			targetNode = this.findWalkableNodeInColumn(0, currentNode, dirY);
+			if (targetNode == null && firstIter){
+				if (dirY < 0){
+					//try above
+					targetNode = this.findWalkableNodeOnEdge('top', currentNode, dirX, dirY, false);
+				}
+				else{
+					//try below
+					targetNode = this.findWalkableNodeOnEdge('bot', currentNode, dirX, dirY, false);
+				}
+			}
+		}
+		else if (edge == 'right'){
+			targetNode = this.findWalkableNodeInColumn(this.columns - 1, currentNode, dirY);
+			if (targetNode == null && firstIter){
+				if (dirY < 0){
+					//try above
+					targetNode = this.findWalkableNodeOnEdge('top', currentNode, dirX, dirY, false);
+				}
+				else{
+					//try below
+					targetNode = this.findWalkableNodeOnEdge('bot', currentNode, dirX, dirY, false);
+				}
+			}
+		}
+		else if (edge == 'top'){
+			targetNode = this.findWalkableNodeInRow(0, currentNode, dirX);
+			if (targetNode == null && firstIter){
+				if (dirX < 0){
+					//try left
+					targetNode = this.findWalkableNodeOnEdge('left', currentNode, dirX, dirY, false);
+				}
+				else{
+					//try right
+					targetNode = this.findWalkableNodeOnEdge('right', currentNode, dirX, dirY, false);
+				}
+			}
+		}
+		else if (edge == 'bot'){
+			targetNode = this.findWalkableNodeInRow(this.rows - 1, currentNode, dirX);
+			if (targetNode == null && firstIter){
+				if (dirX < 0){
+					//try left
+					targetNode = this.findWalkableNodeOnEdge('left', currentNode, dirX, dirY, false);
+				}
+				else{
+					//try right
+					targetNode = this.findWalkableNodeOnEdge('right', currentNode, dirX, dirY, false);
+				}
+			}
+		}
+		else {
+			throw 'Expecting edge to be left, right, top, or bot'
+		}
+
+		return targetNode;
+	}
+
 	isLocationImpassable(x, y){
 		var i,j;
 		i = Math.floor(x / this.gridSpacing.x);

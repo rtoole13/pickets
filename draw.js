@@ -949,7 +949,7 @@ function drawArtilleryAnim(artillery, dt){
 }
 
 function drawDebug(){
-	drawTextDebug();
+	//drawTextDebug();
 	//drawGridDebug();
 }
 
@@ -997,8 +997,6 @@ function drawGridDebug(){
 }
 
 function drawGridPoint(gridNode, pathNode, color){
-	// i refers to the column, j the row
-	
 	if (color == null){
 		var color;
 		switch(gridNode.tileType){
@@ -1016,7 +1014,6 @@ function drawGridPoint(gridNode, pathNode, color){
 				break;
 		}
 	}
-	
 	canvasContext.save()
 	//canvasContext.strokeStyle = 'black';
 	canvasContext.fillStyle = color;

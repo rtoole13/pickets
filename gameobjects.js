@@ -480,19 +480,13 @@ class CombatUnit extends Unit{
 			}
 		}
 		else{
-			var thisGeneral;
-			if (this.army == armies.blue){
-				thisGeneral = playerGeneral;
-			}
-			else{
-				//assumed red army
-				thisGeneral = enemyGeneral;
-			}
 			if (this.strength * this.invMaxStrength < this.retreatThreshold){
 				//current hacky approach just checks for a retreat when below a strength threshold
 				if (getRandomInt(1,1000) <= this.retreatChance){
 					this.retreating = true;
 					this.rallyTimer.start();
+					
+					var thisGeneral = (this.army == armies.blue)? playerGeneral : enemyGeneral;
 					this.updateCommand({type: commandTypes.retreat, target: thisGeneral, date: Date.now()}, true)
 					return;
 				}
@@ -507,6 +501,10 @@ class CombatUnit extends Unit{
 
 			}
 		}
+	}
+
+	plotRetreatPath(){
+
 	}
 
 	getFlankModifier(inBattle, xLoc, yLoc){
@@ -547,6 +545,20 @@ class AuxiliaryUnit extends Unit{
 		super(x, y, angle, army);
 		this.combatRadius = 15;
 		this.auxiliaryUnit = true;
+		//Reference enemy list
+		switch(this.army){
+			case armies.blue:
+				this.enemyList = enemyCombatUnitList;
+				break;
+			
+			case armies.red:
+				this.enemyList = playerCombatUnitList;
+				break;
+
+			default:
+				console.log('Nonexistent army.');
+				break;
+		}
 	}
 }
 

@@ -10,6 +10,7 @@ class SceneHandler {
 
         return SceneHandler.instance;
     }
+    
     changeScene(targetScene, variableArgs){
         switch(this.currentScene){
             default:
@@ -54,6 +55,7 @@ class SceneHandler {
                 break;
         }
     }
+
     loadGameBoardPreset(boardName){
         switch(boardName){
             default: 
@@ -68,6 +70,7 @@ class SceneHandler {
                 return new TutorialThreeBoard();
         }
     }
+
     beginTitleScene(){
         map_bg = new Image(800, 600);
         map_bg.src = 'assets/main_map.png';

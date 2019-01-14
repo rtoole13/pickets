@@ -788,7 +788,7 @@ function rayCastSegment(xA, yA, xB, yB, pathWidth, idList, unitDict, returnAll){
 				allColliders.push[id];
 			}
 		}
-		allColliders = sortListByDist(xA, yA, allColliders, unitDict);
+		allColliders = sortListByDistToPoint(xA, yA, allColliders, unitDict);
 		return allColliders;
 	}
 	else{
