@@ -52,6 +52,11 @@ class Pathfinder{
 		return wayPoints;
 	}
 
+	static findRetreatPath(startX, startY, dirX, dirY, currentUnit, ignoreList){
+		var targetNode = gameBoard.grid.getWalkableNodeOnNearestSide(startX, startY, dirX, dirY);
+		return this.findPath(startX, startY, targetNode.x, targetNode.y, currentUnit, ignoreList);
+	}
+
 	static retracePath(startNode, endNode, targetX, targetY){
 		var path = [];
 		var currentNode = endNode;
@@ -101,7 +106,33 @@ class Pathfinder{
 			return diagonalCost * xDist + straightCost * (yDist - xDist);	
 		}
 	}
-
+	static getRetreatLocationPastClosestSide(x, y){
+		var location, side, outOfBounds;
+		if (x < 0 || x > canvas.width || y < 0 || y > canvas.height){
+			location = null;
+			outOfBounds = true;
+		}
+		else{
+			side = gameBoard.grid.getClosestSide(x,y);
+			if (side == 'left'){
+				location = {x: -100, y: y};
+			}
+			else if (side == 'right'){
+				location = {x: canvas.width + 100, y: y};
+			}
+			else if (side == 'top'){
+				location = {x: x, y: -100};
+			}
+			else if (side == 'bot'){
+				location = {x: x, y: canvas.height + 100};
+			}
+			else{
+				throw 'Invalid side found!'
+			}
+			outOfBounds = false;
+		}
+		return {location: location, outOfBounds: outOfBounds};
+	}
 }
 
 class Grid{
@@ -303,10 +334,10 @@ class Grid{
 		return this.elem[i][j];
 	}
 
-	getWalkableNodeOnNearestSide(x, y, dirX, dirY){
-		//unit is retreating from x,y in preferred direction dirX, dirY
+	getClosestSide(x, y, node){
 		var currentNode, dists, sorted;
-		currentNode = this.getNodeFromLocation(x, y);
+
+		currentNode = (node == undefined)? this.getNodeFromLocation(x, y) : node;
 		dists = {};
 		dists['left']  = currentNode.indX;
 		dists['right'] = this.columns - currentNode.indX;
@@ -314,7 +345,15 @@ class Grid{
 		dists['bot']   = this.rows - currentNode.indY;
 		
 		sorted = sortDictByValue(dists);
-		return this.findWalkableNodeOnEdge(sorted[0], currentNode, dirX, dirY, true);
+		return sorted[0]
+	}
+
+	getWalkableNodeOnNearestSide(x, y, dirX, dirY, returnEdge){
+		//unit is retreating from x,y in preferred direction dirX, dirY
+		var currentNode, side;
+		currentNode = this.getNodeFromLocation(x, y);
+		side = this.getClosestSide(x, y, currentNode);
+		return this.findWalkableNodeOnEdge(side, currentNode, dirX, dirY, true);
 	}
 	
 	findWalkableNodeGreaterThanInColumn(xInd, targetNode){

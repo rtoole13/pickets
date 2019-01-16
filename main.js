@@ -59,7 +59,6 @@ var gameBoard,
     enemyCombatUnitList = {},
     enemyUnitList = {},
     enemyGeneral,
-    unitTerminationList = [],
     unitTrails = [],
 
 	animationList = {},

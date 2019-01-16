@@ -8,6 +8,8 @@ class GameBoard{
 		this.collisionCheckTime = 200;
 		this.collisionTimer = Date.now();
 		this.board = board;
+		this.unitRetreatList = [];
+		this.unitTerminationList = [];
 	}
 
 	initializeBoard(){
@@ -63,12 +65,37 @@ class GameBoard{
 			enemyCavalryList[id].update(dt);
 		}
 
+		//Clear retreat list
+		this.clearRetreatList();
+
 		//Clear termination list
-		for (var i = 0; i < unitTerminationList.length; i++){
-			var data = unitTerminationList[i];
+		this.clearTerminationList();
+	}
+	
+	clearRetreatList(){
+
+	}
+
+	clearTerminationList(){
+		for (var i = 0; i < this.unitTerminationList.length; i++){
+			var data = this.unitTerminationList[i];
 			terminateUnit(data.id, data.unitType, data.army);
 		}
-		unitTerminationList = [];
+		this.unitTerminationList = [];
+	}
+
+	addUnitToRetreatList(unitID, unitArmy){
+		this.unitRetreatList.push({id: unitID, army: unitArmy});
+	}
+
+	removeUnitFromRetreatList(unitID){
+		for (var i = 0; i < this.unitRetreatList.length; i++){
+			var id = this.unitRetreatList[i].id;
+			if (id == unitID){
+				this.unitRetreatList.splice(i,1);
+				return;
+			}
+		}
 	}
 }
 
@@ -291,7 +318,7 @@ class Unit{
 				break;
 			
 			case commandTypes.retreat:
-				this.executeRetreatOrder(order.target);	
+				this.executeRetreatOrder();	
 				break;
 		}
 	}
@@ -344,7 +371,7 @@ class Unit{
 
 	terminateSelf(){
 		var identification = {id: this.id, unitType: this.unitType, army: this.army};
-		unitTerminationList.push(identification);
+		gameBoard.unitTerminationList.push(identification);
 	}
 }
 
@@ -402,6 +429,32 @@ class CombatUnit extends Unit{
 	attack(){
 		throw 'CombatUnit\'s attack() function currently must be overriden by subclass!';
 	}
+
+	getNextWaypoint(){
+		if (this.path != null && this.path.length >= 1){
+			var node = this.path.shift();
+			this.targetPosition = {x:node.x, y:node.y};
+		}
+		else if(this.retreating){
+			var retreatData = Pathfinder.getRetreatLocationPastClosestSide(this.x, this.y);
+			if (retreatData.outOfBounds){
+				gameBoard.removeUnitFromRetreatList(this.id);
+				var identification = {id: this.id, unitType: this.unitType, army: this.army};
+				gameBoard.unitTerminationList.push(identification);
+			}
+			else{
+				gameBoard.addUnitToRetreatList(this.id, this.army);
+				this.targetPosition = retreatData.location;
+			}
+		}
+		else{
+			this.targetPosition = null;
+			this.updateCommand(null, false);
+		}
+		this.updateTargetParameters();
+		return this.targetPosition;
+	}
+
 	executeMoveOrder(location, angle, target){
 		this.targetAngleFinal = angle;
 		this.target = target;
@@ -433,12 +486,9 @@ class CombatUnit extends Unit{
 		this.getNextWaypoint();
 	}
 
-	executeRetreatOrder(target){
+	executeRetreatOrder(){
 		this.targetAngleFinal = null;
-		this.target = target;
-		var ignoreList = [];
-		ignoreList.push(this.target);
-		this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, ignoreList);
+		this.path = Pathfinder.findRetreatPath(this.x, this.y, -this.dirX, -this.dirY, this, []);
 		this.getNextWaypoint();
 	}
 
@@ -473,6 +523,7 @@ class CombatUnit extends Unit{
 			if (this.rallyTimer.checkTime()){
 				if (getRandomInt(1,100) <= this.rallyChance){
 					this.retreating = false;
+					//gameBoard.removeUnitFromRetreatList(this.id);
 					//lower the unit's chance for retreat after having rallied once
 					//because why not
 					this.retreatChance = Math.floor(this.retreatChance / 2);
@@ -484,10 +535,9 @@ class CombatUnit extends Unit{
 				//current hacky approach just checks for a retreat when below a strength threshold
 				if (getRandomInt(1,1000) <= this.retreatChance){
 					this.retreating = true;
+					//gameBoard.addUnitToRetreatList(this.id, this.army);
 					this.rallyTimer.start();
-					
-					var thisGeneral = (this.army == armies.blue)? playerGeneral : enemyGeneral;
-					this.updateCommand({type: commandTypes.retreat, target: thisGeneral, date: Date.now()}, true)
+					this.updateCommand({type: commandTypes.retreat, target: null, date: Date.now()}, true)
 					return;
 				}
 			}
