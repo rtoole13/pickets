@@ -73,6 +73,9 @@ class AudioHandler {
         this.initializePool('assets/audio/gunfire/volley2.ogg', 3, 0.1, 'volley2');
         this.initializePool('assets/audio/gunfire/volley3.ogg', 3, 0.1, 'volley3');
         this.initializePool('assets/audio/gunfire/volley4.ogg', 3, 0.1, 'volley4');
+        this.initializePool('assets/audio/cannonfire/cannon1.ogg', 3, 0.1, 'cannon1');
+        this.initializePool('assets/audio/cannonfire/cannon2.ogg', 3, 0.1, 'cannon2');
+        this.initializePool('assets/audio/cannonfire/cannon3.ogg', 3, 0.1, 'cannon3');
     }
     initializeAudioGroups(){
         var skirmishDict, battleDict, artilleryDict;
@@ -100,13 +103,14 @@ class AudioHandler {
             rifle12 : 1
         }
         artilleryDict = {
-            //FIXME add cannon sounds..
-            volley1 : 2
+            cannon1 : 1,
+            cannon2 : 1,
+            cannon3 : 1
         }
         
         this.initializeAudioGroup('skirmish', 1, skirmishDict);
         this.initializeAudioGroup('battle', 1, battleDict);
-        this.initializeAudioGroup('artillery', 1, artilleryDict);
+        this.initializeAudioGroup('artillery', 0.75, artilleryDict);
     }
 
     initializePool(clip, count, pitchVariance, id){

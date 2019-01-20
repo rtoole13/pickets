@@ -390,7 +390,7 @@ class SkirmishAnimation extends Animation {
 					var circleDir = rotateVector(dir.x, dir.y, getRandomFloat(-this.angleVariance, this.angleVariance), true);
 					var spawnDelay = j * this.delayIter;
 					var circle = new FadingCircle(unit.x + circleDist * circleDir.x, unit.y + circleDist * circleDir.y,
-															 this.circleRadius, this.color, this.circleLifeTime, spawnDelay, this.type);
+												  this.circleRadius, this.color, this.circleLifeTime, spawnDelay, this.type);
 					this.circles.push(circle);
 				}
 
@@ -438,7 +438,7 @@ class FadingCircle {
 				this.begun = true;
 				this.lifeTimer.start();
 				drawCircle(this.x, this.y, this.radius, this.baseColor);
-				audioHandler.playAudioGroup(this.soundType, true);
+				this.playCorrespondingSound();
 				return false;
 			}
 			return false;
@@ -453,18 +453,7 @@ class FadingCircle {
 		return false;
 	}
 	playCorrespondingSound(){
-		switch (this.animationType){
-			case animationTypes.skirmish:
-				audioHandler.playAudioGroup('skirmish', true);
-				break;
-			case animationTypes.battle:
-				audioHandler.playAudioGroup('battle', true);
-				break;
-			case animationTypes.artillery:
-				//audioHandler.playAudioGroup('artillery', true);
-				break;
-		}
-
+		audioHandler.playAudioGroup(this.soundType, true);
 	}
 }	
 
