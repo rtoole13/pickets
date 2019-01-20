@@ -1,6 +1,8 @@
 "use strict";
 var blue_infantry,
 	red_infantry,
+	blue_artillery,
+	red_artillery,
 	blue_general,
 	red_general,
 	blue_courier,
@@ -13,7 +15,7 @@ var blue_infantry,
 	red_courier_sheet;
 
 class SpriteSheet {
-	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation){
+	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, scale){
 		this.image = image;
 		this.x = x;
 		this.y = y;
@@ -22,6 +24,7 @@ class SpriteSheet {
 		this.frameIndex = [[],[]];
 		this.rows = rows;
 		this.columns = columns;
+		this.scale = scale;
 
 		this.frameRate = frameRate;
 		this.ticksPerFrame = 1 / this.frameRate;
@@ -71,15 +74,15 @@ class SpriteSheet {
 		}
 	}
 	draw(width, height){
-		var width = (width != undefined) ? width : this.frameWidth;
-		var height = (height != undefined) ? height : this.frameHeight;
+		var width = this.scale * ((width != undefined) ? width : this.frameWidth);
+		var height = this.scale * ((height != undefined) ? height : this.frameHeight);
 		canvasContext.drawImage(this.image,this.frameIndex[this.YframeIndex][this.XframeIndex].sx,this.frameIndex[this.YframeIndex][this.XframeIndex].sy,this.frameWidth,this.frameHeight,this.x-(width/2),this.y-(height/2),width,height);
 	}
 }
 
 class CombatSpriteSheet extends SpriteSheet {
-	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, rumbleDuration){
-		super(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation);
+	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, rumbleDuration, scale){
+		super(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, scale);
 		this.rumbleDuration = rumbleDuration;
 		this.rumblingTimer = new Timer(this.rumbleDuration, false);
 		this.isRumbling = false;
@@ -842,6 +845,12 @@ function initializeSpriteSheets(){
 	red_infantry = new Image(200, 50);
 	red_infantry.src = 'assets/red_infantry.svg';
 
+	blue_artillery = new Image(350, 50);
+	blue_artillery.src = 'assets/blue_artillery.svg';
+
+	red_artillery = new Image(350, 50);
+	red_artillery.src = 'assets/red_artillery.svg';
+
 	blue_general = new Image(300, 30);
 	blue_general.src = 'assets/blue_general.svg';
 
@@ -859,36 +868,45 @@ function initializeSpriteSheet(unit){
 	switch(unit.unitType){
 		default:
 			if(unit.army == armies.blue){
-				return new CombatSpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 2);
+				return new CombatSpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 2, 1);
 			}
 			else{
-				return new CombatSpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 2);
+				return new CombatSpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 2, 1);
 			}
 			break;
 		case unitTypes.courier:
 			if(unit.army == armies.blue){
-				return new SpriteSheet(blue_courier, unit.x, unit.y, 20, 25, 6, 1, 10, true, true);
+				return new SpriteSheet(blue_courier, unit.x, unit.y, 20, 25, 6, 1, 10, true, true, 1);
 			}
 			else{
-				return new SpriteSheet(red_courier, unit.x, unit.y, 20, 25, 6, 1, 10, true, true);
+				return new SpriteSheet(red_courier, unit.x, unit.y, 20, 25, 6, 1, 10, true, true, 1);
 			}
 			break;
 		case unitTypes.general:
 			if(unit.army == armies.blue){
-				return new SpriteSheet(blue_general, unit.x, unit.y, 30, 30, 6, 1, 10, true, true);
+				return new SpriteSheet(blue_general, unit.x, unit.y, 30, 30, 6, 1, 10, true, true, 1);
 			}
 			else{
-				return new SpriteSheet(red_general, unit.x, unit.y, 30, 30, 6, 1, 10, true, true);
+				return new SpriteSheet(red_general, unit.x, unit.y, 30, 30, 6, 1, 10, true, true, 1);
 			}
 			break;
 		case unitTypes.infantry:
 			if(unit.army == armies.blue){
-				return new CombatSpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 3);
+				return new CombatSpriteSheet(blue_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 3, 1);
 			}
 			else{
-				return new CombatSpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 3);
+				return new CombatSpriteSheet(red_infantry, unit.x, unit.y, 40, 50, 6, 3, 10, true, true, unit.attackCooldownTime / 3, 1);
 			}
 			break;
+		case unitTypes.artillery:
+			if(unit.army == armies.blue){
+				return new CombatSpriteSheet(blue_artillery, unit.x, unit.y, 70, 50, 6, 3, 5, true, true, unit.attackCooldownTime / 3, 0.75);
+			}
+			else{
+				return new CombatSpriteSheet(red_artillery, unit.x, unit.y, 70, 50, 6, 3, 5, true, true, unit.attackCooldownTime / 3, 0.75);
+			}
+			break;
+
 	}
 }
 
@@ -1507,7 +1525,12 @@ function drawArtilleryUnit(unit, drawRadii, color){
 		drawArtilleryEngagementRadii(unit);
 	}
 
-	drawAngledArrow(unit.x, unit.y, 0, color, unit.angle, 12, -6);
+	canvasContext.save();
+	canvasContext.translate(unit.x, unit.y);
+	canvasContext.rotate(-unit.angle * Math.PI/180);
+	unit.spriteSheet.move(0,0);
+	unit.spriteSheet.draw();
+	canvasContext.restore();
 }
 
 function drawCourier(unit){

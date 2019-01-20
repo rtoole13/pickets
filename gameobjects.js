@@ -837,7 +837,8 @@ class ArtilleryUnit extends CombatUnit {
 		this.state = unitStates.braced;
 		this.bracedTimer = new Timer(5000, false);
 		this.bracedTimer.start();
-		//this.spriteSheet = initializeSpriteSheet(this); FIXME need assets
+		this.spriteSheet = initializeSpriteSheet(this);
+		this.spriteSheet.maxRumbleRadius = 6;
 		this.trail = new Trail({x: this.x, y: this.y}, 4, 5, (this.army==armies.blue)?playerColor:enemyColor, 0.5, 0.75, 8000);
 		unitTrails.push(this.trail);
 		this.cannisterCollisionList  = [];
@@ -860,17 +861,17 @@ class ArtilleryUnit extends CombatUnit {
 		var previousState = this.state;
 		if (this.isRotating || this.isMoving){
 			this.state = unitStates.marching;
-			//this.spriteSheet.YframeIndex = 2;
+			this.spriteSheet.YframeIndex = 2;
 		}
 		else{
 			if (this.state == unitStates.entrenched){
-				//this.spriteSheet.YframeIndex = 0;
+				this.spriteSheet.YframeIndex = 0;
 				return;
 			}
 			else if (previousState == unitStates.marching){
 				this.state = unitStates.braced;
 				this.bracedTimer.start();
-				//this.spriteSheet.YframeIndex = 1;
+				this.spriteSheet.YframeIndex = 1;
 			}
 			else{
 				if (this.inBattle){
@@ -879,11 +880,11 @@ class ArtilleryUnit extends CombatUnit {
 				}
 				if (this.bracedTimer.checkTime()){
 					this.state = unitStates.entrenched;
-					//this.spriteSheet.YframeIndex = 0;
+					this.spriteSheet.YframeIndex = 0;
 				}
 				else{
 					this.state = unitStates.braced;
-					//this.spriteSheet.YframeIndex = 1;
+					this.spriteSheet.YframeIndex = 1;
 				}
 			}
 		}
@@ -948,7 +949,7 @@ class ArtilleryUnit extends CombatUnit {
 			//small arms fire
 			if (this.combatCollisionList.length > 0){
 				createBattleAnimation(this, this.combatCollisionList, this.attackCooldownTime);
-				//this.spriteSheet.startRumble();
+				this.spriteSheet.startRumble();
 			} 
 
 			var damage = Math.floor(this.strength * this.multiplierSmallArms / this.combatCollisionList.length);
@@ -978,6 +979,7 @@ class ArtilleryUnit extends CombatUnit {
 			}
 			shotMultiplier = (this.firingCannister)? this.multiplierCannister : this.multiplierSphereShot;
 			damage = this.gunCount * shotMultiplier + flankBonus;
+			this.spriteSheet.startRumble();
 			createArtilleryAnimation(this, this.firingTarget, this.attackCooldownTime);
 			this.firingTarget.takeFire(damage, false, this.x, this.y, true, this.firingCannister);
 
@@ -1080,7 +1082,7 @@ class ArtilleryUnit extends CombatUnit {
 	}
 
 	updateSpriteSheet(dt){
-		//this.spriteSheet.update(dt); FIXME need spritesheet
+		this.spriteSheet.update(dt);
 	}
 }
 
