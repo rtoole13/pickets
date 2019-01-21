@@ -76,9 +76,10 @@ class AudioHandler {
         this.initializePool('assets/audio/cannonfire/cannon1.ogg', 3, 0.1, 'cannon1');
         this.initializePool('assets/audio/cannonfire/cannon2.ogg', 3, 0.1, 'cannon2');
         this.initializePool('assets/audio/cannonfire/cannon3.ogg', 3, 0.1, 'cannon3');
+        this.initializePool('assets/audio/mouse/click.ogg', 3, 0.3, 'click1');
     }
     initializeAudioGroups(){
-        var skirmishDict, battleDict, artilleryDict;
+        var skirmishDict, battleDict, artilleryDict, clickDict;
         
         skirmishDict = {
             rifle1  : 1,
@@ -107,10 +108,14 @@ class AudioHandler {
             cannon2 : 1,
             cannon3 : 1
         }
+        clickDict = {
+            click1: 1
+        }
         
         this.initializeAudioGroup('skirmish', 1, skirmishDict);
         this.initializeAudioGroup('battle', 1, battleDict);
         this.initializeAudioGroup('artillery', 0.75, artilleryDict);
+        this.initializeAudioGroup('click', 0.5, clickDict);
     }
 
     initializePool(clip, count, pitchVariance, id){
