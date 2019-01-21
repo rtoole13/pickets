@@ -249,7 +249,7 @@ function initializePlayableState(board, mainGame){
     //Initialize stuff
     commandType = commandTypes.move;
     combatTextList = new FloatingText();
-    unitToolTip = new UnitToolTip(canvas.width/4, canvas.height/6, {x:50, y:20}, 'black', 'hoverUnit');
+    unitToolTip = new UnitToolTip(canvas.width/4, canvas.height/6, {x:55, y:20}, 'black', 'hoverUnit');
     hoverHealth = new HoverHealth(40, 5, 2, crimsonAlpha, grayAlpha);
     activeHealth = new ActiveHealth(40, 5, 2, greenAlpha, grayAlpha);
 

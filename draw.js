@@ -7,12 +7,8 @@ var blue_infantry,
 	red_general,
 	blue_courier,
 	red_courier,
-	blue_infantry_sheet,
-	red_infantry_sheet,
-	blue_general_sheet,
-	red_general_sheet,
-	blue_courier_sheet,
-	red_courier_sheet;
+	mute_button,
+	arrows;
 
 class SpriteSheet {
 	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, scale){
@@ -851,6 +847,9 @@ function initializeSpriteSheets(){
 
 	red_courier = new Image(200, 25);
 	red_courier.src = 'assets/red_courier.svg';
+
+	mute_button = new Image(328, 60);
+	mute_button.src = 'assets/mute.png';
 }
 
 function initializeSpriteSheet(unit){

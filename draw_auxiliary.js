@@ -66,31 +66,27 @@ class MuteButton extends CanvasButton {
     constructor(centerX, centerY, width, height){
         super(centerX, centerY, width, height);
         this.state = false;
+        this.spriteSheet = new SpriteSheet(mute_button, centerX, centerY, 82, 60, 5, 1, 4, false, true, 0.5);
     }
     draw(){
-        var color;
-        if (this.clicked){
-            color = 'green';
+        var index;
+        if (!this.state){
+            index = 0;
         }
         else{
-            if (this.depressed){
-                color = 'yellow';
-            }
-            else if (!this.state){
-                //unmuted
-                color = 'magenta';
-            }
-            else{
-                //muted
-                color = 'blue';
-            }
+            index = 2;
         }
-        canvasContext.save()
-        canvasContext.fillStyle = color;
+        if (this.depressed){
+            index += 1;   
+        }
+        this.spriteSheet.XframeIndex = index;
+        canvasContext.save();
         canvasContext.translate(this.x, this.y);
-        canvasContext.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+        this.spriteSheet.move(0,0);
+        this.spriteSheet.draw();
         canvasContext.restore();
     }
+
     checkClick(){
         if (CollisionEngine.pointInAABB(mouseX, mouseY, this.xMin, this.xMax, this.yMin, this.yMax)){
             this.clicked = true;
@@ -100,6 +96,10 @@ class MuteButton extends CanvasButton {
             this.clicked = false;
         }
         return this.clicked;
+    }
+
+    updateSpriteSheet(dt){
+        this.spriteSheet.update(dt);
     }
 }
 
