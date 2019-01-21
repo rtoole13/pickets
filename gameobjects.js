@@ -896,8 +896,10 @@ class ArtilleryUnit extends CombatUnit {
 				this.firingTarget = null;
 				return;
 			}
-			var angle = getAngle(this.firingTarget.x - this.x, this.firingTarget.y - this.y, this.dirX, this.dirY, true);
-			if (angle <= this.firingAngleRange){
+			var dist, angle;
+			dist = getDistanceSq(this.x, this.y, this.firingTarget.x, this.firingTarget.y);
+			angle = getAngle(this.firingTarget.x - this.x, this.firingTarget.y - this.y, this.dirX, this.dirY, true);
+			if (angle <= this.firingAngleRange && dist <= this.sphereShotRadiusSq){
 				//in cone
 				if (getDistanceSq(this.x, this.y, this.firingTarget.x, this.firingTarget.y) <= this.cannisterRadiusSq){
 					this.firingCannister = true;
