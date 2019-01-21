@@ -8,7 +8,8 @@ var blue_infantry,
 	blue_courier,
 	red_courier,
 	mute_button,
-	arrows;
+	tutorial_arrow_left,
+	tutorial_arrow_right;
 
 class SpriteSheet {
 	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, scale){
@@ -850,6 +851,12 @@ function initializeSpriteSheets(){
 
 	mute_button = new Image(328, 60);
 	mute_button.src = 'assets/mute.png';
+
+	tutorial_arrow_left = new Image(400, 160);
+	tutorial_arrow_left.src = 'assets/tutorial_arrow_left.svg';
+
+	tutorial_arrow_right = new Image(400, 160);
+	tutorial_arrow_right.src = 'assets/tutorial_arrow_right.svg';
 }
 
 function initializeSpriteSheet(unit){

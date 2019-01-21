@@ -114,8 +114,8 @@ class SceneHandler {
         currentTutorial = 0;
         
         //tutorial arrows
-        tutorialArrowLeft = new TutorialArrow(100, 500, 80, 80, true);
-        tutorialArrowRight = new TutorialArrow(700, 500, 80, 80, false);
+        tutorialArrowLeft = new TutorialArrow(80, 500, 80, 80, true);
+        tutorialArrowRight = new TutorialArrow(720, 500, 80, 80, false);
 
         //Set tutorial params and gameboard
         initializePlayableState(sceneHandler.loadGameBoardPreset(boards[tutorialBoardNames[currentTutorial]]), false);

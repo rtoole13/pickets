@@ -57,16 +57,41 @@ class TutorialArrow extends CanvasButton{
     constructor(centerX, centerY, width, height, arrowLeft){
         super(centerX, centerY, width, height);
         this.arrowLeft = arrowLeft; //true if left, false if right
+        if (this.arrowLeft){
+            this.spriteSheet = new SpriteSheet(tutorial_arrow_left, centerX, centerY, 80, 80, 5, 2, 5, true, true, 0.85);
+        }
+        else{
+            this.spriteSheet = new SpriteSheet(tutorial_arrow_right, centerX, centerY, 80, 80, 5, 2, 5, true, true, 0.85);   
+        }
     }
     draw(){
-        super.draw();
+        var index;
+        if (!this.depressed){
+            index = 1;
+        }
+        else{
+            index = 0;
+        }
+        this.spriteSheet.YframeIndex = index;
+        canvasContext.save();
+        canvasContext.translate(this.x, this.y);
+        this.spriteSheet.move(0,0);
+        this.spriteSheet.draw();
+        canvasContext.restore();
+    }
+    update(dt){
+        super.update();
+        this.updateSpriteSheet(dt);
+    }
+    updateSpriteSheet(dt){
+        this.spriteSheet.update(dt);
     }
 }
 class MuteButton extends CanvasButton {
     constructor(centerX, centerY, width, height){
         super(centerX, centerY, width, height);
         this.state = false;
-        this.spriteSheet = new SpriteSheet(mute_button, centerX, centerY, 82, 60, 5, 1, 4, false, true, 0.5);
+        this.spriteSheet = new SpriteSheet(mute_button, centerX, centerY, 82, 60, 5, 1, 4, false, true, 0.4);
     }
     draw(){
         var index;
