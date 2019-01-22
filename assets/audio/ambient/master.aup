@@ -1,0 +1,172 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="master_data" version="1.3.0" audacityversion="2.3.0" sel0="0.0000000000" sel1="27.7625850340" vpos="0" h="0.0000000000" zoom="10.1935769172" rate="44100.0" snapto="off" selectionformat="hh:mm:ss + milliseconds" frequencyformat="Hz" bandwidthformat="octaves">
+	<tags>
+		<tag name="TITLE" value="farm_loop"/>
+		<tag name="ALBUM" value="YouTube Audio Library"/>
+	</tags>
+	<wavetrack name="Morning_Farm" channel="0" linked="1" mute="0" solo="1" height="150" minimized="0" isSelected="1" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1224330">
+				<waveblock start="0">
+					<simpleblockfile filename="e08089da.au" len="179945" min="-0.003677" max="0.004362" rms="0.00094"/>
+				</waveblock>
+				<waveblock start="179945">
+					<simpleblockfile filename="e0808dc5.au" len="262144" min="-0.005085" max="0.004822" rms="0.001062"/>
+				</waveblock>
+				<waveblock start="442089">
+					<simpleblockfile filename="e0808069.au" len="262144" min="-0.009807" max="0.011286" rms="0.001291"/>
+				</waveblock>
+				<waveblock start="704233">
+					<simpleblockfile filename="e08082e5.au" len="262144" min="-0.005639" max="0.004803" rms="0.001125"/>
+				</waveblock>
+				<waveblock start="966377">
+					<simpleblockfile filename="e0808a5b.au" len="175754" min="-0.004684" max="0.004471" rms="0.000967"/>
+				</waveblock>
+				<waveblock start="1142131">
+					<simpleblockfile filename="e08088c8.au" len="82199" min="-0.002965" max="0.00314" rms="0.000741"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Morning_Farm" channel="1" linked="0" mute="0" solo="1" height="150" minimized="0" isSelected="1" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1224330">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808dd4.au" len="179945" min="-0.003837" max="0.003788" rms="0.000824"/>
+				</waveblock>
+				<waveblock start="179945">
+					<simpleblockfile filename="e080820a.au" len="262144" min="-0.004848" max="0.004743" rms="0.000939"/>
+				</waveblock>
+				<waveblock start="442089">
+					<simpleblockfile filename="e080862f.au" len="262144" min="-0.007556" max="0.00946" rms="0.001172"/>
+				</waveblock>
+				<waveblock start="704233">
+					<simpleblockfile filename="e080888a.au" len="262144" min="-0.004139" max="0.003791" rms="0.000994"/>
+				</waveblock>
+				<waveblock start="966377">
+					<simpleblockfile filename="e080824f.au" len="175754" min="-0.004511" max="0.005034" rms="0.000879"/>
+				</waveblock>
+				<waveblock start="1142131">
+					<simpleblockfile filename="e0808939.au" len="82199" min="-0.002809" max="0.003185" rms="0.000677"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Morning_Farm" channel="0" linked="1" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="27.76258503" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1224330">
+				<waveblock start="0">
+					<simpleblockfile filename="e08089da.au" len="179945" min="-0.003677" max="0.004362" rms="0.00094"/>
+				</waveblock>
+				<waveblock start="179945">
+					<simpleblockfile filename="e0808dc5.au" len="262144" min="-0.005085" max="0.004822" rms="0.001062"/>
+				</waveblock>
+				<waveblock start="442089">
+					<simpleblockfile filename="e0808069.au" len="262144" min="-0.009807" max="0.011286" rms="0.001291"/>
+				</waveblock>
+				<waveblock start="704233">
+					<simpleblockfile filename="e08082e5.au" len="262144" min="-0.005639" max="0.004803" rms="0.001125"/>
+				</waveblock>
+				<waveblock start="966377">
+					<simpleblockfile filename="e0808a5b.au" len="175754" min="-0.004684" max="0.004471" rms="0.000967"/>
+				</waveblock>
+				<waveblock start="1142131">
+					<simpleblockfile filename="e08088c8.au" len="82199" min="-0.002965" max="0.00314" rms="0.000741"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Morning_Farm" channel="1" linked="0" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="27.76258503" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1224330">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808dd4.au" len="179945" min="-0.003837" max="0.003788" rms="0.000824"/>
+				</waveblock>
+				<waveblock start="179945">
+					<simpleblockfile filename="e080820a.au" len="262144" min="-0.004848" max="0.004743" rms="0.000939"/>
+				</waveblock>
+				<waveblock start="442089">
+					<simpleblockfile filename="e080862f.au" len="262144" min="-0.007556" max="0.00946" rms="0.001172"/>
+				</waveblock>
+				<waveblock start="704233">
+					<simpleblockfile filename="e080888a.au" len="262144" min="-0.004139" max="0.003791" rms="0.000994"/>
+				</waveblock>
+				<waveblock start="966377">
+					<simpleblockfile filename="e080824f.au" len="175754" min="-0.004511" max="0.005034" rms="0.000879"/>
+				</waveblock>
+				<waveblock start="1142131">
+					<simpleblockfile filename="e0808939.au" len="82199" min="-0.002809" max="0.003185" rms="0.000677"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Morning_Farm" channel="0" linked="1" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="27.76258503" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1306529">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808bb4.au" len="262144" min="-0.003677" max="0.004362" rms="0.000831"/>
+				</waveblock>
+				<waveblock start="262144">
+					<simpleblockfile filename="e0808e26.au" len="262144" min="-0.005085" max="0.004822" rms="0.001062"/>
+				</waveblock>
+				<waveblock start="524288">
+					<simpleblockfile filename="e0808069.au" len="262144" min="-0.009807" max="0.011286" rms="0.001291"/>
+				</waveblock>
+				<waveblock start="786432">
+					<simpleblockfile filename="e0808cc3.au" len="260048" min="-0.005639" max="0.004803" rms="0.001126"/>
+				</waveblock>
+				<waveblock start="1046480">
+					<simpleblockfile filename="e08087d0.au" len="260049" min="-0.004684" max="0.004471" rms="0.000943"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Morning_Farm" channel="1" linked="0" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="27.76258503" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1306529">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808b52.au" len="262144" min="-0.003837" max="0.003788" rms="0.000732"/>
+				</waveblock>
+				<waveblock start="262144">
+					<simpleblockfile filename="e0808a64.au" len="262144" min="-0.004848" max="0.004743" rms="0.000939"/>
+				</waveblock>
+				<waveblock start="524288">
+					<simpleblockfile filename="e080862f.au" len="262144" min="-0.007556" max="0.00946" rms="0.001172"/>
+				</waveblock>
+				<waveblock start="786432">
+					<simpleblockfile filename="e0808c05.au" len="260048" min="-0.004139" max="0.003791" rms="0.000994"/>
+				</waveblock>
+				<waveblock start="1046480">
+					<simpleblockfile filename="e0808645.au" len="260049" min="-0.004511" max="0.005034" rms="0.000862"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Mix" channel="0" linked="1" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="82199">
+				<waveblock start="0">
+					<simpleblockfile filename="e08088c8.au" len="82199" min="-0.002965" max="0.00314" rms="0.000741"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Mix" channel="1" linked="0" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="1.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="82199">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808939.au" len="82199" min="-0.002809" max="0.003185" rms="0.000677"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>

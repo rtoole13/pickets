@@ -80,7 +80,6 @@ class SceneHandler {
         
         eventHandler.addEventListener('canvas', "mousemove", getMousePositionTitle, false);
         eventHandler.addEventListener('canvas', "mousedown", handleTitleMouseDown, false);
-        
         //Enter title screen game loop
         loopMainTitle();
     }

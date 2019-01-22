@@ -1,6 +1,5 @@
 "use strict";
 
-var audio_farm  = new Audio('assets/audio/Morning_Farm.mp3');
 /*
 work audio controller and audioGroup to preload a fixed number of 
 new Audio objects. Therefore only allowing a set amount of sounds
@@ -77,9 +76,10 @@ class AudioHandler {
         this.initializePool('assets/audio/cannonfire/cannon2.ogg', 3, 0.1, 'cannon2');
         this.initializePool('assets/audio/cannonfire/cannon3.ogg', 3, 0.1, 'cannon3');
         this.initializePool('assets/audio/mouse/click.ogg', 3, 0.3, 'click1');
+        this.initializePool('assets/audio/ambient/farm.ogg', 1, 0, 'farm');
     }
     initializeAudioGroups(){
-        var skirmishDict, battleDict, artilleryDict, clickDict;
+        var skirmishDict, battleDict, artilleryDict, clickDict, ambientDict;
         
         skirmishDict = {
             rifle1  : 1,
@@ -111,11 +111,14 @@ class AudioHandler {
         clickDict = {
             click1: 1
         }
-        
+        ambientDict = {
+            farm: 1
+        }
         this.initializeAudioGroup('skirmish', 1, skirmishDict);
         this.initializeAudioGroup('battle', 1, battleDict);
         this.initializeAudioGroup('artillery', 0.75, artilleryDict);
         this.initializeAudioGroup('click', 0.5, clickDict);
+        this.initializeAudioGroup('ambient', 0.5, ambientDict);
     }
 
     initializePool(clip, count, pitchVariance, id){
