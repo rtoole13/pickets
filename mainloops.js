@@ -93,7 +93,6 @@ function loopTutorialScene(){
         tutorialArrowRight.clicked = true;
     } 
     gameBoard.update(dt);
-    
     drawTutorialScene(dt);
     
     audioHandler.updatePools();

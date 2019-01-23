@@ -37,6 +37,8 @@ class TutorialBoard extends BoardPreset{
 		super();
 		this.goals = new Queue();
 		this.currentGoal = null;
+		this.undeadUnits = {};
+		this.undeadCount = 0;
 	}
 
 	load(){
@@ -46,6 +48,24 @@ class TutorialBoard extends BoardPreset{
 
 	initializeGoals(){
 		throw 'Inheriting classes must override \'initializeGoals\'!';
+	}
+
+	addToUndead(unitID, isPlayer, healTime, healAmount){
+		var entry = {id: unitID, isPlayer : isPlayer, healTimer : new Timer(healTime, true), healAmount: healAmount};
+		entry.healTimer.start();
+		this.undeadUnits[unitID] = entry;
+		this.undeadCount += 1;
+	}
+
+	healUnits(){
+		for (var id in this.undeadUnits){
+			var entry = this.undeadUnits[id];
+			if (entry.healTimer.checkTime()){
+				var unit = (entry.isPlayer)? playerCombatUnitList[id] : enemyCombatUnitList[id];
+				unit.strength += entry.healAmount;
+				unit.strength = (unit.strength > unit.maxStrength)? unit.maxStrength : unit.strength;
+			}
+		}
 	}
 
 	beginGoals(){
@@ -64,6 +84,9 @@ class TutorialBoard extends BoardPreset{
 			if (this.currentGoal != null){
 				this.currentGoal.initiate();
 			}
+		}
+		if (this.undeadCount > 0){
+			this.healUnits();
 		}
 	}
 
