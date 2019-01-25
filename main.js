@@ -1,7 +1,7 @@
 "use strict";
 
 //Base//
-var canvas = document.getElementById('gameCanvas'),
+var canvas,
 	canvasContext,
 	lastFrame = new Date(),
 	currentFrame,
@@ -124,6 +124,7 @@ var gameBoard,
 
 
 window.onload = function(){
+	 canvas = document.getElementById('gameCanvas');
 	canvasContext = canvas.getContext('2d');
 	canvas.style.cursor = "crosshair";
 	init();

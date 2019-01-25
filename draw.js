@@ -1627,7 +1627,8 @@ function drawEndGame(playerVictory, condition){
 }
 
 function drawBackground(){
-    canvasContext.drawImage(map_bg, 0, 0, 800, 600);
+	canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+    //canvasContext.drawImage(map_bg, 0, 0, 800, 600);
 }
 
 function drawScreen(){
