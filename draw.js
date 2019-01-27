@@ -1574,7 +1574,6 @@ function drawGeneral(general, showCommandRadius){
 
 function drawEndGame(playerVictory, condition){
 	drawBackground();
-	drawScreen();
 
 	var endStr, endColor;
 	if (playerVictory){
@@ -1631,14 +1630,6 @@ function drawEndGame(playerVictory, condition){
 
 function drawBackground(){
 	canvasContext.clearRect(0, 0, canvas.width, canvas.height);
-    //canvasContext.drawImage(map_bg, 0, 0, 800, 600);
-}
-
-function drawScreen(){
-	canvasContext.save();
-	canvasContext.fillStyle = grayAlpha;
-	canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-	canvasContext.restore();
 }
 
 function drawFortifications(){

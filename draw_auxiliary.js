@@ -176,7 +176,6 @@ function drawDebugHowTo(){
 
 function drawTitleScene(howToMouseOver, playMouseOver){
     drawBackground();
-    drawScreen();
     muteButton.draw();
     //drawDebugTitle();
     var titleStr, howToStr, playStr;
@@ -202,7 +201,6 @@ function drawTitleScene(howToMouseOver, playMouseOver){
 
 function drawHowToScene(backHighLighted, tutorialHighlighted){
     drawBackground();
-    drawScreen();
     muteButton.draw();
     //drawDebugHowTo();
     var titleStr, keysStr, aStr, fStr, spaceStr, shiftStr, escStr, mouseStr, leftClickStr, rightClickStr, backStr, tutorialStr;

@@ -4,10 +4,46 @@
 
 #main{
     position: absolute;
-    left: 25px;
-    top: 25px;
-    width: 800px;
-    height: 600px;
+    left: 0px;
+    top: 0px;
+    width: 850px;
+    height: 650px;
+}
+
+#main_map-screened{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 850px;
+    height: 650px;
+    z-index: 0;
+}
+
+#main_map{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 850px;
+    height: 650px;
+    z-index: 0;
+}
+
+#tutorial_map-screened{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 850px;
+    height: 650px;
+    z-index: 0;
+}
+
+#tutorial_map{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 850px;
+    height: 650px;
+    z-index: 0;
 }
 
 #gameWindow{
@@ -16,4 +52,5 @@
     top: 25px;
     width: 800px;
     height: 600px;
+    z-index: 1;
 }

@@ -72,8 +72,7 @@ class SceneHandler {
     }
 
     beginTitleScene(){
-        map_bg = new Image(800, 600);
-        map_bg.src = 'assets/main_map.png';
+        setBackground('main_map-screened');
         howToHitBox = {xMin: canvas.width/2 - 55, xMax: canvas.width/2 + 55, yMin: canvas.height/2 - 30, yMax: canvas.height/2 + 10};
         playHitBox = {xMin: canvas.width/2 - 35, xMax: canvas.width/2 + 35, yMin: canvas.height/2 + 20, yMax: canvas.height/2 + 60};
         playClicked = howToClicked = false;
@@ -86,6 +85,7 @@ class SceneHandler {
     }
 
     beginGameScene(){
+        setBackground('main_map');
         initializePlayableState(sceneHandler.loadGameBoardPreset(boards.main), true);
         
         //Enter main game loop
@@ -93,8 +93,7 @@ class SceneHandler {
     }
 
     beginHowToScene(){
-        map_bg = new Image(800, 600);
-        map_bg.src = 'assets/tutorial_map.png';
+        setBackground('tutorial_map-screened');
         tutorialHitBox = {xMin: canvas.width/2 - 65, xMax: canvas.width/2 + 65, yMin: canvas.height/2 + 160, yMax: canvas.height/2 + 190};
         backHitBox = {xMin: canvas.width/2 - 35, xMax: canvas.width/2 + 35, yMin: canvas.height/2 + 120, yMax: canvas.height/2 + 150};
         playClicked = howToClicked = false;
@@ -107,9 +106,7 @@ class SceneHandler {
     }
 
     beginTutorialScene(){
-        map_bg = new Image(800, 600);
-        map_bg.src = 'assets/tutorial_map.png';
-
+        setBackground('tutorial_map');
         tutorialSceneCount = tutorialBoardNames.length;
         currentTutorial = 0;
         
@@ -125,6 +122,7 @@ class SceneHandler {
     }
 
     beginEndScene(variableArgs){
+        setBackground('main_map-screened');
         //Add a restart game key event listener
         eventHandler.addEventListener('window', "keydown", handleEndGameKeyPress, false);
         
@@ -293,4 +291,44 @@ function resetObjects(){
     selector = new Selector(25, 2, 2, 1/6);
 
     gameBoard = null;
+}
+function setBackground(target){
+    var mainScreen, main, tutScreen, tut;
+    mainScreen = document.getElementById('main_map-screened');
+    main = document.getElementById('main_map');
+    tutScreen = document.getElementById('tutorial_map-screened');
+    tut = document.getElementById('tutorial_map');
+
+    switch(target){
+        case 'main_map-screened':
+            mainScreen.style.visibility = 'visible';
+            main.style.visibility = 'hidden';
+            tutScreen.style.visibility = 'hidden';
+            tut.style.visibility = 'hidden';
+            break;
+        case 'main_map':
+            mainScreen.style.visibility = 'hidden';
+            main.style.visibility = 'visible';
+            tutScreen.style.visibility = 'hidden';
+            tut.style.visibility = 'hidden';
+            break;
+        case 'tutorial_map-screened':
+            mainScreen.style.visibility = 'hidden';
+            main.style.visibility = 'hidden';
+            tutScreen.style.visibility = 'visible';
+            tut.style.visibility = 'hidden';
+            break;
+        case 'tutorial_map':
+            mainScreen.style.visibility = 'hidden';
+            main.style.visibility = 'hidden';
+            tutScreen.style.visibility = 'hidden';
+            tut.style.visibility = 'visible';
+            break;
+        default:
+            mainScreen.style.visibility = 'hidden';
+            main.style.visibility = 'visible';
+            tutScreen.style.visibility = 'hidden';
+            tut.style.visibility = 'hidden';
+            break;
+    }
 }
