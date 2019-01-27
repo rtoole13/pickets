@@ -129,9 +129,12 @@ class TutorialOneBoard extends TutorialBoard {
 		var spawnUnitCallback = function(){
 			var playerInf = addPlayerInfantry(-20, 350, 0, "Brigade", infantryID);
 			playerInf.updateCommand({type: commandTypes.move, target: null, x: 100, y: 350, angle: 45, date: Date.now()});
+			gameBoard.board.addToUndead(infantryID, true, 5000, 100);
 
 			var enemyInf = addEnemyInfantry(520, -20, -90, "Brigade", enemyInfantryID);
 			enemyInf.updateCommand({type: commandTypes.move, target: null, x: 520, y: 190, angle: -135, date: Date.now()});
+			gameBoard.board.addToUndead(enemyInfantryID, false, 5000, 100);
+
 			playerGeneral.updateCommand(null, true);
 			activeUnit = undefined;
 		};
@@ -181,16 +184,49 @@ class TutorialTwoBoard extends TutorialBoard {
 		//courier capture tutorial
 		//your units nearly surround an enemy unit
 		//have a unit reroute to intercept a courier being sent by enemy general
+		var infA, infB, infC, infD, unitB, unitD;
+		infA = 'INFA';
+		infB = 'INFB';
+		infC = 'INFC';
+		infD = 'INFD';
 		addPlayerGeneral(205, 460, 45, 10);
 		addEnemyGeneral(650, 150, -135, 10, false);
-		addPlayerArtillery(200, 380, 0, "Brigade");
-		//addEnemyInfantry(520, 190, -135, "Brigade", enemyInfantryID);
+		addPlayerInfantry(340, 250, 0, "Brigade", infA);
+		unitB = addPlayerInfantry(410, 430, 90, "Brigade", infB);
+		addPlayerInfantry(340, 170, 0, "Brigade", infC);
+		unitD = addEnemyInfantry(415, 365, -135, "Brigade", infD);
+		
+		unitB.updateCommand({type: commandTypes.attackmove, target: unitD, x: unitD.x, y: unitD.y, angle: null, date: Date.now()});
+
+		this.addToUndead(infA, true, 3000, 100);
+		this.addToUndead(infB, true, 3000, 100);
+		this.addToUndead(infC, true, 3000, 100);
+		this.addToUndead(infD, false, 3000, 100);
 	}
 
 	initializeGoals(){
-		var eventOverrides = new CustomEventListenerSet();
+		var playerInfA, playerInfC, enemyInf, eventOverrides;
+		playerInfA = 'INFA';
+		playerInfC = 'INFC';
+		enemyInf = 'INFD';
+		eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
-		this.goals.add(new ClickGoal('Tutorial Two: Courier interception.', undefined));
+		var enemyFallBackCallback = function(){
+			var command, enemy;
+			command = {type: commandTypes.fallback, target: null, x: 560, y: 150, angle: null, date: Date.now()};
+			enemyGeneral.courierCooldown.shortTimer();
+			enemyGeneral.issueCommand(enemyInf, command);
+		};
+		this.goals.add(new ClickGoal('Tutorial Two: Courier interception.', enemyFallBackCallback));
+
+		eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
+		eventOverrides.addListener('window', "mousedown", null);
+		this.goals.add(new DurationGoal('Seeing your troops to the north, <br>the enemy general orders his infantry back.', 5000, undefined, eventOverrides));
+		/*
+		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your free unit to the <br>location marked by the green circle by right clicking!', 
+													playerInf, {x:675, y:375}, null, 25, null, undefined, eventOverrides));
+		*/
 		this.beginGoals();
 	}
 }

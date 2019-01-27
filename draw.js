@@ -1027,11 +1027,14 @@ function drawGridPoint(gridNode, pathNode, color){
 				break;
 		}
 	}
+	/*
+	if (gridNode.test){
+		color = 'red';
+	}
+	*/
 	canvasContext.save()
-	//canvasContext.strokeStyle = 'black';
 	canvasContext.fillStyle = color;
 	canvasContext.translate(gridNode.x, gridNode.y);
-	//canvasContext.strokeRect(-gridNode.width/4, -gridNode.height/4, gridNode.width/2, gridNode.height/2);
 	canvasContext.fillRect(-gridNode.width/4, -gridNode.height/4, gridNode.width/2, gridNode.height/2);
 	canvasContext.restore();
 

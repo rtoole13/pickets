@@ -47,7 +47,6 @@ class Pathfinder{
 		}
 		if (pathSuccess){
 			wayPoints = this.retracePath(startNode, targetNode, targetX, targetY);
-			gameBoard.grid.path = wayPoints;
 		}
 		return wayPoints;
 	}
@@ -55,6 +54,15 @@ class Pathfinder{
 	static findRetreatPath(startX, startY, dirX, dirY, currentUnit, ignoreList){
 		var targetNode = gameBoard.grid.getWalkableNodeOnNearestSide(startX, startY, dirX, dirY);
 		return this.findPath(startX, startY, targetNode.x, targetNode.y, currentUnit, ignoreList);
+	}
+
+	static findCourierPathToGeneral(startX, startY, targetX, targetY, currentUnit, ignoreList){
+		var path = this.findPath(startX, startY, targetNode.x, targetNode.y, currentUnit, ignoreList);
+		if (path.length < 1) {
+			ignoreList = ignoreList.concat(currentUnit.enemyList);
+			path = this.findPath(startX, startY, targetX, targetY, currentUnit, ignoreList);
+		}
+		return path
 	}
 
 	static retracePath(startNode, endNode, targetX, targetY){
@@ -232,6 +240,10 @@ class Grid{
 			if (unit.command != null) continue; //unit is moving
 			this.getAllNodesInRadius(unit.x, unit.y, 2 * unit.combatRadius, true);
 		}
+		if (currentUnit.unitType == unitTypes.courier){
+			var targetNode = this.getNodeFromLocation(currentUnit.target.x, currentUnit.target.y);
+			targetNode.walkable = true;
+		}
 	}
 
 	updateForCombatUnit(currentUnit, ignoreList){
@@ -293,9 +305,6 @@ class Grid{
 		yExtent = Math.floor(radius / this.gridSpacing.y);
 		for (var i = -xExtent; i <= xExtent; i++){
 			for (var j = -yExtent; j <= yExtent; j++){
-				if (i == 0 && j == 0){
-					continue;
-				}
 				var checkX = rootNode.indX + i;
 				var checkY = rootNode.indY + j;
 
@@ -304,7 +313,8 @@ class Grid{
 					if (elem.impassable) continue; //Check this out.. might need to be walkable check
 					if (getDistanceSq(x, y, elem.x, elem.y) <= radiusSq){
 						if (setUnwalkable){
-							elem.walkable = false;	
+							elem.walkable = false;
+							elem.test = true;	
 						}
 						nodes.push(elem);
 					}

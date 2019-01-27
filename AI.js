@@ -39,6 +39,13 @@ class EnemyGeneral extends General{
         this.battlingFriendlies = [];
         this.nearbyNotBattlingFriendlies = [];
     }
+    issueCommand(target, command){
+        if (typeof(target)=='string'){
+            target = enemyInfantryList[target];
+        }
+        super.issueCommand(target, command);
+    }
+
     evaluateBoard(){
         //due to awkward structure, cant pre-populate these lists in the broadCollisionCheck in the main game loop
         for(var id in enemyInfantryList){

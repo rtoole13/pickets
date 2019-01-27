@@ -139,8 +139,7 @@ class Unit{
 	update(dt){
 		if (this.target != null){
 			if (this.updateRouteTimer.checkTime()){
-				this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, this.ignoreList);	
-				this.getNextWaypoint();
+				this.updateRoute();
 			}
 		}
 		this.updateTargetParameters();
@@ -149,9 +148,13 @@ class Unit{
 		this.isMoving = this.move(dt);
 		this.updateSpriteSheet(dt);
 	}
+	updateRoute(){
+		this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, this.ignoreList);	
+		this.getNextWaypoint();
+	}
 
 	getNextWaypoint(){
-		if (this.path != null && this.path.length >= 1){
+		if (this.path.length > 0){
 			var node = this.path.shift();
 			this.targetPosition = {x:node.x, y:node.y};
 		}
@@ -431,7 +434,7 @@ class CombatUnit extends Unit{
 	}
 
 	getNextWaypoint(){
-		if (this.path != null && this.path.length >= 1){
+		if (this.path.length > 0){
 			var node = this.path.shift();
 			this.targetPosition = {x:node.x, y:node.y};
 		}
@@ -1140,6 +1143,7 @@ class General extends AuxiliaryUnit{
 		super.rotate(dt);
 	}
 	issueCommand(target, command){
+
 		if (target.retreating){
 			console.log('That unit is retreating!');
 			return;
@@ -1250,14 +1254,14 @@ class Courier extends AuxiliaryUnit{
 	}
 	update(dt){
 		this.deliveryDistance = getDistance(this.x, this.y, this.target.x, this.target.y);
-		
 		if (this.deliveryDistance < this.orderRange){
 			if (this.returning){
 				this.reportToGeneral(true);
 			}
 			else{
-				this.deliverOrder();
+				this.deliverOrder(true);
 			}
+			return;
 		}
 		else if (this.deliveryDistance < this.closingRange){
 			this.path = [];
@@ -1273,12 +1277,19 @@ class Courier extends AuxiliaryUnit{
 		this.updateAngle();
 	}
 	updateRoute(){
-		this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, this.ignoreList);	
+		this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, this.ignoreList);
+		if (!this.returning && this.path.length < 1){
+			//can't reach target, return to general
+			this.deliverOrder(false);
+			this.path = Pathfinder.findCourierPathToGeneral(this.x, this.y, this.target.x, this.target.y, this, this.ignoreList);
+		}
 		this.getNextWaypoint();
 	}
 
-	deliverOrder(){
-		this.target.updateCommand(this.order, false);
+	deliverOrder(success){
+		if (success){
+			this.target.updateCommand(this.order, false);
+		}
 		this.returning = true;
 		this.target = this.general;
 		this.faceTarget();

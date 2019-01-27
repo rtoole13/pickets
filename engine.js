@@ -427,7 +427,6 @@ class CollisionEngine{
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
 		}
-
 		if (unitAux.unitType == unitTypes.general){
 			unitAux.captured = true;
 		}
@@ -911,6 +910,9 @@ class Timer{
 			return true;
 		}
 		return false;
+	}
+	shortTimer(){
+		this.startTime = -Infinity;
 	}
 	getElapsedTime(){
 		return (Date.now() - this.startTime);
