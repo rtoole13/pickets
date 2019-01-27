@@ -144,13 +144,14 @@ class AudioHandler {
 
         this.audioPools[poolID].playAvailableClip(varyPitch, audioGroup.volume);
     }
-
+    playAmbient(){
+        
+    }
     updatePools(){
         var unavailableSum = 0;
         for (var id in this.audioPools){
             unavailableSum += this.audioPools[id].checkUnavailable();
         }
-        //console.log(unavailableSum);
     }
 
 

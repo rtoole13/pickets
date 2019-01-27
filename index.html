@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <canvas id = "gameCanvas" width = "800" height = "600"></canvas>
     <script type = "text/javascript" src = "./main.js"></script>
     <script type = "text/javascript" src = "./utils.js"></script>
     <script type = "text/javascript" src = "./draw.js"></script>
@@ -21,12 +20,14 @@
     <link href='https://fonts.googleapis.com/css?family=Diplomata' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=IM Fell DW Pica SC' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=IM Fell English SC' rel='stylesheet'>
-    <style id="css">
-        @font-face {
-            font-family: 'Mate SC', 'Diplomata', 'IM Fell DW Pica SC', 'IM Fell English SC';
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
+    <div id="main">
+        <img id="bgImg" src="assets/background.png" width = "800" height = "600"></img>
+    </div>
+    <div id="gameWindow">
+        <canvas id = "gameCanvas" width = "800" height = "600"></canvas>
+    </div>
 </body>
 </html>

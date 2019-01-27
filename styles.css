@@ -1,0 +1,19 @@
+@font-face {
+    font-family: 'Mate SC', 'Diplomata', 'IM Fell DW Pica SC', 'IM Fell English SC';
+}
+
+#main{
+    position: absolute;
+    left: 25px;
+    top: 25px;
+    width: 800px;
+    height: 600px;
+}
+
+#gameWindow{
+    position: absolute;
+    left: 25px;
+    top: 25px;
+    width: 800px;
+    height: 600px;
+}
