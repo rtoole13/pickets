@@ -191,9 +191,9 @@ class TutorialTwoBoard extends TutorialBoard {
 		infD = 'INFD';
 		addPlayerGeneral(205, 460, 45, 10);
 		addEnemyGeneral(650, 150, -135, 10, false);
-		addPlayerInfantry(340, 250, 0, "Brigade", infA);
+		addPlayerInfantry(375, 250, 0, "Brigade", infA);
 		unitB = addPlayerInfantry(410, 430, 90, "Brigade", infB);
-		addPlayerInfantry(340, 170, 0, "Brigade", infC);
+		addPlayerInfantry(375, 170, 0, "Brigade", infC);
 		unitD = addEnemyInfantry(415, 365, -135, "Brigade", infD);
 		
 		unitB.updateCommand({type: commandTypes.attackmove, target: unitD, x: unitD.x, y: unitD.y, angle: null, date: Date.now()});
@@ -205,15 +205,15 @@ class TutorialTwoBoard extends TutorialBoard {
 	}
 
 	initializeGoals(){
-		var playerInfA, playerInfC, enemyInf, eventOverrides;
+		var playerInfA, playerInfB, playerInfC, enemyInf, eventOverrides;
 		playerInfA = 'INFA';
+		playerInfB = 'INFB';
 		playerInfC = 'INFC';
 		enemyInf = 'INFD';
 		eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
 		var enemyFallBackCallback = function(){
-			var command, enemy;
-			command = {type: commandTypes.fallback, target: null, x: 560, y: 150, angle: null, date: Date.now()};
+			var command = {type: commandTypes.fallback, target: null, x: 455, y: 325, angle: null, date: Date.now()};
 			enemyGeneral.courierCooldown.shortTimer();
 			enemyGeneral.issueCommand(enemyInf, command);
 		};
@@ -222,7 +222,31 @@ class TutorialTwoBoard extends TutorialBoard {
 		eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
 		eventOverrides.addListener('window', "mousedown", null);
-		this.goals.add(new DurationGoal('Seeing your troops to the north, <br>the enemy general orders his infantry back.', 5000, undefined, eventOverrides));
+
+		var friendlyInterceptCallback = function(){
+			var friendly, command, commandStack, enemy;
+			friendly = playerInfantryList[playerInfA];
+			command = {type: commandTypes.attackmove, target: null, x: 500, y: 350, angle: null, date: Date.now()};
+			playerGeneral.courierCooldown.shortTimer();
+			playerGeneral.issueCommand(friendly, command);
+			
+			friendly = playerInfantryList[playerInfB];
+			enemy = enemyInfantryList[enemyInf];
+			commandStack = [];
+			commandStack.push({type: commandTypes.move, target: null, x: 470, y: 390, angle: null, date: Date.now()});
+			commandStack.push({type: commandTypes.attackmove, target: enemy, x: enemy.x, y: enemy.y, angle: null, date: Date.now()});
+			playerGeneral.courierCooldown.shortTimer();
+			playerGeneral.issueCommand(friendly, commandStack);
+
+		}
+		this.goals.add(new DurationGoal('Seeing your troops to the north, the <br>enemy general is ordering his infantry back.', 5000, friendlyInterceptCallback, eventOverrides));
+		this.goals.add(new DurationGoal('Your infantry move to intercept!', 8000, undefined, eventOverrides));
+		this.goals.add(new ClickGoal('You can prevent units from receiving orders by capturing couriers.', undefined));
+		this.goals.add(new ClickGoal('You can also make a courier\'s job more difficult by blocking its path.', undefined));
+
+		eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
+		this.goals.add(new MoveTargetToLocationGoal('Move your idle infanty unit to the indicated position.', playerInfC, {x:550, y:260}, null, 25, {xMin: 500, xMax: 600, yMin: 200, yMax: 300}, undefined, eventOverrides));
 		/*
 		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your free unit to the <br>location marked by the green circle by right clicking!', 
 													playerInf, {x:675, y:375}, null, 25, null, undefined, eventOverrides));
@@ -351,7 +375,7 @@ function addEnemyCourier(x, y, angle, general, target, order){
 
 function terminateUnit(id, unitType, army){
 	if (army == armies.blue){
-		if (activeUnit.id == id){
+		if (activeUnit != null && activeUnit != undefined && activeUnit.id == id){
 			activeUnit = undefined;
 		}
 		switch (unitType){
