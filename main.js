@@ -19,7 +19,9 @@ var canvas,
     sceneHandler,
     audioHandler,
     eventHandler,
-    muteButton;
+    commandHandler,
+    muteButton,
+    mouseOrderButtons;
 
 //Title Objects//
 var howToHitBox,
@@ -36,10 +38,8 @@ var backHitBox,
 //Tutorial Objects//
 var tutorialArrowLeft,
 	tutorialArrowRight,
-	homeButton,
 	tutorialSceneCount,
-	currentTutorial,
-	customEventListeners;
+	currentTutorial;
 
 //Game Objects//
 var gameBoard,
@@ -134,7 +134,6 @@ function init(){
 	scenes = Object.freeze({titleScene:1, howToScene:2, tutorialScene: 3, gameScene: 4, endScene: 5});
 	boards = Object.freeze({main: 1, tutorialOne: 2, tutorialTwo: 3, tutorialThree: 4});
 	tutorialBoardNames = Object.keys(boards).filter(elem => elem.includes('tutorial'));
-	customEventListeners = Object.freeze({defaults:1, moveOnly:2, attackMoveOnly: 3})
 	orderColor = hexToRGB(playerColor, 0.25);
     enemyOrderColor = hexToRGB(enemyColor, 0.25);
     crimsonAlpha = hexToRGB(crimson, 0.85);
@@ -171,6 +170,7 @@ function handleMouseDown(e){
 	if (muteButton.checkClick()){
 		muteOrUnmuteGame();
 	}
+	mouseOrderButtons.checkClick();
 }
 
 function checkMouseOver(){
@@ -426,7 +426,7 @@ function handleKeyPress(e){
 			if (activeUnit != undefined){
 				activeUnit = undefined;
 			}
-			commandType = commandTypes.move;
+			commandHandler.setCommand(commandTypes.move);
 			break;
 		case 32:
             //Space
@@ -435,20 +435,20 @@ function handleKeyPress(e){
 		case 65:
 			//A
 			if (commandType == commandTypes.attackmove){
-				commandType = commandTypes.move;
+				commandHandler.setCommand(commandTypes.move);
 			}
 			else{
-				commandType = commandTypes.attackmove;
+				commandHandler.setCommand(commandTypes.attackmove);
 			}
 			break;
 		
 		case 70:
 			//F
 			if (commandType == commandTypes.fallback){
-				commandType = commandTypes.move;
+				commandHandler.setCommand(commandTypes.move);
 			}
 			else{
-				commandType = commandTypes.fallback;
+				commandHandler.setCommand(commandTypes.fallback);
 			}
 			break;
 		

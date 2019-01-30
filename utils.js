@@ -175,6 +175,80 @@ class EventHandler {
             this.removeEventListenersByEvent(eventName);
         }
     }
+
+    handleEventOverrides(eventOverrides){
+        for (var eventName in eventOverrides.data){
+            this.removeEventListenersByEvent(eventName);
+            var eventData = eventOverrides.data[eventName];
+            this.addEventListener(eventData.target, eventName, eventData.callback, false);
+            if (mouseOrderButtons == undefined || mouseOrderButtons == null){
+                return;
+            }
+
+            //Enable or disable certain move commands
+            if (eventData.callback == handleKeyPressMoveOnly){
+                mouseOrderButtons.setMoveState(true);
+                mouseOrderButtons.setAttackmoveState(false);
+                mouseOrderButtons.setFallbackState(false);
+            }
+            else if (eventData.callback == handleKeyPressAttackMoveOnly){
+                mouseOrderButtons.setMoveState(false);
+                mouseOrderButtons.setAttackmoveState(true);
+                mouseOrderButtons.setFallbackState(false);
+            }
+            else if (eventData.callback == handleClickToContinue){
+                mouseOrderButtons.setMoveState(false);
+                mouseOrderButtons.setAttackmoveState(false);
+                mouseOrderButtons.setFallbackState(false);
+            }
+            else if (eventData.callback == handleGoalSpecificKeyPress){
+                mouseOrderButtons.setMoveState(false);
+                mouseOrderButtons.setAttackmoveState(false);
+                mouseOrderButtons.setFallbackState(false);
+            }
+            else if (eventData.callback == null){
+                mouseOrderButtons.setMoveState(false);
+                mouseOrderButtons.setAttackmoveState(false);
+                mouseOrderButtons.setFallbackState(false);
+            }
+        }
+    }
+
+}
+
+class CommandHandler {
+    constructor(){
+    }
+    setCommand(command){
+        //intend to put validation logic here..
+        switch (command){
+            case commandTypes.move:
+                if (mouseOrderButtons != undefined || mouseOrderButtons != null){
+                    mouseOrderButtons.moveButton.setSelected(true);
+                    mouseOrderButtons.attackmoveButton.setSelected(false);
+                    mouseOrderButtons.fallbackButton.setSelected(false);
+                }
+                break;
+            case commandTypes.attackmove:
+                if (mouseOrderButtons != undefined || mouseOrderButtons != null){
+                    mouseOrderButtons.moveButton.setSelected(false);
+                    mouseOrderButtons.attackmoveButton.setSelected(true);
+                    mouseOrderButtons.fallbackButton.setSelected(false);
+                }
+                break;
+            case commandTypes.fallback:
+                if (mouseOrderButtons != undefined || mouseOrderButtons != null){
+                    mouseOrderButtons.moveButton.setSelected(false);
+                    mouseOrderButtons.attackmoveButton.setSelected(false);
+                    mouseOrderButtons.fallbackButton.setSelected(true);
+                }
+                break;
+            default:
+                throw 'invalid command!!'
+                break;
+        }
+        commandType = command;
+    }
 }
 class Queue {
     constructor(){

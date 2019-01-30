@@ -30,11 +30,7 @@ class TutorialGoal {
         if (this.eventOverrides == undefined){
             return;
         }
-        for (var eventName in this.eventOverrides.data){
-            eventHandler.removeEventListenersByEvent(eventName);
-            var eventData = this.eventOverrides.data[eventName];
-            eventHandler.addEventListener(eventData.target, eventName, eventData.callback, false);
-        }
+        eventHandler.handleEventOverrides(this.eventOverrides);
     }
 
     checkObjective(){
@@ -288,14 +284,14 @@ class DurationGoal extends TutorialGoal {
 
 function handleKeyPressMoveOnly(e){
     var keyCode = e.keyCode;
-    commandType = commandTypes.move;
+    commandHandler.setCommand(commandTypes.move);
     switch (keyCode){
         case 27:
             //Escape
             if (activeUnit != undefined){
                 activeUnit = undefined;
             }
-            commandType = commandTypes.move;
+            commandHandler.setCommand(commandTypes.move);
             break;
         case 32:
             //Space
@@ -336,7 +332,7 @@ function limitMoveGoalActiveRegion(eventOverrides){
 
 function handleGoalSpecificKeyPress(e){
     var keyCode = e.keyCode;
-    commandType = commandTypes.move;
+    commandHandler.setCommand(commandTypes.move);
     switch (keyCode){
         case gameBoard.board.currentGoal.keyCode:
             if (keyCode == 32){
@@ -355,14 +351,14 @@ function handleGoalSpecificKeyPress(e){
 
 function handleKeyPressAttackMoveOnly(e){
     var keyCode = e.keyCode;
-    commandType = commandTypes.attackmove;
+    commandHandler.setCommand(commandTypes.attackmove);
     switch (keyCode){
         case 27:
             //Escape
             if (activeUnit != undefined){
                 activeUnit = undefined;
             }
-            commandType = commandTypes.attackmove;
+            commandHandler.setCommand(commandTypes.attackmove);
             break;
         case 32:
             //Space

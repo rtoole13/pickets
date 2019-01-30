@@ -1,5 +1,4 @@
 "use strict";
-
 class CanvasButton {
     constructor(centerX, centerY, width, height){
         this.x = centerX;
@@ -53,6 +52,120 @@ class CanvasButton {
         canvasContext.restore();
     }
 }
+
+class MouseOrderButtons {
+    constructor(centerX, centerY, indWidth, indHeight, spacing){
+        this.x = centerX;
+        this.y = centerY;
+        this.indWidth = indWidth;
+        this.indHeight = indHeight;
+        this.spacing = spacing;
+        this.moveButton       = new MouseOrderButton(this.x - this.indWidth - this.spacing, this.y, 
+                                                     this.indWidth, this.indHeight, commandTypes.move, true, true);
+        this.attackmoveButton = new MouseOrderButton(this.x, this.y, this.indWidth, this.indHeight, 
+                                                     commandTypes.attackmove, true, false);
+        this.fallbackButton   = new MouseOrderButton(this.x + this.indWidth + this.spacing, this.y, 
+                                                     this.indWidth, this.indHeight, commandTypes.fallback, true, false);
+    }
+    checkClick(){
+        if (this.moveButton.checkClick()){
+            commandHandler.setCommand(commandTypes.move);
+        }
+        else if (this.attackmoveButton.checkClick()){
+            commandHandler.setCommand(commandTypes.attackmove);
+        }
+        else if (this.fallbackButton.checkClick()){
+            commandHandler.setCommand(commandTypes.fallback);
+        }
+    }
+    update(){
+        this.moveButton.update();
+        this.attackmoveButton.update();
+        this.fallbackButton.update();
+    }
+    draw(){
+        this.moveButton.draw();
+        this.attackmoveButton.draw();
+        this.fallbackButton.draw();
+    }
+
+    setMoveState(active){
+        this.moveButton.setState(active);
+    }
+
+    setAttackmoveState(active){
+        this.attackmoveButton.setState(active);
+    }
+
+    setFallbackState(active){
+        this.fallbackButton.setState(active);
+    }
+}
+
+class MouseOrderButton extends CanvasButton {
+    constructor(centerX, centerY, indWidth, indHeight, command, active, currentlySelected){
+        super(centerX, centerY, indWidth, indHeight);
+        switch (command){
+            case commandTypes.move:
+                this.spriteSheet = new SpriteSheet(command_move, centerX, centerY, 52, 52, 5, 1, 4, false, true, 1);
+                break;
+            case commandTypes.attackmove:
+                this.spriteSheet = new SpriteSheet(command_attackmove, centerX, centerY, 52, 52, 5, 1, 4, false, true, 1);
+                break;
+            case commandTypes.fallback:
+                this.spriteSheet = new SpriteSheet(command_fallback, centerX, centerY, 52, 52, 5, 1, 4, false, true, 1);
+                break;
+            default:
+                this.spriteSheet = new SpriteSheet(command_move, centerX, centerY, 52, 52, 5, 1, 4, false, true, 1);
+                break;
+        }
+        this.active = active;
+        this.currentlySelected = currentlySelected;
+    }
+
+    checkClick(){
+        if (!this.active){
+            return false;
+        }
+        return super.checkClick();
+    }
+
+    setState(active){
+        this.active = active;
+    }
+
+    setSelected(selected){
+        this.currentlySelected = selected;
+    }
+
+    draw(){
+        var index;
+
+        if (!this.active){
+            index = 0;
+        }
+        else{
+            if (this.depressed){
+                index = 3;
+            }
+            else{
+                if (this.currentlySelected){
+                    index = 2;
+                }
+                else{
+                    index = 1;
+                }
+            }
+        }
+        this.spriteSheet.XframeIndex = index;
+        canvasContext.save();
+        canvasContext.translate(this.x, this.y);
+        this.spriteSheet.move(0,0);
+        this.spriteSheet.draw();
+        canvasContext.restore();
+    }
+}
+
 class TutorialArrow extends CanvasButton{
     constructor(centerX, centerY, width, height, arrowLeft){
         super(centerX, centerY, width, height);

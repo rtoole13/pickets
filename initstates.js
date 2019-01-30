@@ -275,7 +275,7 @@ class TutorialThreeBoard extends TutorialBoard {
 	}
 }
 
-//Class to hopefully clean up passing event listeners to be enabled/disabled to the goals.
+//Class to clean up passing event listeners to be enabled/disabled to the goals.
 class CustomEventListenerSet {
 	constructor(){
 		this.data = {};

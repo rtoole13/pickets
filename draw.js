@@ -9,7 +9,10 @@ var blue_infantry,
 	red_courier,
 	mute_button,
 	tutorial_arrow_left,
-	tutorial_arrow_right;
+	tutorial_arrow_right,
+	command_move,
+	command_attackmove,
+	command_fallback;
 
 class SpriteSheet {
 	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, scale){
@@ -857,6 +860,15 @@ function initializeSpriteSheets(){
 
 	tutorial_arrow_right = new Image(400, 160);
 	tutorial_arrow_right.src = 'assets/tutorial_arrow_right.svg';
+
+	command_move = new Image(52, 52);
+	command_move.src = 'assets/icon_move.svg';
+
+	command_attackmove = new Image(52, 52);
+	command_attackmove.src = 'assets/icon_attack.svg';
+
+	command_fallback = new Image(52, 52);
+	command_fallback.src = 'assets/icon_fallback.svg';
 }
 
 function initializeSpriteSheet(unit){
@@ -911,6 +923,7 @@ function drawHUD(){
 	activeHealth.draw();
 	hoverHealth.draw();
 	muteButton.draw();
+	mouseOrderButtons.draw();
 }
 
 function drawAnimations(dt){

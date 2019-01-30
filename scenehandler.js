@@ -147,6 +147,9 @@ class SceneHandler {
         eventHandler.removeEventListenersByEvent("mousemove");
         eventHandler.removeEventListenersByEvent("keydown");
         eventHandler.removeEventListenersByEvent("keyup");
+
+        commandHandler = null;
+        mouseOrderButtons = null;
     }
 
     endHowToScene(){
@@ -167,11 +170,13 @@ class SceneHandler {
         eventHandler.removeEventListenersByEvent("keydown");
         eventHandler.removeEventListenersByEvent("keyup");
 
+        commandHandler = null;
+        mouseOrderButtons = null;
         tutorialArrowLeft = null;
         tutorialArrowRight = null;
-        homeButton = null;
         tutorialSceneCount = null;
         currentTutorial = null;
+
     }
 
     endEndScene(){
@@ -250,6 +255,8 @@ function initializePlayableState(board, mainGame){
     unitToolTip = new UnitToolTip(canvas.width/4, canvas.height/6, {x:55, y:20}, 'black', 'hoverUnit');
     hoverHealth = new HoverHealth(40, 5, 2, crimsonAlpha, grayAlpha);
     activeHealth = new ActiveHealth(40, 5, 2, greenAlpha, grayAlpha);
+    mouseOrderButtons = new MouseOrderButtons(canvas.width / 2, canvas.height - 50, 52, 52, 15);
+    commandHandler = new CommandHandler();
 
     gameBoard = new GameBoard(30,40, board);
     gameBoard.initializeBoard();

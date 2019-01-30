@@ -68,6 +68,7 @@ function loopMainGame(){
 
     //Updates
     muteButton.update();
+    mouseOrderButtons.update();
     gameBoard.update(dt);
     draw(dt);
     
@@ -89,6 +90,7 @@ function loopTutorialScene(){
     tutorialArrowLeft.update(dt);
     tutorialArrowRight.update(dt);
     muteButton.update();
+    mouseOrderButtons.update();
     if (gameBoard.board.checkGoals()){ //change scene when goals are accomplished
         tutorialArrowRight.clicked = true;
     } 
