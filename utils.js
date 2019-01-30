@@ -177,6 +177,13 @@ class EventHandler {
     }
 
     handleEventOverrides(eventOverrides){
+        if (eventOverrides == undefined){
+            console.log('wee')
+            mouseOrderButtons.setMoveState(true);
+            mouseOrderButtons.setAttackmoveState(true);
+            mouseOrderButtons.setFallbackState(true);
+            return;
+        }
         for (var eventName in eventOverrides.data){
             this.removeEventListenersByEvent(eventName);
             var eventData = eventOverrides.data[eventName];

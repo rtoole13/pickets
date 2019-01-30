@@ -27,9 +27,6 @@ class TutorialGoal {
 
     enableEvents(){
         addDefaultListeners();
-        if (this.eventOverrides == undefined){
-            return;
-        }
         eventHandler.handleEventOverrides(this.eventOverrides);
     }
 
