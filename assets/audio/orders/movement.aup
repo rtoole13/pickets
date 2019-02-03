@@ -1,0 +1,112 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE project PUBLIC "-//audacityproject-1.3.0//DTD//EN" "http://audacity.sourceforge.net/xml/audacityproject-1.3.0.dtd" >
+<project xmlns="http://audacity.sourceforge.net/xml/" projname="movement_data" version="1.3.0" audacityversion="2.3.0" sel0="0.0000000000" sel1="1.0720634921" vpos="432" h="0.0000000000" zoom="32.6472648635" rate="44100.0" snapto="off" selectionformat="hh:mm:ss + milliseconds" frequencyformat="Hz" bandwidthformat="octaves">
+	<tags>
+		<tag name="TITLE" value="Battle Movement Pass By"/>
+		<tag name="ALBUM" value="YouTube Audio Library"/>
+	</tags>
+	<wavetrack name="Battle_Movement_Pass_By" channel="0" linked="1" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="10.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1181952">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808b58.au" len="262144" min="-0.009367" max="0.009977" rms="0.000694"/>
+				</waveblock>
+				<waveblock start="262144">
+					<simpleblockfile filename="e08088f3.au" len="262144" min="-0.019945" max="0.016466" rms="0.001563"/>
+				</waveblock>
+				<waveblock start="524288">
+					<simpleblockfile filename="e0808405.au" len="262144" min="-0.033402" max="0.03028" rms="0.003053"/>
+				</waveblock>
+				<waveblock start="786432">
+					<simpleblockfile filename="e080862f.au" len="262144" min="-0.040454" max="0.040218" rms="0.002007"/>
+				</waveblock>
+				<waveblock start="1048576">
+					<simpleblockfile filename="e0808b88.au" len="133376" min="-0.005499" max="0.00678" rms="0.000648"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Battle_Movement_Pass_By" channel="1" linked="0" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="10.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="1181952">
+				<waveblock start="0">
+					<simpleblockfile filename="e080854e.au" len="262144" min="-0.009012" max="0.009246" rms="0.000682"/>
+				</waveblock>
+				<waveblock start="262144">
+					<simpleblockfile filename="e0808aa6.au" len="262144" min="-0.023729" max="0.023927" rms="0.001742"/>
+				</waveblock>
+				<waveblock start="524288">
+					<simpleblockfile filename="e0808761.au" len="262144" min="-0.054365" max="0.045053" rms="0.003986"/>
+				</waveblock>
+				<waveblock start="786432">
+					<simpleblockfile filename="e0808137.au" len="262144" min="-0.055886" max="0.061362" rms="0.002687"/>
+				</waveblock>
+				<waveblock start="1048576">
+					<simpleblockfile filename="e0808d1d.au" len="133376" min="-0.008173" max="0.010647" rms="0.000834"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Battle_Movement_Pass_By" channel="0" linked="1" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="10.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="41875">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808e1a.au" len="41875" min="-0.014227" max="0.010128" rms="0.001594"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Battle_Movement_Pass_By" channel="1" linked="0" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="10.0" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="41875">
+				<waveblock start="0">
+					<simpleblockfile filename="e080809f.au" len="41875" min="-0.018604" max="0.014965" rms="0.001909"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Battle_Movement_Pass_By" channel="0" linked="1" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="5.011872" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="37822">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808fa4.au" len="37822" min="-0.009543" max="0.010386" rms="0.001451"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Battle_Movement_Pass_By" channel="1" linked="0" mute="1" solo="0" height="150" minimized="0" isSelected="0" rate="44100" gain="5.011872" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="37822">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808796.au" len="37822" min="-0.01491" max="0.012794" rms="0.001786"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Battle_Movement_Pass_By" channel="0" linked="1" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="12.589254" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="47278">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808e33.au" len="47278" min="-0.008102" max="0.006446" rms="0.001027"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+	<wavetrack name="Battle_Movement_Pass_By" channel="1" linked="0" mute="0" solo="0" height="150" minimized="0" isSelected="1" rate="44100" gain="12.589254" pan="0.0" colorindex="0">
+		<waveclip offset="0.00000000" colorindex="0">
+			<sequence maxsamples="262144" sampleformat="262159" numsamples="47278">
+				<waveblock start="0">
+					<simpleblockfile filename="e0808d3e.au" len="47278" min="-0.009096" max="0.007339" rms="0.00108"/>
+				</waveblock>
+			</sequence>
+			<envelope numpoints="0"/>
+		</waveclip>
+	</wavetrack>
+</project>
