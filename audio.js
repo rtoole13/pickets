@@ -26,6 +26,9 @@ class AudioHandler {
         //create AudioGroups
         this.audioGroups = {};
         this.initializeAudioGroups();
+
+        //managed clips
+        this.managedClips = [];
     }
 
     get muted(){
@@ -76,7 +79,7 @@ class AudioHandler {
         this.initializePool('assets/audio/cannonfire/cannon2.ogg', 3, 0.1, 'cannon2');
         this.initializePool('assets/audio/cannonfire/cannon3.ogg', 3, 0.1, 'cannon3');
         this.initializePool('assets/audio/mouse/click.ogg', 3, 0.3, 'click1');
-        this.initializePool('assets/audio/ambient/farm.ogg', 1, 0, 'farm');
+        this.initializePool('assets/audio/ambient/farm.ogg', 2, 0, 'farm');
     }
     initializeAudioGroups(){
         var skirmishDict, battleDict, artilleryDict, clickDict, ambientDict;
@@ -118,7 +121,7 @@ class AudioHandler {
         this.initializeAudioGroup('battle', 1, battleDict);
         this.initializeAudioGroup('artillery', 0.75, artilleryDict);
         this.initializeAudioGroup('click', 0.5, clickDict);
-        this.initializeAudioGroup('ambient', 0.5, ambientDict);
+        this.initializeAudioGroup('ambient', 1, ambientDict);
     }
 
     initializePool(clip, count, pitchVariance, id){
@@ -140,13 +143,67 @@ class AudioHandler {
         }
         var audioGroup, poolID;
         audioGroup = this.audioGroups[id];
-        poolID = this.audioGroups[id].getRandomClip();
+        poolID = audioGroup.getRandomClip();
 
         this.audioPools[poolID].playAvailableClip(varyPitch, audioGroup.volume);
     }
-    playAmbient(){
-        
+
+    fadeInAudioGroup(id, varyPitch, startVolume, endVolume, fadeDuration, completionCallback){
+        if (this.muted){
+            return;
+        }
+        var audioGroup, poolID, clip, timer;
+        audioGroup = this.audioGroups[id];
+        poolID = audioGroup.getRandomClip();
+
+        clip = this.audioPools[poolID].playAvailableClip(varyPitch, startVolume);
+        timer = new Timer(fadeDuration, false);
+        timer.start();
+        this.managedClips.push({id: id, clipType: 'fadeIn', clip: clip, startVolume: startVolume, volumeDiff: endVolume - startVolume, 
+                                duration: fadeDuration, timer: timer, callback: completionCallback});   
     }
+
+    update(){
+        this.updateManagedClips();
+        this.updatePools();
+    }
+
+    updateManagedClips(){
+        //Currently only fade in clips
+        for (var i = 0; i < this.managedClips.length; i++){
+            if (this.updateManagedClip(this.managedClips[i])){
+                //Managed clip finished with active management.
+                this.managedClips.splice(i,1);
+                i -= 1;
+            }
+        }
+    }
+
+    updateManagedClip(clipDict){
+        if (clipDict.clipType == 'fadeIn'){
+            if (clipDict.timer.checkTime()){
+                if (clipDict.completionCallback != undefined || clipDict.completionCallback != null ){
+                    clipDict.completionCallback();
+                }
+                return true;
+            }
+            clipDict.clip.volume = clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration;
+
+            return false;
+        }
+        else if (clipDict.clipType == 'crossFadeLoop'){
+            if (clipDict.timer.checkTime()){
+                if (clipDict.completionCallback != undefined || clipDict.completionCallback != null ){
+                    clipDict.completionCallback();
+                }
+                return true;
+            }
+            return false;
+        }
+
+        throw 'Unexpected clip type!!';
+    }
+
     updatePools(){
         var unavailableSum = 0;
         for (var id in this.audioPools){
@@ -249,7 +306,7 @@ class AudioPool {
         return 0;
     }
 
-    playAvailableClip(varyPitch, volume){
+    playAvailableClip(varyPitch, volume, loop){
         var clip = this.available.remove();
         if (clip == undefined){
             return null;
@@ -262,8 +319,11 @@ class AudioPool {
             clip.playbackRate = 1;   
         }
 
+        clip.loop = (loop != null || loop != undefined)? loop : false;
         clip.volume = volume;
         clip.play();
+
+        return clip;
     }
 }
 

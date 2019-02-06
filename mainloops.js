@@ -23,6 +23,7 @@ function loopMainTitle(){
         return;
     }
 
+    audioHandler.update();
     requestAnimationFrame(loopMainTitle);
 }
 
@@ -49,6 +50,7 @@ function loopHowTo(){
         return;
     }
 
+    audioHandler.update();
     requestAnimationFrame(loopHowTo);
 }
 
@@ -72,7 +74,7 @@ function loopMainGame(){
     gameBoard.update(dt);
     draw(dt);
     
-    audioHandler.updatePools();
+    audioHandler.update();
     requestAnimationFrame(loopMainGame);
 }
 
@@ -97,7 +99,7 @@ function loopTutorialScene(){
     gameBoard.update(dt);
     drawTutorialScene(dt);
     
-    audioHandler.updatePools();
+    audioHandler.update();
     requestAnimationFrame(loopTutorialScene);
 }
 
