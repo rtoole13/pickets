@@ -163,6 +163,43 @@ class AudioHandler {
                                 duration: fadeDuration, timer: timer, callback: completionCallback});   
     }
 
+    fadeOutAudioGroup(id, varyPitch, startVolume, endVolume, fadeDuration, completionCallback){
+        if (this.muted){
+            return;
+        }
+        var audioGroup, poolID, clip, clipDuration, delayTime, delayTimer, timer;
+        audioGroup = this.audioGroups[id];
+        poolID = audioGroup.getRandomClip();
+
+        clip = this.audioPools[poolID].playAvailableClip(varyPitch, startVolume);
+        clipDuration = clip.duration * 1000;
+        delayTime = clipDuration - fadeDuration;
+        delayTimer = new Timer(delayTime, false);//fine if negative
+        delayTimer.start();
+
+        console.log(delayTime);
+        fadeDuration = (delayTime <= 0)? clipDuration : fadeDuration;
+        timer = new Timer(fadeDuration, false);
+        console.log(fadeDuration)
+        this.managedClips.push({id: id, clipType: 'fadeOut', clip: clip, startVolume: startVolume, volumeDiff: endVolume - startVolume, 
+                                duration: fadeDuration, delayTimer: delayTimer, timer: timer, callback: completionCallback});
+    }
+    /*
+    crossFadeLoopAudioGroup(id, varyPitch, volume, crossFadeDuration){
+        if (this.muted){
+            return;
+        }
+        var audioGroup, poolID, clip, timer;
+        audioGroup = this.audioGroups[id];
+        poolID = audioGroup.getRandomClip();
+
+        clip = this.audioPools[poolID].playAvailableClip(varyPitch, startVolume);
+        timer = new Timer(fadeDuration, false);
+        timer.start();
+        this.managedClips.push({id: id, clipType: 'fadeIn', clip: clip, startVolume: startVolume, volumeDiff: endVolume - startVolume, 
+                                duration: fadeDuration, timer: timer, began: false, callback: completionCallback});   
+    }
+    */
     update(){
         this.updateManagedClips();
         this.updatePools();
@@ -191,14 +228,25 @@ class AudioHandler {
 
             return false;
         }
-        else if (clipDict.clipType == 'crossFadeLoop'){
-            if (clipDict.timer.checkTime()){
-                if (clipDict.completionCallback != undefined || clipDict.completionCallback != null ){
-                    clipDict.completionCallback();
+        else if (clipDict.clipType == 'fadeOut'){
+            if (clipDict.began){
+                if (clipDict.timer.checkTime()){
+                    if (clipDict.completionCallback != undefined || clipDict.completionCallback != null ){
+                        clipDict.completionCallback();
+                    }
+                    return true;
                 }
-                return true;
+                clipDict.clip.volume = clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration;
+
+                return false;
             }
-            return false;
+            else{
+                if (clipDict.delayTimer.checkTime()){
+                    clipDict.began = true;
+                    clipDict.timer.start();
+                }
+                return false;
+            }
         }
 
         throw 'Unexpected clip type!!';
@@ -287,11 +335,13 @@ class AudioPool {
         this.unavailable = [];
         this.count = count;
 
+        var audio = new Audio(clipURL);
         for (var i = 0; i < count; i++){
-            var audio = new Audio(clipURL);
+            audio = new Audio(clipURL);
             this.available.add(audio);
         }
     }
+    
     checkUnavailable(){
         for (var i = 0; i < this.unavailable.length; i++){
             if (this.unavailable[i].ended){
