@@ -213,7 +213,7 @@ class AudioHandler {
 
         crossFadeTimer = new Timer(crossFadeDuration, false);
         crossFadeTimer.start();
-        this.managedClips.push({id: id, clipType: 'crossFadeLoop', clip: clip, startVolume: startVolume, volumeDiff: maxVolume - startVolume, 
+        this.managedClips.push({id: id, varyPitch : varyPitch, clipType: 'crossFadeLoop', clip: clip, startVolume: startVolume, maxVolume: maxVolume, 
                                 duration: crossFadeDuration, crossFadeDelayTimer: fadeOutDelayTimer, crossFadeTimer: crossFadeTimer, began: false});   
     }
     
@@ -266,7 +266,24 @@ class AudioHandler {
             }
         }
         else if (clipDict.clipType == 'crossFadeLoop'){
-            throw 'IMPLEMENT'
+            var volumeDiff = clipDict.maxVolume - clipDict.startVolume;
+            if (clipDict.began){
+                if (clipDict.crossFadeTimer.checkTime()){
+                    return true;
+                }
+                clipDict.clip.volume = clipDict.maxVolume - (volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration);
+            }
+            else{
+                if (!clipDict.crossFadeTimer.checkTime()){
+                    clipDict.clip.volume = clipDict.startVolume + volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration;
+                }
+                if (clipDict.crossFadeDelayTimer.checkTime()){
+                    this.crossFadeLoopAudioGroup(clipDict.id, clipDict.varyPitch, clipDict.startVolume, clipDict.maxVolume, clipDict.duration);
+                    clipDict.began = true;
+                    clipDict.crossFadeTimer.start();
+                }
+            }
+            return false;
         }
 
         throw 'Unexpected clip type!!';
