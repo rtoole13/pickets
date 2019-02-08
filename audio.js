@@ -309,6 +309,13 @@ class AudioHandler {
         throw 'Unexpected clip type!!';
     }
 
+    killManagedClips(){
+        for (var i = 0; i < this.managedClips.length; i++){
+            this.managedClips[i].clip.volume = 0;
+            this.managedClips.splice(i, 1);
+        }
+    }
+
     updatePools(){
         var unavailableSum = 0;
         for (var id in this.audioPools){
