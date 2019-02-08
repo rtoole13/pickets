@@ -223,7 +223,6 @@ class AudioHandler {
     }
 
     updateManagedClips(){
-        //Currently only fade in clips
         for (var i = 0; i < this.managedClips.length; i++){
             if (this.updateManagedClip(this.managedClips[i])){
                 //Managed clip finished with active management.
@@ -241,8 +240,12 @@ class AudioHandler {
                 }
                 return true;
             }
-            clipDict.clip.volume = clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration;
-
+            if (this.muted){
+                clipDict.clip.volume = 0;
+            }
+            else{
+                clipDict.clip.volume = clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration;
+            }
             return false;
         }
         else if (clipDict.clipType == 'fadeOut'){
@@ -253,8 +256,12 @@ class AudioHandler {
                     }
                     return true;
                 }
-                clipDict.clip.volume = clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration;
-
+                if (this.muted){
+                    clipDict.clip.volume = 0;
+                }
+                else{
+                    clipDict.clip.volume = clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration;
+                }
                 return false;
             }
             else{
@@ -271,17 +278,23 @@ class AudioHandler {
                 if (clipDict.crossFadeTimer.checkTime()){
                     return true;
                 }
-                clipDict.clip.volume = clipDict.maxVolume - (volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration);
+                clipDict.currentVolume = clipDict.maxVolume - (volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration);
             }
             else{
                 if (!clipDict.crossFadeTimer.checkTime()){
-                    clipDict.clip.volume = clipDict.startVolume + volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration;
+                    clipDict.currentVolume = clipDict.startVolume + volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration;
                 }
                 if (clipDict.crossFadeDelayTimer.checkTime()){
                     this.crossFadeLoopAudioGroup(clipDict.id, clipDict.varyPitch, clipDict.startVolume, clipDict.maxVolume, clipDict.duration);
                     clipDict.began = true;
                     clipDict.crossFadeTimer.start();
                 }
+            }
+            if (this.muted){
+                clipDict.clip.volume = 0;
+            }
+            else{
+                clipDict.clip.volume = clipDict.currentVolume;
             }
             return false;
         }
