@@ -157,6 +157,9 @@ class AudioHandler {
         poolID = audioGroup.getRandomClip();
 
         clip = this.audioPools[poolID].playAvailableClip(varyPitch, startVolume);
+        if (clip == null){
+            return;
+        }
         timer = new Timer(fadeDuration, false);
         timer.start();
         this.managedClips.push({id: id, clipType: 'fadeIn', clip: clip, startVolume: startVolume, volumeDiff: endVolume - startVolume, 
@@ -172,34 +175,48 @@ class AudioHandler {
         poolID = audioGroup.getRandomClip();
 
         clip = this.audioPools[poolID].playAvailableClip(varyPitch, startVolume);
+        if (clip == null){
+            return;
+        }
         clipDuration = clip.duration * 1000;
         delayTime = clipDuration - fadeDuration;
         delayTimer = new Timer(delayTime, false);//fine if negative
         delayTimer.start();
 
-        console.log(delayTime);
         fadeDuration = (delayTime <= 0)? clipDuration : fadeDuration;
         timer = new Timer(fadeDuration, false);
-        console.log(fadeDuration)
+        
         this.managedClips.push({id: id, clipType: 'fadeOut', clip: clip, startVolume: startVolume, volumeDiff: endVolume - startVolume, 
-                                duration: fadeDuration, delayTimer: delayTimer, timer: timer, callback: completionCallback});
+                                duration: fadeDuration, delayTimer: delayTimer, timer: timer, began: false, callback: completionCallback});
     }
-    /*
-    crossFadeLoopAudioGroup(id, varyPitch, volume, crossFadeDuration){
+    
+    crossFadeLoopAudioGroup(id, varyPitch, startVolume, maxVolume, crossFadeDuration){
         if (this.muted){
             return;
         }
-        var audioGroup, poolID, clip, timer;
+        var audioGroup, poolID, clip, clipDuration, fadeOutDelayTime, fadeOutDelayTimer, crossFadeTimer;
         audioGroup = this.audioGroups[id];
         poolID = audioGroup.getRandomClip();
 
         clip = this.audioPools[poolID].playAvailableClip(varyPitch, startVolume);
-        timer = new Timer(fadeDuration, false);
-        timer.start();
-        this.managedClips.push({id: id, clipType: 'fadeIn', clip: clip, startVolume: startVolume, volumeDiff: endVolume - startVolume, 
-                                duration: fadeDuration, timer: timer, began: false, callback: completionCallback});   
+        if (clip == null){
+            return;
+        }
+        clipDuration = clip.duration * 1000;
+        fadeOutDelayTime = clipDuration - crossFadeDuration;
+        if (fadeOutDelayTime < 0){
+            throw 'Cross fade duration must be shorter than the clip duration!!'
+        }
+
+        fadeOutDelayTimer = new Timer(fadeOutDelayTime, false);
+        fadeOutDelayTimer.start();
+
+        crossFadeTimer = new Timer(crossFadeDuration, false);
+        crossFadeTimer.start();
+        this.managedClips.push({id: id, clipType: 'crossFadeLoop', clip: clip, startVolume: startVolume, volumeDiff: maxVolume - startVolume, 
+                                duration: crossFadeDuration, crossFadeDelayTimer: fadeOutDelayTimer, crossFadeTimer: crossFadeTimer, began: false});   
     }
-    */
+    
     update(){
         this.updateManagedClips();
         this.updatePools();
@@ -247,6 +264,9 @@ class AudioHandler {
                 }
                 return false;
             }
+        }
+        else if (clipDict.clipType == 'crossFadeLoop'){
+            throw 'IMPLEMENT'
         }
 
         throw 'Unexpected clip type!!';
@@ -356,7 +376,7 @@ class AudioPool {
         return 0;
     }
 
-    playAvailableClip(varyPitch, volume, loop){
+    playAvailableClip(varyPitch, volume){
         var clip = this.available.remove();
         if (clip == undefined){
             return null;
@@ -369,10 +389,8 @@ class AudioPool {
             clip.playbackRate = 1;   
         }
 
-        clip.loop = (loop != null || loop != undefined)? loop : false;
         clip.volume = volume;
         clip.play();
-
         return clip;
     }
 }
