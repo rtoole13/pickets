@@ -235,16 +235,22 @@ class AudioHandler {
     updateManagedClip(clipDict){
         if (clipDict.clipType == 'fadeIn'){
             if (clipDict.timer.checkTime()){
-                if (clipDict.completionCallback != undefined || clipDict.completionCallback != null ){
-                    clipDict.completionCallback();
+                if (clipDict.clip.ended){
+                    if (clipDict.completionCallback != undefined || clipDict.completionCallback != null ){
+                        clipDict.completionCallback();
+                    }
+                    return true;
                 }
-                return true;
+                clipDict.currentVolume = clampFloat(clipDict.startVolume + clipDict.volumeDiff, 0, 1);
+            }
+            else{
+                clipDict.currentVolume = clampFloat(clipDict.startVolume + clipDict.volumeDiff, 0, 1);
             }
             if (this.muted){
                 clipDict.clip.volume = 0;
             }
             else{
-                clipDict.clip.volume = clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration;
+                clipDict.clip.volume = clipDict.currentVolume;
             }
             return false;
         }
@@ -256,21 +262,22 @@ class AudioHandler {
                     }
                     return true;
                 }
-                if (this.muted){
-                    clipDict.clip.volume = 0;
-                }
-                else{
-                    clipDict.clip.volume = clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration;
-                }
-                return false;
+                clipDict.currentVolume = clampFloat(clipDict.startVolume + clipDict.volumeDiff * clipDict.timer.getElapsedTime() / clipDict.duration, 0, 1);
             }
             else{
+                clipDict.currentVolume = clipDict.startVolume;
                 if (clipDict.delayTimer.checkTime()){
                     clipDict.began = true;
                     clipDict.timer.start();
                 }
-                return false;
             }
+            if (this.muted){
+                clipDict.clip.volume = 0;
+            }
+            else{
+                clipDict.clip.volume = clipDict.currentVolume;
+            }
+            return false;
         }
         else if (clipDict.clipType == 'crossFadeLoop'){
             var volumeDiff = clipDict.maxVolume - clipDict.startVolume;
@@ -278,11 +285,11 @@ class AudioHandler {
                 if (clipDict.crossFadeTimer.checkTime()){
                     return true;
                 }
-                clipDict.currentVolume = clipDict.maxVolume - (volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration);
+                clipDict.currentVolume = clampFloat(clipDict.maxVolume - (volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration), 0, 1);
             }
             else{
                 if (!clipDict.crossFadeTimer.checkTime()){
-                    clipDict.currentVolume = clipDict.startVolume + volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration;
+                    clipDict.currentVolume = clampFloat(clipDict.startVolume + volumeDiff * clipDict.crossFadeTimer.getElapsedTime() / clipDict.duration, 0, 1);
                 }
                 if (clipDict.crossFadeDelayTimer.checkTime()){
                     this.crossFadeLoopAudioGroup(clipDict.id, clipDict.varyPitch, clipDict.startVolume, clipDict.maxVolume, clipDict.duration);

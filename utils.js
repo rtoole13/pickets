@@ -10,6 +10,10 @@ function getRandomFloat(min, max){
 	return Math.random() * (max - min) + min;
 }
 
+function clampFloat(value, min, max){
+    return Math.min(max, Math.max(value, min));
+}
+
 function getRandomID(idLength) {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
