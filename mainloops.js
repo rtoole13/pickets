@@ -1,5 +1,17 @@
 "use strict";
 
+function loopLoadingScreen(){
+    if (audioHandler.loaded){
+        sceneHandler.changeScene(scenes.titleScene);
+        return;
+    }
+    var recentlyLoadedURL = audioHandler.checkForLoadedPools();
+    loadingText.update(recentlyLoadedURL);
+
+    drawLoadingScreen();
+    requestAnimationFrame(loopLoadingScreen);
+}
+
 function loopMainTitle(){
     var howToHighLighted, beginHighlighted;
     howToHighLighted = beginHighlighted = false;

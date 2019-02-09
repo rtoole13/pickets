@@ -31,6 +31,8 @@ class SceneHandler {
             case scenes.endScene:
                 this.endEndScene();
                 break;
+            case scenes.loadingScene:
+                this.endLoadingScene();
         }
 
         this.currentScene = targetScene;
@@ -53,6 +55,8 @@ class SceneHandler {
             case scenes.endScene:
                 this.beginEndScene(variableArgs);
                 break;
+            case scenes.loadingScene:
+                this.beginLoadingScene();
         }
     }
 
@@ -71,6 +75,15 @@ class SceneHandler {
         }
     }
 
+    beginLoadingScene(){
+        setBackground('loading_screen');
+
+        loadingText = new LoadingText(2, 500);
+        
+        //Enter loading screen loop
+        loopLoadingScreen();
+    }
+
     beginTitleScene(){
         setBackground('main_map-screened');
         howToHitBox = {xMin: canvas.width/2 - 55, xMax: canvas.width/2 + 55, yMin: canvas.height/2 - 30, yMax: canvas.height/2 + 10};
@@ -79,7 +92,9 @@ class SceneHandler {
         
         eventHandler.addEventListener('canvas', "mousemove", getMousePositionTitle, false);
         eventHandler.addEventListener('canvas', "mousedown", handleTitleMouseDown, false);
-        //audioHandler.playAudioGroup('ambient', false);
+        
+        audioHandler.crossFadeLoopAudioGroup('ambient', false, 0, 1, 5000);
+        
         //Enter title screen game loop
         loopMainTitle();
     }
@@ -130,6 +145,10 @@ class SceneHandler {
         drawEndGame(variableArgs.playerVictory, variableArgs.condition);
     }
 
+    endLoadingScene(){
+        loadingText = null;
+    }
+    
     endTitleScene(){
         eventHandler.removeEventListenersByEvent("mousemove");
         eventHandler.removeEventListenersByEvent("mousedown");
@@ -330,6 +349,12 @@ function setBackground(target){
             main.style.visibility = 'hidden';
             tutScreen.style.visibility = 'hidden';
             tut.style.visibility = 'visible';
+            break;
+        case 'loading_screen':
+            mainScreen.style.visibility = 'visible';
+            main.style.visibility = 'hidden';
+            tutScreen.style.visibility = 'hidden';
+            tut.style.visibility = 'hidden';
             break;
         default:
             mainScreen.style.visibility = 'hidden';

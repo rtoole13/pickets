@@ -241,6 +241,41 @@ class MuteButton extends CanvasButton {
     }
 }
 
+class LoadingText{
+    constructor(maxPeriodCount, periodDuration){
+        this.maxPeriodCount = maxPeriodCount;
+        this.currentPeriodCount = 1;
+        this.periodDuration = periodDuration;
+        this.periodTimer = new Timer(periodDuration, false);
+        this.periodTimer.start();
+        this.baseString = 'Loading.';
+        this.recentlyLoadedClip = null;
+    }
+    update(recentlyLoadedClip){
+        if (this.periodTimer.checkTime()){
+            this.currentPeriodCount += 1;
+            this.currentPeriodCount = this.currentPeriodCount % (this.maxPeriodCount + 1);
+            this.periodTimer.start();
+        }
+        this.recentlyLoadedClip = recentlyLoadedClip;
+    }
+    draw(){
+        var loadingStr = this.baseString + '.'.repeat(this.currentPeriodCount);
+        canvasContext.save();
+        canvasContext.fillStyle = playerColor;
+        canvasContext.font = '50px IM Fell English SC';
+        canvasContext.textAlign = 'left';
+        canvasContext.fillText(loadingStr, canvas.width/2 - 100, -65 + canvas.height/2);
+        
+        if (this.recentlyLoadedClip != null){
+            var assetStr = 'Loaded: ' + this.recentlyLoadedClip;
+            canvasContext.font = '20px IM Fell English SC';
+            canvasContext.textAlign = 'center';
+            canvasContext.fillText(assetStr, canvas.width/2, -35 + canvas.height/2);
+        }
+        canvasContext.restore();
+    }
+}
 function drawArrows(){
     tutorialArrowLeft.draw();
     tutorialArrowRight.draw();
@@ -287,6 +322,11 @@ function drawDebugHowTo(){
 
 }
 
+function drawLoadingScreen(){
+    drawBackground();
+    loadingText.draw();
+
+}
 function drawTitleScene(howToMouseOver, playMouseOver){
     drawBackground();
     muteButton.draw();

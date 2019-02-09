@@ -21,7 +21,9 @@ class AudioHandler {
         this._globalVolumeScale = 1;
         //create AudioPools
         this.audioPools = {};
+        this.loadingPools = [];
         this.initializePools();
+        this.loaded = false;
 
         //create AudioGroups
         this.audioGroups = {};
@@ -56,6 +58,20 @@ class AudioHandler {
         else{
             this._globalVolumeScale = value;
         }
+    }
+
+    checkForLoadedPools(){
+        for (var i = 0; i < this.loadingPools.length; i++){
+            var id = this.loadingPools[i];
+            if (this.audioPools[id].loadedCount >= this.audioPools[id].count){
+                this.loadingPools.splice(i,1);
+                return this.audioPools[id].clipURL;
+            }
+        }
+        if (this.loadingPools.length == 0){
+            this.loaded = true;
+        }
+        return null
     }
 
     initializePools(){
@@ -126,6 +142,7 @@ class AudioHandler {
 
     initializePool(clip, count, pitchVariance, id){
         this.audioPools[id] = new AudioPool(clip, count, pitchVariance, id);
+        this.loadingPools.push(id);
     }
 
     initializeAudioGroup(id, volume, clipDict){
@@ -398,10 +415,13 @@ class AudioPool {
         this.available = new Queue();
         this.unavailable = [];
         this.count = count;
+        this.loadedCount = 0;
+        this.loaded = false;
 
-        var audio = new Audio(clipURL);
+        var audio;
         for (var i = 0; i < count; i++){
             audio = new Audio(clipURL);
+            audio.oncanplaythrough = onAudioLoad(this);
             this.available.add(audio);
         }
     }
@@ -439,3 +459,6 @@ class AudioPool {
     }
 }
 
+function onAudioLoad(audioPool){
+    audioPool.loadedCount += 1;
+}

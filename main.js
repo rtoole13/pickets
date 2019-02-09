@@ -28,7 +28,10 @@ var howToHitBox,
 	playHitBox,
 	howToClicked,
 	playClicked;
-	
+
+//Loading Screen Objects//
+var loadingText;
+
 //HowTo Objects//
 var backHitBox,
 	tutorialHitBox,
@@ -131,7 +134,7 @@ window.onload = function(){
 }
 
 function init(){
-	scenes = Object.freeze({titleScene:1, howToScene:2, tutorialScene: 3, gameScene: 4, endScene: 5});
+	scenes = Object.freeze({titleScene:1, howToScene:2, tutorialScene: 3, gameScene: 4, endScene: 5, loadingScene: 6});
 	boards = Object.freeze({main: 1, tutorialOne: 2, tutorialTwo: 3, tutorialThree: 4});
 	tutorialBoardNames = Object.keys(boards).filter(elem => elem.includes('tutorial'));
 	orderColor = hexToRGB(playerColor, 0.25);
@@ -153,7 +156,8 @@ function init(){
 	muteButton 	 = new MuteButton(canvas.width - 30, canvas.height - 30, 25, 25);
 
 	//Begin game
-	sceneHandler.beginTitleScene();
+	//sceneHandler.beginTitleScene();
+	sceneHandler.beginLoadingScene();
 }
 
 //Event Handlers
