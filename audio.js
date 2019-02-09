@@ -421,7 +421,7 @@ class AudioPool {
         var audio;
         for (var i = 0; i < count; i++){
             audio = new Audio(clipURL);
-            audio.oncanplaythrough = onAudioLoad(this);
+            audio.canplay = onAudioLoad(this);
             this.available.add(audio);
         }
     }

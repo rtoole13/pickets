@@ -78,8 +78,11 @@ class SceneHandler {
     beginLoadingScene(){
         setBackground('loading_screen');
 
+        eventHandler.addEventListener('window', "mousedown", handleInteract, false);
+        eventHandler.addEventListener('canvas', "contextmenu", disableRightClick, false);
+
         loadingText = new LoadingText(2, 500);
-        
+
         //Enter loading screen loop
         loopLoadingScreen();
     }
@@ -90,11 +93,13 @@ class SceneHandler {
         playHitBox = {xMin: canvas.width/2 - 35, xMax: canvas.width/2 + 35, yMin: canvas.height/2 + 20, yMax: canvas.height/2 + 60};
         playClicked = howToClicked = false;
         
+        eventHandler.addEventListener('window', "mousedown", handleInteract, false);
         eventHandler.addEventListener('canvas', "mousemove", getMousePositionTitle, false);
         eventHandler.addEventListener('canvas', "mousedown", handleTitleMouseDown, false);
+        eventHandler.addEventListener('canvas', "contextmenu", disableRightClick, false);
         
-        audioHandler.crossFadeLoopAudioGroup('ambient', false, 0, 1, 5000);
-        
+        //audioHandler.crossFadeLoopAudioGroup('ambient', false, 0, 1, 5000);
+
         //Enter title screen game loop
         loopMainTitle();
     }
@@ -115,6 +120,7 @@ class SceneHandler {
         
         eventHandler.addEventListener('canvas', "mousemove", getMousePositionTitle, false);
         eventHandler.addEventListener('canvas', "mousedown", handleHowToMouseDown, false);
+        eventHandler.addEventListener('canvas', "contextmenu", disableRightClick, false);
         
         //Enter title screen game loop
         loopHowTo();
@@ -140,6 +146,7 @@ class SceneHandler {
         setBackground('main_map-screened');
         //Add a restart game key event listener
         eventHandler.addEventListener('window', "keydown", handleEndGameKeyPress, false);
+        eventHandler.addEventListener('canvas', "contextmenu", disableRightClick, false);
         
         //Go to end screen.
         drawEndGame(variableArgs.playerVictory, variableArgs.condition);
@@ -147,11 +154,14 @@ class SceneHandler {
 
     endLoadingScene(){
         loadingText = null;
+        eventHandler.removeEventListenersByEvent("mousemove");
+        eventHandler.removeEventListenersByEvent("contextmenu");
     }
     
     endTitleScene(){
         eventHandler.removeEventListenersByEvent("mousemove");
         eventHandler.removeEventListenersByEvent("mousedown");
+        eventHandler.removeEventListenersByEvent("contextmenu");
 
         howToHitBox = null;
         playHitBox = null;
@@ -174,6 +184,7 @@ class SceneHandler {
     endHowToScene(){
         eventHandler.removeEventListenersByEvent("mousemove");
         eventHandler.removeEventListenersByEvent("mousedown");
+        eventHandler.removeEventListenersByEvent("contextmenu");
 
         backHitBox = null;
         tutorialHitBox = null;

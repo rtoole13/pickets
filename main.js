@@ -21,7 +21,9 @@ var canvas,
     eventHandler,
     commandHandler,
     muteButton,
-    mouseOrderButtons;
+    mouseOrderButtons,
+    hasInteracted = false,
+    startedAudio = false;
 
 //Title Objects//
 var howToHitBox,
@@ -156,7 +158,6 @@ function init(){
 	muteButton 	 = new MuteButton(canvas.width - 30, canvas.height - 30, 25, 25);
 
 	//Begin game
-	//sceneHandler.beginTitleScene();
 	sceneHandler.beginLoadingScene();
 }
 
@@ -538,6 +539,15 @@ function handleKeyRelease(e){
 	}
 }
 
+function handleInteract(e){
+	if (!hasInteracted){
+		hasInteracted = true;
+	}
+}
+
+function disableRightClick(e){
+	e.preventDefault();
+}
 function getMousePosition(e){
 	var rect = canvas.getBoundingClientRect(),
         root = document.documentElement;
