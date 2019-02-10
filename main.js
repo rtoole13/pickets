@@ -316,6 +316,7 @@ function handleLeftClick(){
 		}
 	}
 	activeUnit = undefined;
+	audioHandler.playAudioGroup('click', true);
 	return;
 }
 function selectEnemyUnit(x, y){
@@ -468,6 +469,7 @@ function handleKeyPress(e){
 }
 
 function handleTitleMouseDown(e){
+	audioHandler.playAudioGroup('click', true);
 	if (CollisionEngine.pointInAABB(mouseX, mouseY, howToHitBox.xMin, howToHitBox.xMax, howToHitBox.yMin, howToHitBox.yMax)){
 	    howToClicked = true;
 	    return;
@@ -485,6 +487,7 @@ function handleTitleMouseDown(e){
 }
 
 function handleHowToMouseDown(e){
+	audioHandler.playAudioGroup('click', true);
 	if (CollisionEngine.pointInAABB(mouseX, mouseY, backHitBox.xMin, backHitBox.xMax, backHitBox.yMin, backHitBox.yMax)){
 	    backClicked = true;
 	    return;

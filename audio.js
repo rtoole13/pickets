@@ -155,7 +155,7 @@ class AudioHandler {
         this.initializeAudioGroup('skirmish', 1, skirmishDict);
         this.initializeAudioGroup('battle', 1, battleDict);
         this.initializeAudioGroup('artillery', 0.75, artilleryDict);
-        this.initializeAudioGroup('click', 0.5, clickDict);
+        this.initializeAudioGroup('click', 0.5, clickDict, 300);
         this.initializeAudioGroup('ambient', 1, ambientDict);
         this.initializeAudioGroup('move', 0.5, moveDict);
         this.initializeAudioGroup('attackmove', 0.5, attackmoveDict);
@@ -167,8 +167,8 @@ class AudioHandler {
         this.loadingPools.push(id);
     }
 
-    initializeAudioGroup(id, volume, clipDict){
-        var audioGroup = new AudioGroup(volume);
+    initializeAudioGroup(id, volume, clipDict, minimumInterval){
+        var audioGroup = new AudioGroup(volume, minimumInterval);
 
         for (var poolID in clipDict){
             audioGroup.addClip(poolID, clipDict[poolID]);
@@ -182,9 +182,12 @@ class AudioHandler {
         }
         var audioGroup, poolID;
         audioGroup = this.audioGroups[id];
-        poolID = audioGroup.getRandomClip();
+        if (audioGroup.canPlay()){
+            poolID = audioGroup.getRandomClip();
+            this.audioPools[poolID].playAvailableClip(varyPitch, audioGroup.volume);
+            audioGroup.canPlayTimer.start();
+        }
 
-        this.audioPools[poolID].playAvailableClip(varyPitch, audioGroup.volume);
     }
 
     fadeInAudioGroup(id, varyPitch, startVolume, endVolume, fadeDuration, completionCallback){
@@ -366,13 +369,15 @@ class AudioHandler {
 }
 
 class AudioGroup {
-    constructor(volume){
+    constructor(volume, minimumInterval){
         this.clips = [];
         this.weights = [];
         this.rollingWeights = [];
         this.volume = volume;
         this.totalWeight = 0;
-
+        this.minimumInterval = (minimumInterval == undefined) ? 0 : minimumInterval;
+        this.canPlayTimer = new Timer(this.minimumInterval, false);
+        this.canPlayTimer.shortTimer();
         //this.debugTally = [];
     }
 
@@ -395,6 +400,12 @@ class AudioGroup {
         //this.debugTally.push(0);
     }
 
+    canPlay(){
+        if (this.canPlayTimer.checkTime()){
+            return true;
+        }
+        return false;
+    }
     getClipAtIndex(i){
         //play clip at index i
         return this.clips[i];
