@@ -105,6 +105,9 @@ class SceneHandler {
     }
 
     beginGameScene(){
+        audioHandler.killManagedClips();
+        audioHandler.crossFadeLoopAudioGroup('ambient', false, 0, .03, 5000);
+
         setBackground('main_map');
         initializePlayableState(sceneHandler.loadGameBoardPreset(boards.main), true);
         
@@ -127,6 +130,9 @@ class SceneHandler {
     }
 
     beginTutorialScene(){
+        audioHandler.killManagedClips();
+        audioHandler.crossFadeLoopAudioGroup('ambient', false, 0, .03, 5000);
+
         setBackground('tutorial_map');
         tutorialSceneCount = tutorialBoardNames.length;
         currentTutorial = 0;

@@ -154,12 +154,12 @@ class AudioHandler {
 
         this.initializeAudioGroup('skirmish', 1, skirmishDict);
         this.initializeAudioGroup('battle', 1, battleDict);
-        this.initializeAudioGroup('artillery', 0.75, artilleryDict);
-        this.initializeAudioGroup('click', 0.5, clickDict, 300);
+        this.initializeAudioGroup('artillery', 0.65, artilleryDict);
+        this.initializeAudioGroup('click', 0.3, clickDict, 300);
         this.initializeAudioGroup('ambient', 1, ambientDict);
-        this.initializeAudioGroup('move', 0.5, moveDict);
-        this.initializeAudioGroup('attackmove', 0.5, attackmoveDict);
-        this.initializeAudioGroup('fallback', 0.5, fallbackDict);
+        this.initializeAudioGroup('move', 0.5, moveDict, 250);
+        this.initializeAudioGroup('attackmove', 0.2, attackmoveDict, 500);
+        this.initializeAudioGroup('fallback', 0.2, fallbackDict, 250);
     }
 
     initializePool(clip, count, pitchVariance, id){

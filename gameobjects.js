@@ -310,18 +310,30 @@ class Unit{
 			
 			case commandTypes.move:
 				this.executeMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
+				if (this.army == armies.blue){
+					audioHandler.playAudioGroup('move', true);
+				}
 				break;
 			
 			case commandTypes.attackmove:
 				this.executeAttackMoveOrder({x: order.x, y: order.y}, order.angle, order.target);
+				if (this.army == armies.blue){
+					audioHandler.playAudioGroup('attackmove', true);
+				}
 				break;
 			
 			case commandTypes.fallback:
 				this.executeMoveOrder({x: order.x, y: order.y});
+				if (this.army == armies.blue){
+					audioHandler.playAudioGroup('fallback', true);
+				}
 				break;
 			
 			case commandTypes.retreat:
-				this.executeRetreatOrder();	
+				this.executeRetreatOrder();
+				if (this.army == armies.blue){
+					audioHandler.playAudioGroup('fallback', true);
+				}
 				break;
 		}
 	}
@@ -1191,6 +1203,9 @@ class General extends AuxiliaryUnit{
 		}
 		this.path = Pathfinder.findPath(this.x, this.y, order.x, order.y, this);
 		this.getNextWaypoint();
+		if (this.targetPosition != null){
+			audioHandler.playAudioGroup('move', true);
+		}
 	}
 
 	update(dt){

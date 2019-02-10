@@ -17,7 +17,7 @@ function loopMainTitle(){
     howToHighLighted = beginHighlighted = false;
     if (hasInteracted && !startedAudio){
         startedAudio = true;
-        audioHandler.crossFadeLoopAudioGroup('ambient', false, 0, .5, 5000);
+        audioHandler.crossFadeLoopAudioGroup('ambient', false, 0, .35, 5000);
     }
     if (CollisionEngine.pointInAABB(mouseX, mouseY, howToHitBox.xMin, howToHitBox.xMax, howToHitBox.yMin, howToHitBox.yMax)){
         howToHighLighted = true;
