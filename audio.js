@@ -96,9 +96,15 @@ class AudioHandler {
         this.initializePool('assets/audio/cannonfire/cannon3.ogg', 3, 0.1, 'cannon3');
         this.initializePool('assets/audio/mouse/click.ogg', 3, 0.3, 'click1');
         this.initializePool('assets/audio/ambient/farm.ogg', 2, 0, 'farm');
+        this.initializePool('assets/audio/orders/attackmove.ogg', 1, 0.2, 'attackmove');
+        this.initializePool('assets/audio/orders/fallback1.ogg', 1, 0.2, 'fallback1');
+        this.initializePool('assets/audio/orders/fallback2.ogg', 1, 0.2, 'fallback2');
+        this.initializePool('assets/audio/orders/move1.ogg', 1, 0.2, 'move1');
+        this.initializePool('assets/audio/orders/move2.ogg', 1, 0.2, 'move2');
+        this.initializePool('assets/audio/orders/move3.ogg', 1, 0.2, 'move3');
     }
     initializeAudioGroups(){
-        var skirmishDict, battleDict, artilleryDict, clickDict, ambientDict;
+        var skirmishDict, battleDict, artilleryDict, clickDict, ambientDict, attackmoveDict, moveDict, fallbackDict;
         
         skirmishDict = {
             rifle1  : 1,
@@ -133,11 +139,27 @@ class AudioHandler {
         ambientDict = {
             farm: 1
         }
+        attackmoveDict = {
+            attackmove: 1
+        }
+        moveDict = {
+            move1: 1,
+            move2: 1,
+            move3: 1
+        }
+        fallbackDict = {
+            fallback1: 1,
+            fallback2: 1
+        }
+
         this.initializeAudioGroup('skirmish', 1, skirmishDict);
         this.initializeAudioGroup('battle', 1, battleDict);
         this.initializeAudioGroup('artillery', 0.75, artilleryDict);
         this.initializeAudioGroup('click', 0.5, clickDict);
         this.initializeAudioGroup('ambient', 1, ambientDict);
+        this.initializeAudioGroup('move', 0.5, moveDict);
+        this.initializeAudioGroup('attackmove', 0.5, attackmoveDict);
+        this.initializeAudioGroup('fallback', 0.5, fallbackDict);
     }
 
     initializePool(clip, count, pitchVariance, id){
