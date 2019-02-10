@@ -185,6 +185,7 @@ class SceneHandler {
 
         commandHandler = null;
         mouseOrderButtons = null;
+        courierCountIcon = null;
     }
 
     endHowToScene(){
@@ -208,6 +209,7 @@ class SceneHandler {
 
         commandHandler = null;
         mouseOrderButtons = null;
+        courierCountIcon = null;
         tutorialArrowLeft = null;
         tutorialArrowRight = null;
         tutorialSceneCount = null;
@@ -292,6 +294,7 @@ function initializePlayableState(board, mainGame){
     hoverHealth = new HoverHealth(40, 5, 2, crimsonAlpha, grayAlpha);
     activeHealth = new ActiveHealth(40, 5, 2, greenAlpha, grayAlpha);
     mouseOrderButtons = new MouseOrderButtons(canvas.width / 2, canvas.height - 50, 52, 52, 15);
+    courierCountIcon = new CourierCountIcon(canvas.width / 2  - 125, canvas.height - 30);
     commandHandler = new CommandHandler();
 
     gameBoard = new GameBoard(30,40, board);

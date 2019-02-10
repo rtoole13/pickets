@@ -166,6 +166,29 @@ class MouseOrderButton extends CanvasButton {
     }
 }
 
+class CourierCountIcon {
+    constructor(centerX, centerY){
+        this.x = centerX;
+        this.y = centerY;
+        this.spriteSheet = new SpriteSheet(icon_courierCount, centerX, centerY, 52, 52, 5, 1, 1, false, true, 0.55);
+    }
+
+    draw(){
+        canvasContext.save();
+        canvasContext.translate(this.x, this.y);
+        this.spriteSheet.move(0,0);
+        this.spriteSheet.draw();
+        canvasContext.restore();
+
+        canvasContext.save();
+        canvasContext.fillStyle = "black";
+        canvasContext.font = '24px IM Fell English SC';
+        canvasContext.textAlign = 'center';
+        canvasContext.fillText(String(playerGeneral.courierCount), this.x, this.y + 5);
+        canvasContext.restore();
+    }
+}
+
 class TutorialArrow extends CanvasButton{
     constructor(centerX, centerY, width, height, arrowLeft){
         super(centerX, centerY, width, height);

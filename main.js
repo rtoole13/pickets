@@ -22,6 +22,7 @@ var canvas,
     commandHandler,
     muteButton,
     mouseOrderButtons,
+    courierCountIcon,
     hasInteracted = false,
     startedAudio = false;
 

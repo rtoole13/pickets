@@ -12,7 +12,8 @@ var blue_infantry,
 	tutorial_arrow_right,
 	command_move,
 	command_attackmove,
-	command_fallback;
+	command_fallback,
+	icon_courierCount;
 
 class SpriteSheet {
 	constructor(image, x, y, frameWidth, frameHeight, frameRate, rows, columns, randomFrames, loopAnimation, scale){
@@ -869,6 +870,9 @@ function initializeSpriteSheets(){
 
 	command_fallback = new Image(52, 52);
 	command_fallback.src = 'assets/icon_fallback.svg';
+
+	icon_courierCount = new Image(52, 52);
+	icon_courierCount.src = 'assets/icon_couriercount.svg';
 }
 
 function initializeSpriteSheet(unit){
@@ -924,6 +928,7 @@ function drawHUD(){
 	hoverHealth.draw();
 	muteButton.draw();
 	mouseOrderButtons.draw();
+	courierCountIcon.draw();
 }
 
 function drawAnimations(dt){
