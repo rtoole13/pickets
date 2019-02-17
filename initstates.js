@@ -201,7 +201,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		this.addToUndead(infA, true, 3000, 100);
 		this.addToUndead(infB, true, 3000, 100);
 		this.addToUndead(infC, true, 3000, 100);
-		this.addToUndead(infD, false, 3000, 200);
+		this.addToUndead(infD, false, 3000, 300);
 	}
 
 	initializeGoals(){
@@ -217,8 +217,8 @@ class TutorialTwoBoard extends TutorialBoard {
 			enemyGeneral.courierCooldown.shortTimer();
 			enemyGeneral.issueCommand(enemyInf, command);
 		};
+		this.goals.add(new ClickGoal('Press <R> at any point to restart the current tutorial,<br> or use the arrows to navigate between tutorials.', undefined));
 		this.goals.add(new ClickGoal('Tutorial Two: Courier interception.', enemyFallBackCallback));
-
 		eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
 		eventOverrides.addListener('window', "mousedown", null);
@@ -280,15 +280,103 @@ class TutorialThreeBoard extends TutorialBoard {
 
 	addUnits(){
 		//fallback and artillery tutorial
-		//have a unit fallback to friendly lines, then attack enemy with artillery
-		addPlayerGeneral(550, 450, 45, 10);
+		//your units nearly surround an enemy unit
+		//have a unit reroute to intercept a courier being sent by enemy general
+		var infA, infB, infC, infD, infE, infF, artA, artB, unitB, unitC, unitD, unitF, artUnitA, artUnitB;
+		infA = 'INFA';
+		infB = 'INFB';
+		infC = 'INFC';
+		infD = 'INFD';
+		infE = 'INFE';
+		infF = 'INFF';
+		artA = 'ARTA';
+		artB = 'ARTB';
+
+		addPlayerGeneral(205, 460, 45, 10);
+		addPlayerInfantry(240, 380, 45, "Brigade", infA);
+		unitB = addPlayerInfantry(330, 360, 45, "Brigade", infB);
+		artUnitA = addPlayerArtillery(100, 315, 45, "Brigade", artA);
+
 		addEnemyGeneral(650, 150, -135, 10, false);
+		unitC = addEnemyInfantry(335, 235, -115, "Brigade", infC);
+		unitD = addEnemyInfantry(435, 285, -135, "Brigade", infD);
+		unitF = addEnemyInfantry(445, 395, -170, "Brigade", infF);
+		artUnitB = addEnemyArtillery(465, 215, -135, "Brigade", artB);
+
+		this.addToUndead(infA, true, 3000, 200);
+		this.addToUndead(infB, true, 3000, 200);
+		this.addToUndead(artA, true, 3000, 200);
+		this.addToUndead(infC, false, 3000, 300);
+		this.addToUndead(infD, false, 3000, 200);
+		this.addToUndead(artB, false, 3000, 200);
+		
 	}
 
 	initializeGoals(){
+		this.goals.add(new ClickGoal('Press <R> at any point to restart the current tutorial,<br> or use the arrows to navigate between tutorials.', undefined));
+		
+		var enemyAttackCallback = function(){
+			var enemyC, enemyD, enemyF, enemyArt, friendly, command;
+			enemyC = enemyInfantryList['INFC'];
+			enemyD = enemyInfantryList['INFD'];
+			enemyF = enemyInfantryList['INFF'];
+			enemyArt = enemyArtilleryList['ARTB'];
+			friendly = playerInfantryList['INFB'];
+
+			command = {type: commandTypes.attackmove, target: friendly, x: friendly.x, y: friendly.y, angle: null, date: Date.now()};
+			enemyC.updateCommand(command);
+			enemyD.updateCommand(command);
+			enemyF.updateCommand(command);
+			enemyArt.updateCommand({type: commandTypes.move, target: friendly, x: friendly.x, y: friendly.y, angle: null, date: Date.now()});
+		}
+		this.goals.add(new ClickGoal('Tutorial Three: Artillery and falling back.', enemyAttackCallback));
+		
+		var eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressFallbackOnly);
+		eventOverrides.addListener('window', "mousedown", null);
+		
+		this.goals.add(new DurationGoal('The enemy is surrounding your forward infantry!', 4000, undefined, eventOverrides));
+		this.goals.add(new ClickGoal('Once engaged in battle, a unit won\'t break off <br> unless ordered to fall back.', undefined));
+		
+		var eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressFallbackOnly);
+
+		var secondEnemyAttackCallback = function(){
+			var enemyC, enemyD, enemyF, enemyArt, friendlyA, friendlyB, commandStack;
+			enemyC = enemyInfantryList['INFC'];
+			enemyD = enemyInfantryList['INFD'];
+			enemyF = enemyInfantryList['INFF'];
+			enemyArt = enemyArtilleryList['ARTB'];
+			friendlyA = playerInfantryList['INFA'];
+			friendlyB = playerInfantryList['INFB'];
+
+			enemyC.updateCommand({type: commandTypes.attackmove, target: friendlyA, x: friendlyA.x, y: friendlyA.y, angle: null, date: Date.now()});
+			enemyD.updateCommand({type: commandTypes.attackmove, target: friendlyB, x: friendlyB.x, y: friendlyB.y, angle: null, date: Date.now()});
+			
+			commandStack = [];
+			commandStack.push({type: commandTypes.attackmove, target: null, x: 320, y: 450, angle: null, date: Date.now()});
+			commandStack.push({type: commandTypes.attackmove, target: friendlyB, x: friendlyB.x, y: friendlyB.y, angle: null, date: Date.now()});
+			enemyF.updateCommand(commandStack);
+
+			enemyArt.updateCommand({type: commandTypes.attackmove, target: friendlyB, x: friendlyB.x, y: friendlyB.y, angle: null, date: Date.now()});
+
+		}
+		this.goals.add(new MoveTargetToLocationGoal('Order your infantry to fall back.', 'INFB', {x:280, y:420}, null, 25, {xMin: 0, xMax: 350, yMin: 330, yMax: canvas.height}, secondEnemyAttackCallback, eventOverrides));
+		this.goals.add(new ClickGoal('You can see artillery ranges by holding <Space>.', undefined));
+		this.goals.add(new ClickGoal('Targets in the yellow section may be targeting with sphere shot, <br> and targets in the red with cannister shot.', undefined));
+		this.goals.add(new ClickGoal('Cannister shot can be fired at a faster rate and deals more damage.', undefined));
+		this.goals.add(new ClickGoal('If a friendly unit is blocking a direct line to the enemy, <br> cannister shot can\'t be used.', undefined));
+		this.goals.add(new ClickGoal('Despite being in cannister range now, the enemy artillery must <br> fire over its allies with sphere shot.', undefined));
+		
 		var eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
-		this.goals.add(new ClickGoal('Tutorial Three: Artillery and falling back.', undefined));
+		this.goals.add(new MoveTargetToLocationGoal('Position your artillery to fire on the enemy\'s flank.', 'ARTA', {x:170, y:245}, {x:0.5, y:0.5}, 25, null, undefined, eventOverrides));
+		this.goals.add(new ClickGoal('Artillery will automatically fire on enemies in range.', undefined));
+		this.goals.add(new ClickGoal('Furthermore, maximum damage is dealt when firing on a flank.', undefined));
+
+		this.goals.add(new BattleTargetGoal('Order your artillery into cannister range by issuing an attack order!', 'ARTA', 'INFC', undefined, undefined));
+		this.goals.add(new ClickGoal('Your artillery\'s now dealing tremendous damage by both hitting <br> the enemy\'s flank and by using cannister shot.', undefined));
+		this.goals.add(new ClickGoal('Congratulations! You completed the third tutorial.', undefined));
 		this.beginGoals();
 	}
 }

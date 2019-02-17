@@ -206,6 +206,11 @@ class EventHandler {
                 mouseOrderButtons.setAttackmoveState(true);
                 mouseOrderButtons.setFallbackState(false);
             }
+            else if (eventData.callback == handleKeyPressFallbackOnly){
+                mouseOrderButtons.setMoveState(false);
+                mouseOrderButtons.setAttackmoveState(false);
+                mouseOrderButtons.setFallbackState(true);
+            }
             else if (eventData.callback == handleClickToContinue){
                 mouseOrderButtons.setMoveState(false);
                 mouseOrderButtons.setAttackmoveState(false);

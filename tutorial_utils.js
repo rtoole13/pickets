@@ -307,6 +307,34 @@ function handleKeyPressMoveOnly(e){
     }
 }
 
+function handleKeyPressFallbackOnly(e){
+    var keyCode = e.keyCode;
+    commandHandler.setCommand(commandTypes.fallback);
+    switch (keyCode){
+        case 27:
+            //Escape
+            if (activeUnit != undefined){
+                activeUnit = undefined;
+            }
+            commandHandler.setCommand(commandTypes.fallback);
+            break;
+        case 32:
+            //Space
+            displayingCommandRadii = true;
+            break;
+        case 16:
+            //Shift
+            queuingOrders = true;
+            break;
+        case 82:
+            //R
+            restartTutorialScene();
+            break;
+        default:
+            return;
+    }
+}
+
 function limitMoveGoalActiveRegion(eventOverrides){
     //only allow orders to be issued within activeArea
     //return eventOverrides;

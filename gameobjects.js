@@ -62,7 +62,7 @@ class GameBoard{
 			enemyInfantryList[id].update(dt);
 		}
 		for (var id in enemyArtilleryList){
-			enemyCavalryList[id].update(dt);
+			enemyArtilleryList[id].update(dt);
 		}
 
 		//Clear retreat list
