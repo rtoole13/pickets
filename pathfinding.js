@@ -57,7 +57,7 @@ class Pathfinder{
 	}
 
 	static findCourierPathToGeneral(startX, startY, targetX, targetY, currentUnit, ignoreList){
-		var path = this.findPath(startX, startY, targetNode.x, targetNode.y, currentUnit, ignoreList);
+		var path = this.findPath(startX, startY, targetX, targetY, currentUnit, ignoreList);
 		if (path.length < 1) {
 			ignoreList = ignoreList.concat(currentUnit.enemyList);
 			path = this.findPath(startX, startY, targetX, targetY, currentUnit, ignoreList);
@@ -72,7 +72,6 @@ class Pathfinder{
 			path.push(currentNode);
 			currentNode = currentNode.parent;
 		}
-		//path.push(startNode);
 		path.reverse();
 		gameBoard.grid.pathOrig = path;
 		path = this.simplifyPath(path, targetX, targetY);
@@ -238,7 +237,7 @@ class Grid{
 				continue;
 			}
 			if (unit.command != null) continue; //unit is moving
-			this.getAllNodesInRadius(unit.x, unit.y, 2 * unit.combatRadius, true);
+			this.getAllNodesInRadius(unit.x, unit.y, 1.6 * unit.combatRadius, true);
 		}
 		if (currentUnit.unitType == unitTypes.courier){
 			var targetNode = this.getNodeFromLocation(currentUnit.target.x, currentUnit.target.y);
@@ -254,7 +253,7 @@ class Grid{
 					continue;
 				}
 				if (unit.command != null) continue; //unit is moving
-				this.getAllNodesInRadius(unit.x, unit.y, 2 * unit.combatRadius, true);
+				this.getAllNodesInRadius(unit.x, unit.y, 1.5 * unit.combatRadius, true);
 			}
 		}
 	}
@@ -262,6 +261,7 @@ class Grid{
 	reset(){
 		for (var i = 0; i < this.passableElem.length; i++){
 			this.passableElem[i].walkable = true;
+			this.passableElem[i].test = false;
 		}
 	}
 
@@ -301,8 +301,8 @@ class Grid{
 		rootNode = this.getNodeFromLocation(x, y);
 		nodes.push(rootNode);
 
-		xExtent = Math.floor(radius / this.gridSpacing.x);
-		yExtent = Math.floor(radius / this.gridSpacing.y);
+		xExtent = Math.ceil(radius / this.gridSpacing.x);
+		yExtent = Math.ceil(radius / this.gridSpacing.y);
 		for (var i = -xExtent; i <= xExtent; i++){
 			for (var j = -yExtent; j <= yExtent; j++){
 				var checkX = rootNode.indX + i;
@@ -314,7 +314,6 @@ class Grid{
 					if (getDistanceSq(x, y, elem.x, elem.y) <= radiusSq){
 						if (setUnwalkable){
 							elem.walkable = false;
-							elem.test = true;	
 						}
 						nodes.push(elem);
 					}

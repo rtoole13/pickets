@@ -161,7 +161,7 @@ class TutorialOneBoard extends TutorialBoard {
 		this.goals.add(new ClickGoal('Notice that your general had to issue the order by courier, as your<br>infantry unit was outside of your general\'s command radius.', undefined));
 		this.goals.add(new ClickGoal('You can specify a unit\'s angle while issuing an order<br> by holding right click and dragging.', undefined));
 		this.goals.add(new MoveTargetToLocationGoal('Move your infantry here and rotate to the angle indicated by the arrow.', infantryID, {x:300, y:350}, {x:0, y:1}, 25, {xMin: 0, xMax: 350, yMin: 0, yMax: canvas.height}, undefined, eventOverrides));
-		this.goals.add(new MoveTargetToLocationGoal('Now rotate to face the enemy!', infantryID, {x:300, y:350}, {x:0.79, y:-0.6}, 25, null, undefined, eventOverrides));
+		this.goals.add(new MoveTargetToLocationGoal('Now rotate to face the enemy!', infantryID, {x:300, y:350}, {x:0.79, y:-0.6}, 25, {xMin: 0, xMax: 350, yMin: 0, yMax: canvas.height}, undefined, eventOverrides));
 		
 		var enemyFallBackCallback = function(){
 			var enemyInf = enemyInfantryList[enemyInfantryID];
@@ -193,7 +193,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		addEnemyGeneral(650, 150, -135, 10, false);
 		addPlayerInfantry(375, 250, 0, "Brigade", infA);
 		unitB = addPlayerInfantry(410, 430, 90, "Brigade", infB);
-		addPlayerInfantry(375, 170, 0, "Brigade", infC);
+		addPlayerInfantry(410, 170, 0, "Brigade", infC);
 		unitD = addEnemyInfantry(415, 365, -135, "Brigade", infD);
 		
 		unitB.updateCommand({type: commandTypes.attackmove, target: unitD, x: unitD.x, y: unitD.y, angle: null, date: Date.now()});
@@ -201,7 +201,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		this.addToUndead(infA, true, 3000, 100);
 		this.addToUndead(infB, true, 3000, 100);
 		this.addToUndead(infC, true, 3000, 100);
-		this.addToUndead(infD, false, 3000, 100);
+		this.addToUndead(infD, false, 3000, 200);
 	}
 
 	initializeGoals(){
@@ -233,7 +233,8 @@ class TutorialTwoBoard extends TutorialBoard {
 			friendly = playerInfantryList[playerInfB];
 			enemy = enemyInfantryList[enemyInf];
 			commandStack = [];
-			commandStack.push({type: commandTypes.move, target: null, x: 470, y: 390, angle: null, date: Date.now()});
+			commandStack.push({type: commandTypes.move, target: null, x: 480, y: 395, angle: null, date: Date.now()});
+			commandStack.push({type: commandTypes.move, target: null, x: 500, y: 365, angle: null, date: Date.now()});
 			commandStack.push({type: commandTypes.attackmove, target: enemy, x: enemy.x, y: enemy.y, angle: null, date: Date.now()});
 			playerGeneral.courierCooldown.shortTimer();
 			playerGeneral.issueCommand(friendly, commandStack);
@@ -246,11 +247,28 @@ class TutorialTwoBoard extends TutorialBoard {
 
 		eventOverrides = new CustomEventListenerSet();
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
-		this.goals.add(new MoveTargetToLocationGoal('Move your idle infanty unit to the indicated position.', playerInfC, {x:550, y:260}, null, 25, {xMin: 500, xMax: 600, yMin: 200, yMax: 300}, undefined, eventOverrides));
-		/*
-		this.goals.add(new MoveTargetToLocationGoal('While it\s selected, move your free unit to the <br>location marked by the green circle by right clicking!', 
-													playerInf, {x:675, y:375}, null, 25, null, undefined, eventOverrides));
-		*/
+
+		this.goals.add(new MoveTargetToLocationGoal('Move your idle infanty unit to the indicated position.', playerInfC, {x:540, y:250}, null, 25, {xMin: 400, xMax: canvas.width, yMin: 0, yMax: 275}, undefined, eventOverrides));
+		
+		var enemyIssueCommand = function() {
+			var command = {type: commandTypes.fallback, target: null, x: 300, y: 600, angle: null, date: Date.now()};
+			enemyGeneral.courierCooldown.shortTimer();
+			enemyGeneral.issueCommand(enemyInf, command);
+		}
+
+		this.goals.add(new BattleTargetGoal('Now order that unit to attack the infantry!', playerInfC, enemyInf, enemyIssueCommand, undefined));
+		
+		eventOverrides = new CustomEventListenerSet();
+		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
+		eventOverrides.addListener('window', "mousedown", null);
+
+		this.goals.add(new DurationGoal('Note the difficulty the enemy courier <br> faces reaching its target.', 3000, enemyIssueCommand, eventOverrides));
+		this.goals.add(new DurationGoal('Note the difficulty the enemy courier <br> faces reaching its target.', 3000, enemyIssueCommand, eventOverrides));
+		this.goals.add(new DurationGoal('Even if it manages to deliver it\'s order, <br> capture is likely.', 5000, enemyIssueCommand, eventOverrides));
+		this.goals.add(new ClickGoal('Your courier count is displayed to the left of your command buttons.', undefined ));
+		this.goals.add(new ClickGoal('Captured couriers are removed from your available pool.', undefined ));
+		this.goals.add(new ClickGoal('Whether couriers are able to return or are captured, <br> the available pool replenishes over time.', undefined ));
+		this.goals.add(new ClickGoal('Congratulations! You completed the second tutorial.', undefined));
 		this.beginGoals();
 	}
 }

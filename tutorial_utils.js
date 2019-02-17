@@ -312,12 +312,14 @@ function limitMoveGoalActiveRegion(eventOverrides){
     //return eventOverrides;
     var newOverride = new CustomEventListenerSet();
     newOverride.copy(eventOverrides);
+    
     if ("mousedown" in newOverride.data){
         throw "A \'mousedown\' event override has already been specified!"
     }
     else{
         newOverride.addListener('window', "mousedown", handleGoalSpecificMouseDown);
     }
+
     if ("contextmenu" in newOverride.data){
         throw "A \'contextmenu\' event override has already been specified!"
     }

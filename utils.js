@@ -182,7 +182,6 @@ class EventHandler {
 
     handleEventOverrides(eventOverrides){
         if (eventOverrides == undefined){
-            console.log('wee')
             mouseOrderButtons.setMoveState(true);
             mouseOrderButtons.setAttackmoveState(true);
             mouseOrderButtons.setFallbackState(true);

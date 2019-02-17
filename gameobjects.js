@@ -395,6 +395,7 @@ class CombatUnit extends Unit{
 		super(x, y, angle, army);
 		this.element = element;
 		this.maxStrength =	initializeInfantryElement(this.element);
+		this.courierCaptureRadius = 18;
 		this.invMaxStrength = 1 / this.maxStrength;
 		this.strength = this.maxStrength;
 		this.retreatThreshold = 0.25; //Currently just checking relative strength
@@ -637,6 +638,7 @@ class InfantryUnit extends CombatUnit{
 		this.multiplierCombat = 6/500;
 		this.multiplierSkirmish = 6/3000;
 		this.flankedModifier = 1.5;
+		this.courierCaptureRadius = 18;
 		this.combatRadius = 22;
 		this.skirmishRadius = 65;
 		this.state = unitStates.braced;
@@ -1254,6 +1256,9 @@ class Courier extends AuxiliaryUnit{
 		this.order = order;
 		this.orderRange = 25;
 		this.closingRange = 100;
+		this.isClosing = false;
+		this.closingTimer = new Timer(1000, true);
+		this.closingTimer.shortTimer();
 		this.targetSigma = 15;
 		this.turnAngleTol = 60;
 		this.rotationRate = 120;
@@ -1279,8 +1284,17 @@ class Courier extends AuxiliaryUnit{
 			return;
 		}
 		else if (this.deliveryDistance < this.closingRange){
-			this.path = [];
-			this.targetPosition = {x: this.target.x, y: this.target.y};
+			if (!this.isClosing){
+				if (this.closingTimer.checkTime() && !anyAlongRay(this.x, this.y, this.target.x, this.target.y, this.enemyList, [], this)){
+					this.isClosing = true;
+					this.updateRouteTimer = this.closingTimer;
+				}
+			}
+			else{
+				this.path = [];
+				this.targetPosition = {x: this.target.x, y: this.target.y};
+			}
+			
 		}
 		super.update(dt);
 	}
@@ -1305,6 +1319,8 @@ class Courier extends AuxiliaryUnit{
 		if (success){
 			this.target.updateCommand(this.order, false);
 		}
+		this.updateRouteTimer = new Timer(2000, true);
+		this.updateRouteTimer.shortTimer();
 		this.returning = true;
 		this.target = this.general;
 		this.faceTarget();

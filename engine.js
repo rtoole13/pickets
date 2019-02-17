@@ -422,7 +422,7 @@ class CollisionEngine{
 		}
 
 		radiusA = unitAux.combatRadius;
-		radiusB = unitOther.combatRadius;
+		radiusB = unitOther.courierCaptureRadius;
 
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return;
@@ -742,11 +742,13 @@ function getMidpoint(xA, yA, xB, yB){
 	return {x: xA + ((xB - xA) / 2), y: yA + ((yB - yA) / 2)}
 }
 
-function anyAlongRay(xA, yA, xB, yB, unitDict, ignoreList){
+function anyAlongRay(xA, yA, xB, yB, unitDict, ignoreList, thisUnit){
 	//Give a ray origin (xA, yA) and terminating location (xB, yB),
 	//return true if any on ray, else false.
 	//ignore ids in ignoreList
-	var id, unit, vecA, vecB, perpA, perpDist;
+	//if thisUnit provided, check perpDist against unit.combatRadius + thisUnit.combatRadius
+
+	var id, unit, vecA, vecB, perpA, perpDist, perpLimit;
 	vecB = {x: xB - xA, y: yB - yA};
 	for (var id in unitDict){
 		if (ignoreList.includes(id)){
@@ -760,7 +762,14 @@ function anyAlongRay(xA, yA, xB, yB, unitDict, ignoreList){
 			continue;
 		}
 		perpDist = getVectorMag(perpA.x, perpA.y);
-		if (perpDist < unit.combatRadius){
+		
+		if (thisUnit != undefined){
+			perpLimit = thisUnit.combatRadius + unit.combatRadius;
+		}
+		else{
+			perpLimit = unit.combatRadius;
+		}
+		if (perpDist < perpLimit){
 			return true;
 		}
 	}
