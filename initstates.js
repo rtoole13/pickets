@@ -19,16 +19,24 @@ class MainBoard extends BoardPreset{
 	}
 
 	addUnits(){
-		addPlayerGeneral(550, 450, 45, 10);
-		addEnemyGeneral(450, 200, -135, 10, true);
+		addPlayerGeneral(100, 350, 0, 5);
+		addPlayerInfantry(140, 130, 0, "Brigade");
+		addPlayerInfantry(140, 310, 30, "Brigade");
+		addPlayerInfantry(200, 310, 30, "Brigade");
+		addPlayerInfantry(230, 370, 30, "Brigade");
+		
+		addPlayerArtillery(100, 75, 0, "Brigade");
+		addPlayerArtillery(170, 410, 30, "Brigade");
 
-		addPlayerArtillery(600, 400, 0, "Brigade");
-		addPlayerInfantry(500, 360, -135, "Brigade");
-		//addPlayerInfantry(600, 400, 0, "Brigade");
-		//addPlayerInfantry(400, 400, 0, "Brigade");
+		addEnemyGeneral(610, 200, 0, 5, true);
+		addEnemyInfantry(520, 260, -180, "Brigade");
+		addEnemyInfantry(510, 200, -165, "Brigade");
 
-		addEnemyInfantry(500, 260, -135, "Brigade");
-		addEnemyInfantry(200, 200, -135, "Brigade");
+		addEnemyInfantry(600, 360, -180, "Brigade");
+		addEnemyInfantry(610, 430, -100, "Brigade");
+
+		addEnemyArtillery(475, 110, -180, "Brigade");
+		addEnemyArtillery(630, 260, 178, "Brigade");
 	}	
 }
 

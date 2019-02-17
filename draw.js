@@ -322,6 +322,9 @@ class BattleAnimation extends Animation {
 			var unit = unitList[this.unitID];
 			for (var i = 0; i < this.targets.length; i++){
 				var target = unit.enemyList[this.targets[i]];
+				if (target == undefined){
+					continue;
+				}
 				var dist = getDistance(unit.x, unit.y, target.x, target.y);
 				var dir = {x: (unit.x - target.x) / dist, y: (unit.y - target.y) / dist}; //from target to unit
 				for (var j = 0; j < this.circlesPerUnitPerFrame; j++){	
@@ -383,6 +386,9 @@ class SkirmishAnimation extends Animation {
 			var unit = unitList[this.unitID];
 			for (var i = 0; i < this.targets.length; i++){
 				var target = unit.enemyList[this.targets[i]];
+				if (target == undefined){
+					continue;
+				}
 				var dist = getDistance(unit.x, unit.y, target.x, target.y);
 				var dir = {x: (target.x - unit.x) / dist, y: (target.y - unit.y) / dist};
 				var maxDist = dist - 20; 
