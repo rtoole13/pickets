@@ -320,6 +320,9 @@ class BattleAnimation extends Animation {
 			//iterate over targets and create circles at positions on the combat radius +/- a dist of each target within +/- angle variance from each line drawn
 			//from this unit to each target.
 			var unit = unitList[this.unitID];
+			if (unit == undefined){
+				return;
+			}
 			for (var i = 0; i < this.targets.length; i++){
 				var target = unit.enemyList[this.targets[i]];
 				if (target == undefined){
@@ -384,6 +387,9 @@ class SkirmishAnimation extends Animation {
 			//locations between each target and this unit
 			//draw circles
 			var unit = unitList[this.unitID];
+			if (unit == undefined){
+				return;
+			}
 			for (var i = 0; i < this.targets.length; i++){
 				var target = unit.enemyList[this.targets[i]];
 				if (target == undefined){
