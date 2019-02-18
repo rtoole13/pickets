@@ -28,12 +28,13 @@ class EnemyGeneral extends General{
 
     }
     update(dt){
-        if (this.smart){
+        if (this.smart && gameBoard.unitTerminationList.length == 0){
             this.executeStateLogic();
         }
         super.update(dt);
         this.nearbyEnemies = [];
         this.nearbyFriendlies = [];
+        this.routingFriendlies = [];
         this.freeFriendlies = [];
         this.skirmishingFriendlies = [];
         this.battlingFriendlies = [];
