@@ -8,7 +8,7 @@ class EnemyGeneral extends General{
         this.panicRadius = 75;
         this.AIcontrolled = true;
         this.riskAssessment = {};
-        this.riskThreshold = 8;
+        this.riskThreshold = 7;
         this.nearbyEnemies = [];
         this.nearbyFriendlies = [];
         this.routingFriendlies = [];
@@ -19,13 +19,14 @@ class EnemyGeneral extends General{
         this.flankedRiskMultiplier = 3;
         this.battleRiskMultiplier = 2;
         this.recentAssistFactor = 3;
+        this.artilleryRiskFactor = 5;
         this.stateChangeTimer = new Timer(500, true);
         this.stateChangeTimer.start();
         this.AIstates = enemyGenStates; //global enum surviving, rallying, commanding
         this.currentState = this.AIstates.commanding;
         this.recentlyAssistedUnitID = '';
         this.smart = smart;
-
+        this.defendingAI = false;
     }
     update(dt){
         if (this.smart && gameBoard.unitTerminationList.length == 0){
@@ -42,15 +43,15 @@ class EnemyGeneral extends General{
     }
     issueCommand(target, command){
         if (typeof(target)=='string'){
-            target = enemyInfantryList[target];
+            target = enemyCombatUnitList[target];
         }
         super.issueCommand(target, command);
     }
 
     evaluateBoard(){
         //due to awkward structure, cant pre-populate these lists in the broadCollisionCheck in the main game loop
-        for(var id in enemyInfantryList){
-            var unit = enemyInfantryList[id];
+        for(var id in enemyCombatUnitList){
+            var unit = enemyCombatUnitList[id];
 
             //track risk value of all friendlies
             this.riskAssessment[id] = this.calculateUnitRisk(unit, id);
@@ -80,18 +81,22 @@ class EnemyGeneral extends General{
                 this.freeFriendlies.push(id);
             }
         }
-        this.nearbyNotBattlingFriendlies = sortListByDistToPoint(this.x, this.y, this.nearbyNotBattlingFriendlies, enemyInfantryList);
-        this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyInfantryList);
-        this.battlingFriendlies = sortListByDistToPoint(this.x, this.y, this.battlingFriendlies, enemyInfantryList);   
-        this.skirmishingFriendlies = sortListByDistToPoint(this.x, this.y, this.skirmishingFriendlies, enemyInfantryList);
-        this.freeFriendlies = sortListByDistToPoint(this.x, this.y, this.freeFriendlies, enemyInfantryList);
+        this.nearbyNotBattlingFriendlies = sortListByDistToPoint(this.x, this.y, this.nearbyNotBattlingFriendlies, enemyCombatUnitList);
+        this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyCombatUnitList);
+        this.battlingFriendlies = sortListByDistToPoint(this.x, this.y, this.battlingFriendlies, enemyCombatUnitList);   
+        this.skirmishingFriendlies = sortListByDistToPoint(this.x, this.y, this.skirmishingFriendlies, enemyCombatUnitList);
+        this.freeFriendlies = sortListByDistToPoint(this.x, this.y, this.freeFriendlies, enemyCombatUnitList);
     }
     calculateUnitRisk(unit, id){
-        var risk = unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
+        var artilleryFactor = (unit.isArtillery)? 1 : 0;
+        var risk = (artilleryFactor * this.artilleryRiskFactor) + unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
                    (unit.recentlyFlanked * this.flankedRiskMultiplier);
         if (id == this.recentlyAssistedUnitID){
             //Unit was helped last command, reduce apparent risk.
             risk -= this.recentAssistFactor;
+        }
+        if (unit.isArtillery){  
+            console.log(unit.combatCollisionList.length);
         }
         return risk;
 
@@ -107,7 +112,7 @@ class EnemyGeneral extends General{
         if (this.currentState == this.AIstates.surviving){
             this.stateSurvive();
         }
-        else if (this.currentState == this.AIstates.rallying){
+        else if ((this.currentState == this.AIstates.rallying)){
             this.stateRally();
         }
         else{
@@ -118,7 +123,7 @@ class EnemyGeneral extends General{
         if (this.nearbyEnemies.length > 0){
             //enemies are near! Run (maybe)!
             var centroid = getCentroidAndClosest(this.x, this.y, this.nearbyEnemies, playerUnitList);
-            if (rayCastSegment(this.x, this.y, centroid.centerX, centroid.centerY, 10, this.nearbyFriendlies, enemyInfantryList, false) != null){
+            if (rayCastSegment(this.x, this.y, centroid.centerX, centroid.centerY, 10, this.nearbyFriendlies, enemyCombatUnitList, false) != null){
                 //A friendly is blocking the path
                 console.log('enemyGeneral: a friendly seems to be blocking path to enemy');
                 this.currentState = this.AIstates.rallying;
@@ -130,10 +135,10 @@ class EnemyGeneral extends General{
                 this.moveDirectlyAwayFrom(centroid.closestUnit.x, centroid.closestUnit.y);
                 return;
             }
-            if (this.nearbyNotBattlingFriendlies.length > 0){
+            if (this.nearbyNotBattlingFriendlies.length > 0 && this.canIssueCommand()){
                 //friends are near to help
                 var nearID, potentialAid;
-                potentialAid = sortListByDistToPoint(centroid.centerX, centroid.centerY, this.nearbyNotBattlingFriendlies, enemyInfantryList);
+                potentialAid = sortListByDistToPoint(centroid.centerX, centroid.centerY, this.nearbyNotBattlingFriendlies, enemyCombatUnitList);
                 nearID = potentialAid[0];
                 if (nearID != null){
                     var nearUnit, midpoint;
@@ -165,14 +170,14 @@ class EnemyGeneral extends General{
         //Either way, change state.
     }
     stateRally(){
-        if (this.routingFriendlies.length > 0){
+        if (this.routingFriendlies.length > 0  && this.canIssueCommand()){
             //1) find a routing unit to which path is clear
             //2) route near to that unit if path is available,
             //   else, do nothing and jump to commanding state.
             this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyUnitList);
             for (var i = 0; i < this.routingFriendlies.length; i++){
                 var unit = enemyUnitList[this.routingFriendlies[i]];
-                if (rayCastSegment(this.x, this.y, unit.x, unit.y, 15, this.nearbyEnemies, enemyInfantryList, false) == null){
+                if (rayCastSegment(this.x, this.y, unit.x, unit.y, 15, this.nearbyEnemies, enemyCombatUnitList, false) == null){
                     //Path is relatively free to the routing enemy
                     console.log('enemyGeneral: Path is clear to a routing unit, Moving towards.')
                     this.moveTowardsUnit(unit, this.commandRadius / 2);
@@ -186,6 +191,10 @@ class EnemyGeneral extends General{
         }
     }
     stateCommand(){
+        if (!this.canIssueCommand()){
+            this.currentState = this.AIstates.surviving;
+            return;
+        }
         var unitInNeed = this.getUnitMostAtRisk();
         if (!defendingAI){
             if (unitInNeed != null){
@@ -203,6 +212,7 @@ class EnemyGeneral extends General{
         if (this.freeFriendlies.length > 0){
             //free friendlies
             //this.hailMary(this.freeFriendlies, enemyUnitList);
+
         }
         else if (this.skirmishingFriendlies.length > 0){
             //no free, but some skirmishing.
@@ -228,18 +238,18 @@ class EnemyGeneral extends General{
         var highestRiskValue = 0;
         var mostAtRiskID = null;
         for(var id in this.riskAssessment){
-            if (this.riskAssessment[id] > this.riskThreshold && this.riskAssessment[id] > highestRiskValue){
+            if (this.riskAssessment[id] >= this.riskThreshold && this.riskAssessment[id] > highestRiskValue){
                 highestRiskValue = this.riskAssessment[id];
                 mostAtRiskID = id;
             }
         }
         return mostAtRiskID;
     }
+
     defensiveCommand(unitInNeed){
         if (unitInNeed != null){
             this.sendAssistance(unitInNeed);
         }
-
     }
 
     sendAssistance(unitInNeed){
@@ -252,7 +262,7 @@ class EnemyGeneral extends General{
     }
 
     sendAssistanceFromList(unitInNeed, unitList){
-        var unit = enemyInfantryList[unitInNeed];
+        var unit = enemyCombatUnitList[unitInNeed];
         var ignoreList = [];
         ignoreList.push(unitInNeed);
         var closestFreeUnit = getClosestUnitToPosition(unit.x, unit.y, unitList, ignoreList);
@@ -266,7 +276,7 @@ class EnemyGeneral extends General{
             }
             target = playerInfantryList[targetID];
             console.log('enemyGeneral: Sending a unit to assist another at risk.');
-            this.issueCommandWrapper(enemyInfantryList[closestFreeUnit], commandTypes.attackmove, target, target.x, target.y, false);
+            this.issueCommandWrapper(enemyCombatUnitList[closestFreeUnit], commandTypes.attackmove, target, target.x, target.y, false);
             this.recentlyAssistedUnitID = unitInNeed;
         }
     }

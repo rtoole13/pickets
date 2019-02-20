@@ -394,6 +394,7 @@ class CombatUnit extends Unit{
 	constructor(x, y, angle, element, army){
 		super(x, y, angle, army);
 		this.element = element;
+		this.isArtillery = false;
 		this.maxStrength =	initializeInfantryElement(this.element);
 		this.courierCaptureRadius = 18;
 		this.invMaxStrength = 1 / this.maxStrength;
@@ -815,6 +816,7 @@ class ArtilleryUnit extends CombatUnit {
 	constructor(x, y, angle, element, army) {
 		super(x, y, angle, element, army);
 		this.maxBatteryCount = initializeArtilleryElement(element);
+		this.isArtillery = true;
 		this.gunsPerBattery = 6;
 		this.gunDetachment = 15;
 		this.maxGunCount = this.maxBatteryCount * this.gunsPerBattery; //30
@@ -1218,12 +1220,10 @@ class General extends AuxiliaryUnit{
 	refreshCouriers(){
 		if (this.courierRecharge.checkTime()){
 			this.addCourier();
-
 		}
 	}
 
 	addCourier(){
-
 		if ((this.courierCount + this.issuedCourierCount) < this.maxCourierCount){
 			this.courierCount += 1;
 		}
@@ -1243,6 +1243,16 @@ class General extends AuxiliaryUnit{
 		else{
 			console.log('No couriers available!');
 		}
+	}
+
+	canIssueCommand(){
+		if (this.courierCooldown.checkTime()){
+			//Just want to check. CheckTimer restarts the timer, want to make sure that the next
+			//call to checkTime returns true as well. So, short the timer.
+			this.courierCooldown.shortTimer();
+			return true;
+		}
+		return false;
 	}
 }
 
