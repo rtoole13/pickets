@@ -408,6 +408,10 @@ class CombatUnit extends Unit{
 		this.isSkirmishing = false;
 		this.retreating = false;
 		this.inBattle = false;
+		this.state = unitStates.marching;
+		this.bracedTimer = new Timer(5000, false);
+		this.bracedTimer.start();
+		this.entrenchedTimer = new Timer(5000, false);
 		this.combatTargetProximityTol = 40;
 		this.command = null;
 		this.recentlyFlanked = false;
@@ -445,6 +449,85 @@ class CombatUnit extends Unit{
 
 	attack(){
 		throw 'CombatUnit\'s attack() function currently must be overriden by subclass!';
+	}
+
+	updateState(){
+		if (this.isRotating || this.isMoving){
+			this.state = unitStates.marching;
+			this.spriteSheet.YframeIndex = 2;
+			return;
+		}
+		if (this.state == unitStates.marching){
+			//no longer rotating or moving.
+			this.state = unitStates.exposed;
+			this.spriteSheet.YframeIndex = 2;
+			this.bracedTimer.start();
+		}
+		else if (this.state == unitStates.exposed){
+			if (this.inBattle){
+				//only truly beginning countdown once out of combat.
+				this.bracedTimer.start();
+			}
+			else{
+				if (this.bracedTimer.checkTime()){
+					this.state = unitStates.braced;
+					this.spriteSheet.YframeIndex = 1;
+					this.entrenchedTimer.start();
+				}
+			}
+		}
+		else if (this.state == unitStates.braced){
+			if (this.inBattle){
+				//only truly beginning countdown once out of combat.
+				this.entrenchedTimer.start();
+			}
+			else{
+				if (this.entrenchedTimer.checkTime()){
+					this.state = unitStates.entrenched;
+					this.spriteSheet.YframeIndex = 0;
+				}
+			}
+		}
+		/*
+		else{
+			if (this.state == unitStates.entrenched){
+				this.spriteSheet.YframeIndex = 0;
+				return;
+			}
+			else if (previousState == unitStates.marching){
+				this.state = unitStates.exposed;
+				this.bracedTimer.start();
+				this.spriteSheet.YframeIndex = 2;
+			}
+			else if (previousState == unitStates.exposed){
+				this.state = unitStates.braced;
+				this.entrenchedTimer.start();
+				this.spriteSheet.YframeIndex = 1;
+			}
+			else{
+
+
+
+
+				if (this.inBattle){
+					if (this.state == unitStates.exposed){
+						this.bracedTimer.start();
+					}
+					else{
+						this.bracedTimer.start();	
+					}
+					return;
+				}
+				if (this.bracedTimer.checkTime()){
+					this.state = unitStates.entrenched;
+					this.spriteSheet.YframeIndex = 0;
+				}
+				else{
+					this.state = unitStates.braced;
+					this.spriteSheet.YframeIndex = 1;
+				}
+			}
+		}*/
 	}
 
 	getNextWaypoint(){
@@ -642,9 +725,6 @@ class InfantryUnit extends CombatUnit{
 		this.courierCaptureRadius = 18;
 		this.combatRadius = 22;
 		this.skirmishRadius = 65;
-		this.state = unitStates.braced;
-		this.bracedTimer = new Timer(5000, false);
-		this.bracedTimer.start();
 		this.unitType = unitTypes.infantry;
 		this.spriteSheet = initializeSpriteSheet(this);
 		this.trail = new Trail({x: this.x, y: this.y}, 4, 5, (this.army==armies.blue)?playerColor:enemyColor, 0.5, 0.75, 8000);
@@ -659,39 +739,6 @@ class InfantryUnit extends CombatUnit{
 		this.combatCollisionList = []; //Enemies in combat range this frame 
 		this.skirmishCollisionList = []; //Enemies in skirmish range this frame
 		this.trail.update({x:this.x, y:this.y});
-	}
-
-	updateState(){
-		var previousState = this.state;
-		if (this.isRotating || this.isMoving){
-			this.state = unitStates.marching;
-			this.spriteSheet.YframeIndex = 2;
-		}
-		else{
-			if (this.state == unitStates.entrenched){
-				this.spriteSheet.YframeIndex = 0;
-				return;
-			}
-			else if (previousState == unitStates.marching){
-				this.state = unitStates.braced;
-				this.bracedTimer.start();
-				this.spriteSheet.YframeIndex = 1;
-			}
-			else{
-				if (this.inBattle){
-					this.bracedTimer.start();
-					return;
-				}
-				if (this.bracedTimer.checkTime()){
-					this.state = unitStates.entrenched;
-					this.spriteSheet.YframeIndex = 0;
-				}
-				else{
-					this.state = unitStates.braced;
-					this.spriteSheet.YframeIndex = 1;
-				}
-			}
-		}
 	}
 
 	checkCombatLists(){
@@ -853,9 +900,6 @@ class ArtilleryUnit extends CombatUnit {
 		this.bonusPerFlankDeg     = 1;
 		this.targetFlankRange = 50; //angle from target dir at which flank angle bonus starts
 		this.flankedModifier = 1.5; //this modifies incoming damage.
-		this.state = unitStates.braced;
-		this.bracedTimer = new Timer(5000, false);
-		this.bracedTimer.start();
 		this.spriteSheet = initializeSpriteSheet(this);
 		this.spriteSheet.maxRumbleRadius = 6;
 		this.trail = new Trail({x: this.x, y: this.y}, 4, 5, (this.army==armies.blue)?playerColor:enemyColor, 0.5, 0.75, 8000);
@@ -874,39 +918,6 @@ class ArtilleryUnit extends CombatUnit {
 		this.cannisterCollisionList = []; //Enemies in cannister range this frame 
 		this.sphereShotCollisionList = []; //Enemies in sphere shot range this frame
 		this.trail.update({x:this.x, y:this.y});
-	}
-
-	updateState(){
-		var previousState = this.state;
-		if (this.isRotating || this.isMoving){
-			this.state = unitStates.marching;
-			this.spriteSheet.YframeIndex = 2;
-		}
-		else{
-			if (this.state == unitStates.entrenched){
-				this.spriteSheet.YframeIndex = 0;
-				return;
-			}
-			else if (previousState == unitStates.marching){
-				this.state = unitStates.braced;
-				this.bracedTimer.start();
-				this.spriteSheet.YframeIndex = 1;
-			}
-			else{
-				if (this.inBattle){
-					this.bracedTimer.start();
-					return;
-				}
-				if (this.bracedTimer.checkTime()){
-					this.state = unitStates.entrenched;
-					this.spriteSheet.YframeIndex = 0;
-				}
-				else{
-					this.state = unitStates.braced;
-					this.spriteSheet.YframeIndex = 1;
-				}
-			}
-		}
 	}
 
 	updateFiringTarget(){

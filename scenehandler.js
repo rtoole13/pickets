@@ -273,11 +273,11 @@ function initializePlayableState(board, mainGame){
                                     fallback: hexToRGB(commandColors.fallback, 0.15)});
     targetPosColors  = Object.freeze({move: hexToRGB(commandColors.move, 0.35), attackmove: hexToRGB(commandColors.attackmove, 0.35), 
                                     fallback: hexToRGB(commandColors.fallback, 0.35)});
-    unitTypes        = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5})
-    unitSpeeds       = Object.freeze({infantry:15, general:30, courier:75, artillery:12, cavalry:30})
+    unitTypes        = Object.freeze({infantry:1, general:2, courier:3, artillery:4, cavalry:5});
+    unitSpeeds       = Object.freeze({infantry:15, general:30, courier:75, artillery:12, cavalry:30});
     winConditions    = Object.freeze({generalCaptured:1, unitsRouting:2, unitsCaptured:3})
-    unitStates       = Object.freeze({marching:1, braced:2, entrenched:3});
-    fortifyModifiers = Object.freeze({marching:1.5, braced:1, entrenched:0.8})
+    unitStates       = Object.freeze({marching:1, braced:2, entrenched:3, exposed: 4});
+    fortifyModifiers = Object.freeze({marching:2, braced:1, entrenched:0.8, exposed: 1.5});
     armies           = Object.freeze({blue:1, red:2});
     animationTypes   = Object.freeze({skirmish:1, battle:2, artillery:3});
     tileTypes        = Object.freeze({plain:0, road:1, mountain:2});

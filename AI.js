@@ -95,9 +95,11 @@ class EnemyGeneral extends General{
             //Unit was helped last command, reduce apparent risk.
             risk -= this.recentAssistFactor;
         }
+        /*
         if (unit.isArtillery){  
             console.log(unit.combatCollisionList.length);
         }
+        */
         return risk;
 
     }
