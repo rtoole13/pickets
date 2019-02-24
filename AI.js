@@ -20,6 +20,8 @@ class EnemyGeneral extends General{
         this.battleRiskMultiplier = 2;
         this.recentAssistFactor = 3;
         this.artilleryRiskFactor = 5;
+        this.commandStateRecursionLimit = 3;
+        this.currentCommandStateRecurse = 0;
         this.stateChangeTimer = new Timer(500, true);
         this.stateChangeTimer.start();
         this.AIstates = enemyGenStates; //global enum surviving, rallying, commanding
@@ -27,9 +29,11 @@ class EnemyGeneral extends General{
         this.recentlyAssistedUnitID = '';
         this.smart = smart;
         this.defendingAI = false;
+        this.recentCommands = [];
     }
     update(dt){
         if (this.smart && gameBoard.unitTerminationList.length == 0){
+            //Not operating AI on frames where units are targeted for termination.
             this.executeStateLogic();
         }
         super.update(dt);
@@ -107,6 +111,8 @@ class EnemyGeneral extends General{
 
     }
     executeStateLogic(){
+        this.clearRecentCommands();
+
         //Only change state if timer is up.
         if (!this.stateChangeTimer.checkTime()){
             return;
@@ -213,7 +219,6 @@ class EnemyGeneral extends General{
             this.defensiveCommand(unitInNeed);
         }
         
-        //1) evaluate unit risk
         if (this.freeFriendlies.length > 0){
             //free friendlies
             //this.hailMary(this.freeFriendlies, enemyUnitList);
@@ -341,13 +346,45 @@ class EnemyGeneral extends General{
         this.moveTowardsUnit(nearUnit, this.commandRadius);
     }
 
+    checkRecentCommands(targetFriendly, commandType, targetEnemy, targetX, targetY){
+        //If the intended command is similar to a recent command, refrain from sending, i.e. return true.
+        var targetProximitySq = 1225;
+        for (var i = 0; i < this.recentCommands.length; i++){
+            var commandData = this.recentCommands[i];
+            if (targetFriendly.id == commandData.friendly.id && commandType == commandData.type){
+                if (targetEnemy.id == commandData.target.id){
+                    return true;
+                }
+                if (getDistanceSq(targetX, targetY, commandData.x, commandDate.y) <= targetProximitySq){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    clearRecentCommands(){
+        for (var i = 0; i < this.recentCommands.length; i++){
+            var commandData = this.recentCommands[i];
+            if (commandData.timer.checkTime()){
+                this.recentCommands.splice(i,1);
+            }
+        }
+    }
+
     issueCommandWrapper(targetFriendly, commandType, targetEnemy, targetOriginX, targetOriginY, intercepting){
-        var dir, targetAngle = null;
+        var dir, command, delayTimer, targetAngle = null;
         if (intercepting){
             dir = normalizeVector(targetOriginX - this.x, targetOriginY - this.y);
             targetAngle = getAngleFromDir(dir.x, dir.y);
         }
+        if (this.checkRecentCommands(targetFriendly, commandType, targetEnemy, targetOriginX, targetOriginY)){
+            return;
+        }
         this.issueCommand(targetFriendly, {type: commandType, target: targetEnemy, x: targetOriginX, y: targetOriginY, angle: targetAngle, date: Date.now(), queue: false});
+        delayTimer = new Timer(8000, false);
+        delayTimer.start();
+        this.recentCommands.push({friendly: targetFriendly, target: targetEnemy, type: commandType, x: targetOriginX, y: targetOriginY, timer: delayTimer});
     }
 
     sendCourier(target, command){
