@@ -88,18 +88,21 @@ class EnemyGeneral extends General{
         this.freeFriendlies = sortListByDistToPoint(this.x, this.y, this.freeFriendlies, enemyCombatUnitList);
     }
     calculateUnitRisk(unit, id){
-        var artilleryFactor = (unit.isArtillery)? 1 : 0;
-        var risk = (artilleryFactor * this.artilleryRiskFactor) + unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
+        var risk;
+        if (unit.isArtillery){
+            risk = this.artilleryRiskFactor + unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.artilleryRiskFactor) +
                    (unit.recentlyFlanked * this.flankedRiskMultiplier);
+        }
+        else{
+            risk = unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
+                   (unit.recentlyFlanked * this.flankedRiskMultiplier);
+        }
+
         if (id == this.recentlyAssistedUnitID){
             //Unit was helped last command, reduce apparent risk.
             risk -= this.recentAssistFactor;
         }
-        /*
-        if (unit.isArtillery){  
-            console.log(unit.combatCollisionList.length);
-        }
-        */
+        
         return risk;
 
     }

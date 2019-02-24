@@ -327,7 +327,7 @@ class CollisionEngine{
 
 	static attackMoveCollisionDefaultEnemy(unitA, idA, unitB, idB, distanceSq){
 		var radiusA = unitA.combatRadius;
-		var radiusB = unitB.combatRadius;
+		var radiusB = (unitB.unitType == unitTypes.artillery)? unitB.smallArmsRadius : unitB.combatRadius;
 
 		if (distanceSq >= Math.pow(radiusA + radiusB, 2)){
 			return false;

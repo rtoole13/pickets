@@ -488,46 +488,6 @@ class CombatUnit extends Unit{
 				}
 			}
 		}
-		/*
-		else{
-			if (this.state == unitStates.entrenched){
-				this.spriteSheet.YframeIndex = 0;
-				return;
-			}
-			else if (previousState == unitStates.marching){
-				this.state = unitStates.exposed;
-				this.bracedTimer.start();
-				this.spriteSheet.YframeIndex = 2;
-			}
-			else if (previousState == unitStates.exposed){
-				this.state = unitStates.braced;
-				this.entrenchedTimer.start();
-				this.spriteSheet.YframeIndex = 1;
-			}
-			else{
-
-
-
-
-				if (this.inBattle){
-					if (this.state == unitStates.exposed){
-						this.bracedTimer.start();
-					}
-					else{
-						this.bracedTimer.start();	
-					}
-					return;
-				}
-				if (this.bracedTimer.checkTime()){
-					this.state = unitStates.entrenched;
-					this.spriteSheet.YframeIndex = 0;
-				}
-				else{
-					this.state = unitStates.braced;
-					this.spriteSheet.YframeIndex = 1;
-				}
-			}
-		}*/
 	}
 
 	getNextWaypoint(){
@@ -894,6 +854,7 @@ class ArtilleryUnit extends CombatUnit {
 		this.reloaded = true;
 		this.firingTarget = null;
 		this.firingCannister = false;
+		this.artilleryFirePenalty = 0.6; //artillery on artiller damage reduction
 		this.multiplierSphereShot = 1; //all multipliers are * by guns
 		this.multiplierCannister  = 2.5;
 		this.multiplierSmallArms  = 0.1;
@@ -1037,7 +998,7 @@ class ArtilleryUnit extends CombatUnit {
 
 	takeFire(damage, inBattle, xLoc, yLoc, artilleryFire, cannisterShot){
 		if (artilleryFire){
-			damage = Math.floor(damage * this.getFortificationModifier());
+			damage = Math.floor(this.artilleryFirePenalty * damage * this.getFortificationModifier());
 			damage = Math.max(damage, 1);
 			if (cannisterShot){
 				addCombatText("-" + parseFloat(damage).toFixed(0) + ' *Cannister!*', this.x, this.y - 5, damageColor);
