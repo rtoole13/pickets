@@ -111,14 +111,14 @@ class EnemyGeneral extends General{
 
     }
     executeStateLogic(){
-        this.clearRecentCommands();
 
         //Only change state if timer is up.
         if (!this.stateChangeTimer.checkTime()){
             return;
         }
-        //evaluate the gameboard
+        //evaluate the gameboard & clear recent commands
         this.evaluateBoard();
+        this.clearRecentCommands();
 
         if (this.currentState == this.AIstates.surviving){
             this.stateSurvive();
@@ -207,7 +207,7 @@ class EnemyGeneral extends General{
             return;
         }
         var unitInNeed = this.getUnitMostAtRisk();
-        if (!defendingAI){
+        if (!this.defendingAI){
             if (unitInNeed != null){
                 this.sendAssistance(unitInNeed);
             }
@@ -303,7 +303,7 @@ class EnemyGeneral extends General{
             this.issueCommandWrapper(unit, commandTypes.attackmove, playerGeneral, playerGeneral.x, playerGeneral.y, true);
         }
     }
-
+    
     moveDirectlyAwayFrom(x, y){
         var newX, newY;
         newX = 2 * this.x - x;

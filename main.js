@@ -125,7 +125,6 @@ var gameBoard,
 	givingOrder = false,
 	queuingOrders = false,
 	orderStack = [],
-	defendingAI = true,
 	selector;
 
 
