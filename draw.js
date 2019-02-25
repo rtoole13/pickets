@@ -837,6 +837,7 @@ function draw(dt){
 	drawAnimations(dt);
 	drawSelection(dt);
 	combatTextList.draw(dt);
+	drawGoal();
 	drawHUD();
 }
 

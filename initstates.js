@@ -3,6 +3,8 @@
 class BoardPreset {
 	constructor(){
 		this.externalMap = false;
+		this.goals = new Queue();
+		this.currentGoal = null;
 	}
 	load(){
 		this.addUnits();
@@ -10,16 +12,54 @@ class BoardPreset {
 	addUnits(){
 
 	}
+	checkGoals(){
+		//returns true if over
+		if (this.currentGoal == null){
+			return true;
+		}
+		if (this.currentGoal.checkObjective()){
+			this.currentGoal = this.goals.remove();
+			if (this.currentGoal != null){
+				this.currentGoal.initiate();
+			}
+		}
+	}
+
+	beginGoals(){
+		this.currentGoal = this.goals.remove();
+		if (this.currentGoal != null){
+			this.currentGoal.initiate();
+		}
+	}
+
+	clearGoals(){
+		this.goals.clearData();
+		this.goals = new Queue();
+	}
+
+	resetGoals(){
+		this.clearGoals();
+		this.initializeGoals();
+	}
 }
 
 class MainBoard extends BoardPreset{
 	constructor(){
 		super();
 		this.externalMap = true;
+		this.initializeGoals();
 	}
 
 	addUnits(){
 		addPlayerGeneral(100, 350, 0, 5);
+		addEnemyGeneral(610, 200, 0, 5, true);
+		/*
+		addPlayerInfantry(140, 130, 0, "Brigade");
+		//addPlayerArtillery(170, 200, 30, "Brigade");
+		addEnemyArtillery(255, 110, -180, "Brigade");
+		addEnemyInfantry(300, 300, -165, "Brigade");
+		*/
+		
 		addPlayerInfantry(140, 130, 0, "Brigade");
 		addPlayerInfantry(140, 310, 30, "Brigade");
 		addPlayerInfantry(200, 310, 30, "Brigade");
@@ -28,7 +68,6 @@ class MainBoard extends BoardPreset{
 		addPlayerArtillery(100, 75, 0, "Brigade");
 		addPlayerArtillery(170, 410, 30, "Brigade");
 
-		addEnemyGeneral(610, 200, 0, 5, true);
 		addEnemyInfantry(520, 260, -180, "Brigade");
 		addEnemyInfantry(510, 200, -165, "Brigade");
 
@@ -37,14 +76,25 @@ class MainBoard extends BoardPreset{
 
 		addEnemyArtillery(475, 110, -180, "Brigade");
 		addEnemyArtillery(630, 260, 178, "Brigade");
-	}	
+		
+	}
+	initializeGoals(){
+		var durationCallback = function(){
+			var enemyInfOne, enemyInfTwo;
+			var enemyInfOne = addEnemyInfantry(520, -20, -90, "Brigade");
+			enemyInfOne.updateCommand({type: commandTypes.attackmove, target: playerGeneral, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
+
+			var enemyInfTwo = addEnemyInfantry(600, -25, -90, "Brigade");
+			enemyInfTwo.updateCommand({type: commandTypes.attackmove, target: playerGeneral, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
+		}
+		this.goals.add(new DurationGoal('Defeat the enemy before reinforcements arrive!', 180000, durationCallback, undefined, true));
+		this.beginGoals();
+	}
 }
 
 class TutorialBoard extends BoardPreset{
 	constructor(){
 		super();
-		this.goals = new Queue();
-		this.currentGoal = null;
 		this.undeadUnits = {};
 		this.undeadCount = 0;
 	}
@@ -76,12 +126,6 @@ class TutorialBoard extends BoardPreset{
 		}
 	}
 
-	beginGoals(){
-		this.currentGoal = this.goals.remove();
-		if (this.currentGoal != null){
-			this.currentGoal.initiate();
-		}
-	}
 	checkGoals(){
 		//returns true if over
 		if (this.currentGoal == null){

@@ -109,7 +109,7 @@ class SceneHandler {
         audioHandler.crossFadeLoopAudioGroup('ambient', false, 0, .03, 5000);
 
         setBackground('main_map');
-        initializePlayableState(sceneHandler.loadGameBoardPreset(boards.main), true);
+        initializePlayableState(true);
         
         //Enter main game loop
         loopMainGame();
@@ -142,7 +142,7 @@ class SceneHandler {
         tutorialArrowRight = new TutorialArrow(720, 500, 80, 80, false);
 
         //Set tutorial params and gameboard
-        initializePlayableState(sceneHandler.loadGameBoardPreset(boards[tutorialBoardNames[currentTutorial]]), false);
+        initializePlayableState(false, currentTutorial);
 
         //Enter tutorial loop
         loopTutorialScene();
@@ -223,7 +223,7 @@ class SceneHandler {
     }
 }
 
-function initializePlayableState(board, mainGame){
+function initializePlayableState(mainGame, tutorialNumber){
     //called by both tutorial and game scene.
     //Zero out dicts
     unitList = {},
@@ -297,7 +297,12 @@ function initializePlayableState(board, mainGame){
     courierCountIcon = new CourierCountIcon(canvas.width / 2  - 125, canvas.height - 30);
     commandHandler = new CommandHandler();
 
-    gameBoard = new GameBoard(30,40, board);
+    if (mainGame){
+        gameBoard = new GameBoard(30,40, sceneHandler.loadGameBoardPreset(boards.main));
+    }
+    else{
+        gameBoard = new GameBoard(30,40, sceneHandler.loadGameBoardPreset(boards[tutorialBoardNames[currentTutorial]]));
+    }
     gameBoard.initializeBoard();
 
     hoverUnit = {};

@@ -86,6 +86,7 @@ function loopMainGame(){
     //Updates
     muteButton.update();
     mouseOrderButtons.update();
+    gameBoard.board.checkGoals();
     gameBoard.update(dt);
     draw(dt);
     

@@ -238,10 +238,27 @@ class BattleTargetGoal extends TutorialGoal {
 }
 
 class DurationGoal extends TutorialGoal {
-    constructor(message, duration, completionCallback, eventOverrides){
+    constructor(message, duration, completionCallback, eventOverrides, mainGameOverride){
         super(message, completionCallback, eventOverrides);
         this.duration = duration;
         this.goalTimer = new Timer(this.duration, false);
+        this.mainGameOverride = mainGameOverride;
+    }
+
+    enableEvents(){
+        if (this.mainGameOverride){
+            //do nothing
+            return;
+        }
+        super.enableEvents();
+    }
+
+    disableEvents(){
+        if (this.mainGameOverride){
+            //do nothing
+            return;
+        }
+        super.disableEvents();
     }
 
     checkObjective(){

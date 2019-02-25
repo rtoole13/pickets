@@ -292,7 +292,7 @@ class EnemyGeneral extends General{
     }
 
     aggressiveCommand(){
-
+        
     }
 
     hailMary(idList, unitDict){
@@ -303,7 +303,7 @@ class EnemyGeneral extends General{
             this.issueCommandWrapper(unit, commandTypes.attackmove, playerGeneral, playerGeneral.x, playerGeneral.y, true);
         }
     }
-    
+
     moveDirectlyAwayFrom(x, y){
         var newX, newY;
         newX = 2 * this.x - x;
