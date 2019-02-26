@@ -19,7 +19,9 @@ class EnemyGeneral extends General{
         this.flankedRiskMultiplier = 3;
         this.battleRiskMultiplier = 2;
         this.recentAssistFactor = 3;
+        this.forgetRecentAssistTimer = null;
         this.artilleryRiskFactor = 5;
+        this.unitFriendlyRiskRangeSq = 4225;
         this.commandStateRecursionLimit = 3;
         this.currentCommandStateRecurse = 0;
         this.stateChangeTimer = new Timer(500, true);
@@ -88,28 +90,28 @@ class EnemyGeneral extends General{
         this.nearbyNotBattlingFriendlies = sortListByDistToPoint(this.x, this.y, this.nearbyNotBattlingFriendlies, enemyCombatUnitList);
         this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyCombatUnitList);
         this.battlingFriendlies = sortListByDistToPoint(this.x, this.y, this.battlingFriendlies, enemyCombatUnitList);   
-        this.skirmishingFriendlies = sortListByDistToPoint(this.x, this.y, this.skirmishingFriendlies, enemyCombatUnitList);
+        this.skirmishingFriendlies = sortListByDistToPoint(this.x,   this.y, this.skirmishingFriendlies, enemyCombatUnitList);
         this.freeFriendlies = sortListByDistToPoint(this.x, this.y, this.freeFriendlies, enemyCombatUnitList);
     }
+
     calculateUnitRisk(unit, id){
         var risk;
         if (unit.isArtillery){
-            risk = this.artilleryRiskFactor + unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.artilleryRiskFactor) +
-                   (unit.recentlyFlanked * this.flankedRiskMultiplier);
+            var closeFriendCount = unitsInDictNearToPosition(unit.x, unit.y, this.unitFriendlyRiskRangeSq, unit.friendlyList, [unit.id]);
+            risk = this.artilleryRiskFactor + (unit.combatCollisionList.length * this.artilleryRiskFactor) +
+                   (unit.recentlyFlanked * this.flankedRiskMultiplier) - (closeFriendCount * this.battleRiskMultiplier);
         }
         else{
             risk = unit.skirmishCollisionList.length + (unit.combatCollisionList.length * this.battleRiskMultiplier) +
                    (unit.recentlyFlanked * this.flankedRiskMultiplier);
         }
-
         if (id == this.recentlyAssistedUnitID){
             //Unit was helped last command, reduce apparent risk.
             risk -= this.recentAssistFactor;
         }
-        
         return risk;
-
     }
+
     executeStateLogic(){
 
         //Only change state if timer is up.
@@ -288,11 +290,18 @@ class EnemyGeneral extends General{
             console.log('enemyGeneral: Sending a unit to assist another at risk.');
             this.issueCommandWrapper(enemyCombatUnitList[closestFreeUnit], commandTypes.attackmove, target, target.x, target.y, false);
             this.recentlyAssistedUnitID = unitInNeed;
+            if (this.forgetRecentAssistTimer == null){
+                this.forgetRecentAssistTimer = new Timer(15000, false);
+                this.forgetRecentAssistTimer.start();
+            }
+            else{
+                this.forgetRecentAssistTimer.start();
+            }
         }
     }
 
     aggressiveCommand(){
-        
+
     }
 
     hailMary(idList, unitDict){
@@ -369,6 +378,9 @@ class EnemyGeneral extends General{
             if (commandData.timer.checkTime()){
                 this.recentCommands.splice(i,1);
             }
+        }
+        if ((this.forgetRecentAssistTimer != null) && (this.forgetRecentAssistTimer.checkTime())){
+            this.recentlyAssistedUnitID = '';
         }
     }
 

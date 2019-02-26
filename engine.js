@@ -738,6 +738,24 @@ function getClosestUnitToPosition(x, y, idList, ignoreList){
 	return closestID;
 }
 
+function unitsInDictNearToPosition(x, y, targetDistanceSq, unitDict, ignoreList){
+	//Given a unit dict, position, and distanceSq value, return number of units in the dict
+	//within specified distance from point
+	var id, unit, distSq, unitCount = 0;
+	
+	for (var id in unitDict){
+		if (ignoreList.includes(id)){
+			continue;
+		}
+		unit = unitDict[id];
+		distSq = getDistanceSq(x, y, unit.x, unit.y);
+		if (distSq <= targetDistanceSq){
+			unitCount += 1;
+		}
+	}
+	return unitCount;
+
+}
 function getMidpoint(xA, yA, xB, yB){
 	return {x: xA + ((xB - xA) / 2), y: yA + ((yB - yA) / 2)}
 }
