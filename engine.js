@@ -760,6 +760,12 @@ function getMidpoint(xA, yA, xB, yB){
 	return {x: xA + ((xB - xA) / 2), y: yA + ((yB - yA) / 2)}
 }
 
+function positionOutOfBounds(x, y){
+	if (x < 0 || x > canvas.width || y < 0 || y > canvas.height){
+		return true;
+	}
+	return false;
+}
 function anyAlongRay(xA, yA, xB, yB, unitDict, ignoreList, thisUnit){
 	//Give a ray origin (xA, yA) and terminating location (xB, yB),
 	//return true if any on ray, else false.

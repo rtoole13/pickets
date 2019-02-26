@@ -149,6 +149,9 @@ class Unit{
 		this.updateSpriteSheet(dt);
 	}
 	updateRoute(){
+		if (positionOutOfBounds(this.target.x, this.target.y)){
+			this.updateCommand(null, true);
+		}
 		this.path = Pathfinder.findPath(this.x, this.y, this.target.x, this.target.y, this, this.ignoreList);	
 		this.getNextWaypoint();
 	}
