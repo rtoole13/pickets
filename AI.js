@@ -286,9 +286,12 @@ class EnemyGeneral extends General{
             else if (unit.skirmishCollisionList.length > 0){
                 targetID = unit.skirmishCollisionList[0];
             }
-            target = playerInfantryList[targetID];
+            target = playerCombatUnitList[targetID];
             console.log('enemyGeneral: Sending a unit to assist another at risk.');
-            this.issueCommandWrapper(enemyCombatUnitList[closestFreeUnit], commandTypes.attackmove, target, target.x, target.y, false);
+            var assistingUnit = enemyCombatUnitList[closestFreeUnit];
+            //If artillery, assist with sphere shot
+            var commandType = (assistingUnit.isArtillery)? commandTypes.move : commandTypes.attackmove;
+            this.issueCommandWrapper(assistingUnit, commandType, target, target.x, target.y, false);
             this.recentlyAssistedUnitID = unitInNeed;
             if (this.forgetRecentAssistTimer == null){
                 this.forgetRecentAssistTimer = new Timer(15000, false);

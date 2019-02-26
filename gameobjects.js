@@ -402,6 +402,7 @@ class CombatUnit extends Unit{
 		this.retreatThreshold = 0.25; //Currently just checking relative strength
 		this.retreatChance = 5; //out of 1000, checked each frame if below threshold
 		this.rallyChance = 5; //out of 100
+		this.generalRallyChanceMultiplier = 3;
 		this.rallyTimer = new Timer(3000, true); //Arbitrarily potentially rallying whenever timer is up.
 		this.auxiliaryUnit = false;
 		this.isRotating = false;
@@ -581,7 +582,26 @@ class CombatUnit extends Unit{
 		
 		if (this.retreating){
 			if (this.rallyTimer.checkTime()){
-				if (getRandomInt(1,100) <= this.rallyChance){
+				var rallyChance;
+				if (this.army == armies.blue){
+					if (getDistanceSq(this.x, this.y, playerGeneral.x, playerGeneral.y) 
+						<=(playerGeneral.commandRadius * playerGeneral.commandRadius)){
+						rallyChance = this.rallyChance * this.generalRallyChanceMultiplier;
+					}
+					else{
+						rallyChance = this.rallyChance;
+					}
+				}
+				else{
+					if (getDistanceSq(this.x, this.y, enemyGeneral.x, enemyGeneral.y) 
+						<=(enemyGeneral.commandRadius * enemyGeneral.commandRadius)){
+						rallyChance = this.rallyChance * this.generalRallyChanceMultiplier;
+					}
+					else{
+						rallyChance = this.rallyChance;
+					}
+				}
+				if (getRandomInt(1,100) <= rallyChance){
 					this.retreating = false;
 					//gameBoard.removeUnitFromRetreatList(this.id);
 					//lower the unit's chance for retreat after having rallied once
