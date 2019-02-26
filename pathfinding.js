@@ -346,7 +346,7 @@ class Grid{
 	getClosestSide(x, y, node){
 		var currentNode, dists, sorted;
 
-		currentNode = (node == undefined)? this.getNodeFromLocation(x, y) : node;
+		currentNode = (node == undefined)? this.getClosestValidNodeFromLocation(x, y) : node;
 		dists = {};
 		dists['left']  = currentNode.indX;
 		dists['right'] = this.columns - currentNode.indX;
@@ -360,7 +360,7 @@ class Grid{
 	getWalkableNodeOnNearestSide(x, y, dirX, dirY, returnEdge){
 		//unit is retreating from x,y in preferred direction dirX, dirY
 		var currentNode, side;
-		currentNode = this.getNodeFromLocation(x, y);
+		currentNode = this.getClosestValidNodeFromLocation(x, y);
 		side = this.getClosestSide(x, y, currentNode);
 		return this.findWalkableNodeOnEdge(side, currentNode, dirX, dirY, true);
 	}
