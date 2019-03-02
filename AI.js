@@ -367,7 +367,7 @@ class EnemyGeneral extends General{
                 if (targetEnemy.id == commandData.target.id){
                     return true;
                 }
-                if (getDistanceSq(targetX, targetY, commandData.x, commandDate.y) <= targetProximitySq){
+                if (getDistanceSq(targetX, targetY, commandData.x, commandData.y) <= targetProximitySq){
                     return true;
                 }
             }

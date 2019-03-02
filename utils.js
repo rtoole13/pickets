@@ -63,6 +63,28 @@ function getColorPrefix(hex){
 	return 'rgba(' + r.toString() + ', ' + g.toString() + ', ' + b.toString() + ', ';
 }
 
+function getTwoPositionsOffLeftOrTopSide(){
+    var xVal1, yVal1, xVal2, yVal2, top;
+    //hardcoding 50% of left and top as the only valid spawn points
+    if (getRandomInt(0,1) == 0){
+        //left
+        top = false;
+        xVal1 = -20;
+        yVal1 = getRandomFloat(0, (canvas.height / 2) - 80);
+        xVal2 = -30;
+        yVal2 = yVal1 + 80;
+    }
+    else{
+        //top
+        top = true;
+        xVal1 = getRandomFloat(0, (canvas.width / 2) - 80);
+        yVal1 = -20;
+        xVal2 = xVal1 + 80;
+        yVal2 = -30;
+    }
+    return {x1: xVal1, y1: yVal1, x2: xVal2, y2: yVal2, top: top};
+}
+
 function capitalizeFirstLetter(string){
 	return string.charAt(0).toUpperCase() + string.slice(1);
 }

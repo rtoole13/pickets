@@ -52,7 +52,7 @@ class MainBoard extends BoardPreset{
 
 	addUnits(){
 		addPlayerGeneral(100, 350, 0, 5);
-		addEnemyGeneral(610, 200, 0, 5, true);
+		addEnemyGeneral(630, 230, 0, 5, true);
 		/*
 		addPlayerInfantry(140, 130, 0, "Brigade");
 		//addPlayerArtillery(170, 200, 30, "Brigade");
@@ -60,33 +60,36 @@ class MainBoard extends BoardPreset{
 		addEnemyInfantry(300, 300, -165, "Brigade");
 		*/
 		
-		addPlayerInfantry(140, 130, 0, "Brigade");
+		//addPlayerInfantry(140, 130, 0, "Brigade");
 		addPlayerInfantry(140, 310, 30, "Brigade");
 		addPlayerInfantry(200, 310, 30, "Brigade");
 		addPlayerInfantry(230, 370, 30, "Brigade");
 		
-		addPlayerArtillery(100, 75, 0, "Brigade");
+		addPlayerArtillery(90, 280, 30, "Brigade");
 		addPlayerArtillery(170, 410, 30, "Brigade");
 
-		addEnemyInfantry(520, 260, -180, "Brigade");
-		addEnemyInfantry(510, 200, -165, "Brigade");
+		addEnemyInfantry(523, 345, -180, "Brigade");
+		addEnemyInfantry(500, 175, -165, "Brigade");
+		addEnemyInfantry(525, 280, 175, "Brigade");
+		//addEnemyInfantry(610, 430, -100, "Brigade");
 
-		addEnemyInfantry(600, 360, -180, "Brigade");
-		addEnemyInfantry(610, 430, -100, "Brigade");
-
-		addEnemyArtillery(475, 110, -180, "Brigade");
-		addEnemyArtillery(630, 260, 178, "Brigade");
+		addEnemyArtillery(465, 115, -155, "Brigade");
+		addEnemyArtillery(600, 395, 178, "Brigade");
 		
 	}
 	initializeGoals(){
 		var durationCallback = function(){
-			var enemyInfOne, enemyInfTwo;
-			var enemyInfOne = addEnemyInfantry(520, -20, -90, "Brigade");
+			var enemyInfOne, enemyInfTwo, positions, angle;
+			positions = getTwoPositionsOffLeftOrTopSide();
+			angle = (positions.top)? -90 : 0;
+
+			var enemyInfOne = addEnemyInfantry(positions.x1, positions.y1, angle, "Brigade");
 			enemyInfOne.updateCommand({type: commandTypes.attackmove, target: playerGeneral, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
 
-			var enemyInfTwo = addEnemyInfantry(600, -25, -90, "Brigade");
+			var enemyInfTwo = addEnemyInfantry(positions.x2, positions.y2, angle, "Brigade");
 			enemyInfTwo.updateCommand({type: commandTypes.attackmove, target: playerGeneral, x: playerGeneral.x, y: playerGeneral.y, angle: null, date: Date.now()});
 		}
+		this.goals.add(new DurationGoal('Defeat the enemy before reinforcements arrive!', 180000, durationCallback, undefined, true));
 		this.goals.add(new DurationGoal('Defeat the enemy before reinforcements arrive!', 180000, durationCallback, undefined, true));
 		this.beginGoals();
 	}
