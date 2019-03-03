@@ -213,16 +213,35 @@ class CollisionEngine{
 				}
 				
 				redirectDir = normalizeVector(redirectDir.x, redirectDir.y);
-					
-				unitA.rerouteTargetX = unitA.x + unitA.rerouteDistance * redirectDir.x;
-				unitA.rerouteTargetY = unitA.y + unitA.rerouteDistance * redirectDir.y;
 				
-				if (velB.x != 0 && velB.y != 0){
-					unitB.rerouteTargetX = unitB.x + unitB.rerouteDistance * -redirectDir.x;
-					unitB.rerouteTargetY = unitB.y + unitB.rerouteDistance * -redirectDir.y;
-					unitB.rerouting = true;
+				if (dotProduct(velA.x, velA.y, velB.x, velB.y) > 0){
+					//units are heading in the same direction.
+					if (dotProduct(velA.x, velA.y, normal.x, normal.y) < 0){
+						//unitA is behind unitB
+						unitA.rerouteTargetX = unitA.x + unitA.rerouteDistance * redirectDir.x;
+						unitA.rerouteTargetY = unitA.y + unitA.rerouteDistance * redirectDir.y;
+						unitA.rerouting = true;
+					}
+					else{
+						//unitB is behind unitA
+						if (velB.x != 0 && velB.y != 0){
+							unitB.rerouteTargetX = unitB.x + unitB.rerouteDistance * -redirectDir.x;
+							unitB.rerouteTargetY = unitB.y + unitB.rerouteDistance * -redirectDir.y;
+							unitB.rerouting = true;
+						}
+					}
 				}
-				unitA.rerouting = true;
+				else{
+					unitA.rerouteTargetX = unitA.x + unitA.rerouteDistance * redirectDir.x;
+					unitA.rerouteTargetY = unitA.y + unitA.rerouteDistance * redirectDir.y;
+					
+					if (velB.x != 0 && velB.y != 0){
+						unitB.rerouteTargetX = unitB.x + unitB.rerouteDistance * -redirectDir.x;
+						unitB.rerouteTargetY = unitB.y + unitB.rerouteDistance * -redirectDir.y;
+						unitB.rerouting = true;
+					}
+					unitA.rerouting = true;
+				}
 				
 			}
 			unitA.friendlyCollisionList.push(idB);
