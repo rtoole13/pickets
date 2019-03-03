@@ -768,6 +768,13 @@ function positionOutOfBounds(x, y){
 	}
 	return false;
 }
+function positionCloseToEdge(x, y, buffer){
+	if (x < buffer || x > (canvas.width - buffer) || y < buffer || y > (canvas.height - buffer)){
+		return true;
+	}
+	return false;
+}
+
 function anyAlongRay(xA, yA, xB, yB, unitDict, ignoreList, thisUnit){
 	//Give a ray origin (xA, yA) and terminating location (xB, yB),
 	//return true if any on ray, else false.
@@ -811,6 +818,9 @@ function rayCastSegment(xA, yA, xB, yB, pathWidth, idList, unitDict, returnAll){
 		for (var i = 0; i < idList.length; i++){
 			id = idList[i];
 			unit = unitDict[id];
+			if (unit == undefined){
+				continue;
+			}
 			vecA = {x: unit.x - xA, y: unit.y - yA};
 
 			perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);
@@ -832,6 +842,9 @@ function rayCastSegment(xA, yA, xB, yB, pathWidth, idList, unitDict, returnAll){
 		for (var i = 0; i < idList.length; i++){
 			id = idList[i];
 			unit = unitList[id];
+			if (unit == undefined){
+				continue;
+			}
 			vecA = {x: unit.x - xA, y: unit.y - yA};
 
 			perpA = vectorRejection(vecA.x, vecA.y, vecB.x, vecB.y, true);

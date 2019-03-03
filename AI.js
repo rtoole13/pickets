@@ -190,6 +190,9 @@ class EnemyGeneral extends General{
             this.routingFriendlies = sortListByDistToPoint(this.x, this.y, this.routingFriendlies, enemyUnitList);
             for (var i = 0; i < this.routingFriendlies.length; i++){
                 var unit = enemyUnitList[this.routingFriendlies[i]];
+                if (positionCloseToEdge(unit.x, unit.y, 30)){
+                    continue;
+                }
                 if (rayCastSegment(this.x, this.y, unit.x, unit.y, 15, this.nearbyEnemies, enemyCombatUnitList, false) == null){
                     //Path is relatively free to the routing enemy
                     console.log('enemyGeneral: Path is clear to a routing unit, Moving towards.')
