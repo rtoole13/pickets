@@ -1143,6 +1143,7 @@ class General extends AuxiliaryUnit{
 		this.courierRecharge.start();
 		this.courierCooldown = new Timer(1000, true);
 		this.courierCooldown.start();
+		this.canIssueCommand = false;
 		this.unitType = unitTypes.general;
 		this.captured = false;
 		this.spriteSheet = initializeSpriteSheet(this);
@@ -1208,6 +1209,11 @@ class General extends AuxiliaryUnit{
 
 	update(dt){
 		this.refreshCouriers();
+		if (!this.canIssueCommand){
+			if (this.courierCooldown.checkTime()){
+				this.canIssueCommand = true;
+			}
+		}
 		super.update(dt);
 	}
 
@@ -1224,29 +1230,13 @@ class General extends AuxiliaryUnit{
 	}
 
 	sendCourier(target, command){
-		if (this.courierCount > 0){
-			if (this.courierCooldown.checkTime()){
-				addPlayerCourier(this.x, this.y, this.angle, this, target, command);
-				this.courierCount -= 1;
-				this.issuedCourierCount += 1;
-			}
-			else{
-				console.log('Courier sending on cooldown!');
-			}	
+		if (this.courierCount > 0 && this.canIssueCommand){
+			addPlayerCourier(this.x, this.y, this.angle, this, target, command);
+			this.courierCount -= 1;
+			this.issuedCourierCount += 1;
+			this.canIssueCommand = false;
+			this.courierCooldown.start();
 		}
-		else{
-			console.log('No couriers available!');
-		}
-	}
-
-	canIssueCommand(){
-		if (this.courierCooldown.checkTime()){
-			//Just want to check. CheckTimer restarts the timer, want to make sure that the next
-			//call to checkTime returns true as well. So, short the timer.
-			this.courierCooldown.shortTimer();
-			return true;
-		}
-		return false;
 	}
 }
 

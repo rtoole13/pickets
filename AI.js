@@ -17,7 +17,7 @@ class EnemyGeneral extends General{
         this.skirmishingFriendlies = [];
         this.battlingFriendlies = [];
         this.flankedRiskMultiplier = 3;
-        this.battleRiskMultiplier = 2;
+        this.battleRiskMultiplier = 3;
         this.recentAssistFactor = 3;
         this.forgetRecentAssistTimer = null;
         this.artilleryRiskFactor = 5;
@@ -148,7 +148,7 @@ class EnemyGeneral extends General{
                 this.moveDirectlyAwayFrom(centroid.closestUnit.x, centroid.closestUnit.y);
                 return;
             }
-            if (this.nearbyNotBattlingFriendlies.length > 0 && this.canIssueCommand()){
+            if (this.nearbyNotBattlingFriendlies.length > 0 && this.canIssueCommand){
                 //friends are near to help
                 var nearID, potentialAid;
                 potentialAid = sortListByDistToPoint(centroid.centerX, centroid.centerY, this.nearbyNotBattlingFriendlies, enemyCombatUnitList);
@@ -183,7 +183,7 @@ class EnemyGeneral extends General{
         //Either way, change state.
     }
     stateRally(){
-        if (this.routingFriendlies.length > 0  && this.canIssueCommand()){
+        if (this.routingFriendlies.length > 0  && this.canIssueCommand){
             //1) find a routing unit to which path is clear
             //2) route near to that unit if path is available,
             //   else, do nothing and jump to commanding state.
@@ -204,7 +204,7 @@ class EnemyGeneral extends General{
         }
     }
     stateCommand(){
-        if (!this.canIssueCommand()){
+        if (!this.canIssueCommand){
             this.currentState = this.AIstates.surviving;
             return;
         }

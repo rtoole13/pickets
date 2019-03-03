@@ -269,7 +269,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		eventOverrides.addListener('window', "keydown", handleKeyPressMoveOnly);
 		var enemyFallBackCallback = function(){
 			var command = {type: commandTypes.fallback, target: null, x: 455, y: 325, angle: null, date: Date.now()};
-			enemyGeneral.courierCooldown.shortTimer();
+			enemyGeneral.canIssueCommand = true;
 			enemyGeneral.issueCommand(enemyInf, command);
 		};
 		this.goals.add(new ClickGoal('Press <R> at any point to restart the current tutorial,<br> or use the arrows to navigate between tutorials.', undefined));
@@ -282,7 +282,7 @@ class TutorialTwoBoard extends TutorialBoard {
 			var friendly, command, commandStack, enemy;
 			friendly = playerInfantryList[playerInfA];
 			command = {type: commandTypes.attackmove, target: null, x: 500, y: 350, angle: null, date: Date.now()};
-			playerGeneral.courierCooldown.shortTimer();
+			playerGeneral.canIssueCommand = true;
 			playerGeneral.issueCommand(friendly, command);
 			
 			friendly = playerInfantryList[playerInfB];
@@ -291,7 +291,7 @@ class TutorialTwoBoard extends TutorialBoard {
 			commandStack.push({type: commandTypes.move, target: null, x: 480, y: 395, angle: null, date: Date.now()});
 			commandStack.push({type: commandTypes.move, target: null, x: 500, y: 365, angle: null, date: Date.now()});
 			commandStack.push({type: commandTypes.attackmove, target: enemy, x: enemy.x, y: enemy.y, angle: null, date: Date.now()});
-			playerGeneral.courierCooldown.shortTimer();
+			playerGeneral.canIssueCommand = true;
 			playerGeneral.issueCommand(friendly, commandStack);
 
 		}
@@ -307,7 +307,7 @@ class TutorialTwoBoard extends TutorialBoard {
 		
 		var enemyIssueCommand = function() {
 			var command = {type: commandTypes.fallback, target: null, x: 300, y: 600, angle: null, date: Date.now()};
-			enemyGeneral.courierCooldown.shortTimer();
+			enemyGeneral.canIssueCommand = true;
 			enemyGeneral.issueCommand(enemyInf, command);
 		}
 

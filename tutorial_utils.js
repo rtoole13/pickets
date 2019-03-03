@@ -216,9 +216,18 @@ class BattleTargetGoal extends TutorialGoal {
         this.color = crimsonAlpha;
     }
     checkObjective(){
-        if ((getDistanceSq(this.targetUnit.x, this.targetUnit.y, this.battleTargetUnit.x, this.battleTargetUnit.y) <= this.radiusSq) &&
-            (this.targetUnit.inBattle)) {
-            return this.onCompletion();
+        if (getDistanceSq(this.targetUnit.x, this.targetUnit.y, this.battleTargetUnit.x, this.battleTargetUnit.y) <= this.radiusSq){
+            if (!this.targetUnit.isArtillery){
+                if (this.targetUnit.inBattle){
+                    return this.onCompletion();
+                }
+                else{
+                    return false;
+                }
+            }
+            else{
+                return this.onCompletion();
+            }
         }
         else {
             return false;
@@ -228,11 +237,13 @@ class BattleTargetGoal extends TutorialGoal {
         super.initiate();
         this.targetUnit = playerUnitList[this.targetID];
         this.battleTargetUnit = enemyUnitList[this.battleTargetID];
-        var dist = this.targetUnit.combatRadius + this.battleTargetUnit.combatRadius;
+        var radius, dist;
+        radius = (this.targetUnit.isArtillery)? this.targetUnit.cannisterRadius : this.targetUnit.combatRadius;
+        dist = radius + this.battleTargetUnit.combatRadius;
         this.radiusSq = dist * dist;
     }
     draw(){
-        super.draw();
+        super.draw(); 
         drawCircle(this.battleTargetUnit.x, this.battleTargetUnit.y, 15, this.color);
     }
 }
@@ -433,9 +444,11 @@ function handleGoalSpecificMouseDown(e){
 function handleGoalSpecificRightClickUp(e){
     e.preventDefault();
     var activeArea = gameBoard.board.currentGoal.activeArea;
-    if ((mouseX > activeArea.xMax || mouseX < activeArea.xMin) ||
-        (mouseY > activeArea.yMax || mouseY < activeArea.yMin)){
-        return;
+    if (!givingOrder){
+        if ((mouseX > activeArea.xMax || mouseX < activeArea.xMin) ||
+            (mouseY > activeArea.yMax || mouseY < activeArea.yMin)){
+            return;
+        }
     }
     handleRightClickUp(e);
 }

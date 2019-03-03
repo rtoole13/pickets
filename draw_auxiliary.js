@@ -170,10 +170,15 @@ class CourierCountIcon {
     constructor(centerX, centerY){
         this.x = centerX;
         this.y = centerY;
-        this.spriteSheet = new SpriteSheet(icon_courierCount, centerX, centerY, 52, 52, 5, 1, 1, false, true, 0.55);
+        this.spriteSheet = new SpriteSheet(icon_courierCount, centerX, centerY, 50, 50, 5, 1, 2, false, true, 0.55);
     }
-
     draw(){
+        if (playerGeneral.canIssueCommand){
+            this.spriteSheet.changeFrame(0,0);
+        }
+        else{
+            this.spriteSheet.changeFrame(1,0);
+        }
         canvasContext.save();
         canvasContext.translate(this.x, this.y);
         this.spriteSheet.move(0,0);
