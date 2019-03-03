@@ -364,7 +364,7 @@ class EnemyGeneral extends General{
         for (var i = 0; i < this.recentCommands.length; i++){
             var commandData = this.recentCommands[i];
             if (targetFriendly.id == commandData.friendly.id && commandType == commandData.type){
-                if (targetEnemy.id == commandData.target.id){
+                if (targetEnemy != null && targetEnemy.id == commandData.target.id){
                     return true;
                 }
                 if (getDistanceSq(targetX, targetY, commandData.x, commandData.y) <= targetProximitySq){
@@ -392,6 +392,9 @@ class EnemyGeneral extends General{
         if (intercepting){
             dir = normalizeVector(targetOriginX - this.x, targetOriginY - this.y);
             targetAngle = getAngleFromDir(dir.x, dir.y);
+        }
+        if (targetFriendly == undefined || targetFriendly == null){
+            return;
         }
         if (this.checkRecentCommands(targetFriendly, commandType, targetEnemy, targetOriginX, targetOriginY)){
             return;

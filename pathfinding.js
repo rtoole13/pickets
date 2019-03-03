@@ -241,7 +241,9 @@ class Grid{
 		}
 		if (currentUnit.unitType == unitTypes.courier){
 			var targetNode = this.getNodeFromLocation(currentUnit.target.x, currentUnit.target.y);
-			targetNode.walkable = true;
+			if (targetNode != null){
+				targetNode.walkable = true;
+			}
 		}
 	}
 

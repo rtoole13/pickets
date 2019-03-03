@@ -609,7 +609,10 @@ class CombatUnit extends Unit{
 					//gameBoard.removeUnitFromRetreatList(this.id);
 					//lower the unit's chance for retreat after having rallied once
 					//because why not
-					this.retreatChance = Math.floor(this.retreatChance / 2);
+					this.retreatChance = Math.floor(this.retreatChaitkrgnce / 2);
+				}
+				else{
+					addCombatText('*Retreating!*', this.x, this.y - 5, damageColor);
 				}
 			}
 		}
@@ -634,10 +637,6 @@ class CombatUnit extends Unit{
 
 			}
 		}
-	}
-
-	plotRetreatPath(){
-
 	}
 
 	getFlankModifier(inBattle, xLoc, yLoc){

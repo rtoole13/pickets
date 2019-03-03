@@ -143,16 +143,18 @@ class CollisionEngine{
 		radiusB = unitB.combatRadius;
 		distanceSq = getDistanceSq(unitA.x, unitA.y, unitB.x, unitB.y);
 		if (distanceSq <= Math.pow(radiusA + radiusB, 2)){
-			distanceSq = getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitB.x, unitB.y);
-			if (unitA.targetSigma > unitA.combatRadius){
-				var rad = radiusB - (unitA.targetSigma - unitA.combatRadius);
-				if (distanceSq <= (rad * rad)){
-					unitA.getNextWaypoint();
+			if (unitA.targetPosition != null){
+				distanceSq = getDistanceSq(unitA.targetPosition.x, unitA.targetPosition.y, unitB.x, unitB.y);
+				if (unitA.targetSigma > unitA.combatRadius){
+					var rad = radiusB - (unitA.targetSigma - unitA.combatRadius);
+					if (distanceSq <= (rad * rad)){
+						unitA.getNextWaypoint();
+					}
 				}
-			}
-			else{
-				if(distanceSq <= (unitA.combatRadius * unitA.combatRadius)){
-					unitA.getNextWaypoint();
+				else{
+					if(distanceSq <= (unitA.combatRadius * unitA.combatRadius)){
+						unitA.getNextWaypoint();
+					}
 				}
 			}
 
