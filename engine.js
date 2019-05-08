@@ -750,6 +750,9 @@ function getClosestUnitToPosition(x, y, idList, ignoreList){
 			continue;
 		}
 		unit = unitList[id];
+		if (unit == null || unit == undefined){
+			continue;
+		}
 		distSq = getDistanceSq(x, y, unit.x, unit.y);
 		if (distSq < closestDistSq){
 			closestDistSq = distSq;
