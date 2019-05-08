@@ -280,7 +280,7 @@ class EnemyGeneral extends General{
         var unit = enemyCombatUnitList[unitInNeed];
         var ignoreList = [];
         ignoreList.push(unitInNeed);
-        var closestFreeUnit = getClosestUnitToPosition(unit.x, unit.y, unitList, ignoreList);
+        var closestFreeUnit = (unit == null || unit == undefined)? null : getClosestUnitToPosition(unit.x, unit.y, unitList, ignoreList);
         if (closestFreeUnit != null){
             var target, targetID = null;
             if (unit.combatCollisionList.length > 0){
